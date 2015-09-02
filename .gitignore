@@ -1,0 +1,16 @@
+*.pb.h
+*.grpc.pb.h
+*.o
+*.so
+*.class
+cpp/greeter_client
+.DS_Store
+*~
+*.a
+.settings
+**/target
+cpp/src/main/native/src/greeter_client
+client_unit/Debug/
+*.pid
+testlibgrpcfmi/external_client_unittests
+testlibgrpcfmu/external_client_unittests
