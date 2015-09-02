@@ -3,7 +3,7 @@
 CXX = g++
 CPPFLAGS += -I/usr/local/include  -g
 CXXFLAGS += -std=c++11
-LDFLAGS += -L/usr/local/lib -lgrpc -lgpr -lprotobuf -lgrpc++_unsecure -lpthread -ldl -L/home/parallels/Downloads/grpc-fmi/mk/libgrpcfmi/ -lgrpcfmi
+LDFLAGS += -L/usr/local/lib -lgrpc -lgpr -lprotobuf -lgrpc++_unsecure -lpthread -ldl -L../libgrpcfmi/ -lgrpcfmi
 
 
 #test: MainTest.o ExternalClient_Tests.o
@@ -31,7 +31,7 @@ LDFLAGS += -L/usr/local/lib -lgrpc -lgpr -lprotobuf -lgrpc++_unsecure -lpthread 
 
 # Points to the root of Google Test, relative to where this file is.
 # Remember to tweak this if you move this file.
-GTEST_DIR = /home/parallels/Downloads/gtest-1.7.0
+GTEST_DIR = ../third_party/googletest/googletest/
 
 # Where to find user code.
 USER_DIR = .

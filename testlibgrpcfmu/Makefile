@@ -31,7 +31,7 @@ LDFLAGS += -L/usr/local/lib -lgrpc -lgpr -lprotobuf -lgrpc++_unsecure -lpthread 
 
 # Points to the root of Google Test, relative to where this file is.
 # Remember to tweak this if you move this file.
-GTEST_DIR = /home/parallels/Downloads/gtest-1.7.0
+GTEST_DIR = ../third_party/googletest/googletest/
 
 # Where to find user code.
 USER_DIR = .
