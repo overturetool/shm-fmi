@@ -100,6 +100,11 @@ libgrpcfmi.so:
 external_client_unittests : ExternalClient_Tests.o gtest_main.a 
 	$(CXX) $^ $(LDFLAGS) -lpthread -o $@
 
-test: external_client_unittests libgrpcfmi.so
+ ../grpcfmi-server/target/fmi-server-7-jar-with-dependencies.jar:
+	cd ../grpcfmi-server/ && mvn package -q
+
+test: external_client_unittests libgrpcfmi.so  ../grpcfmi-server/target/fmi-server-7-jar-with-dependencies.jar
+	../grpcfmi-server/start-debug-server.sh
 	LD_LIBRARY_PATH=../libgrpcfmi/ ./external_client_unittests
+	../grpcfmi-server/stop-debug-server.sh
 

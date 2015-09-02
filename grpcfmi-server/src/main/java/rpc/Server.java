@@ -73,6 +73,7 @@ public class Server {
 	public static void main(String[] args) throws Exception {
 		Server server = new Server(8980);
 		server.start();
+		
 	}
 
 	/**
@@ -100,6 +101,9 @@ public class Server {
 				StreamObserver<InstantiateReply> responseObserver) {
 			// TODO Auto-generated method stub
 			System.out.println("Called fmi2Instantiate");
+			
+			responseObserver.onValue(InstantiateReply.newBuilder().build());
+			responseObserver.onCompleted();
 		}
 
 		@Override

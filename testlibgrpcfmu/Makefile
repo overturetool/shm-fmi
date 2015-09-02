@@ -105,11 +105,11 @@ external_client_unittests : ExternalClient_Tests.o fmu-loader.o gtest_main.a
 fmu:
 	make -C ../libgrpcfmi
 
-server:
+../grpcfmi-server/target/fmi-server-7-jar-with-dependencies.jar:
 	cd ../grpcfmi-server/ && mvn clean package
 
-test: external_client_unittests fmu server
-	java -jar ../grpcfmi-server/target/fmi-server-7-jar-with-dependencies.jar &
-	mypid=$!
+test: external_client_unittests fmu ../grpcfmi-server/target/fmi-server-7-jar-with-dependencies.jar
+	../grpcfmi-server/start-debug-server.sh
 	./external_client_unittests
-	kill -s TERM $!
+	../grpcfmi-server/stop-debug-server.sh
+
