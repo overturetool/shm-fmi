@@ -1,0 +1,168 @@
+syntax = "proto3";
+
+option java_generic_services = true;
+option java_package= "com.lausdahl.examples";
+//option java_multiple_files = true;
+
+
+package service;
+
+service Fmu
+{
+
+	rpc GetVersion(VersionRequest) returns(VersionReply);
+	rpc fmi2Instantiate(InstantiateRequest) returns(InstantiateReply);
+
+	rpc fmi2SetupExperiment(SetupExperimentRequest) returns(Fmi2StatusReply);
+	rpc fmi2EnterInitializationMode(Empty) returns(Fmi2StatusReply);
+	rpc fmi2ExitInitializationMode(Empty) returns(Fmi2StatusReply);
+	rpc fmi2Terminate(Empty) returns(Fmi2StatusReply);
+	rpc fmi2Reset(Empty) returns(Fmi2StatusReply);
+	//Maybe just kill the process! rpc fmi2FreeInstance
+
+	rpc fmi2SetDebugLogging(SetDebugLoggingRequest) returns(Fmi2StatusReply);
+
+	rpc fmi2GetReal(GetRequest) returns(GetRealReply);
+	rpc fmi2GetInteger(GetRequest) returns(GetIntegerReply);
+	rpc fmi2GetBoolean(GetRequest) returns(GetBooleanReply);
+	rpc fmi2GetString(GetRequest) returns(GetStringReply);
+
+	rpc fmi2SetReal(SetRealRequest) returns(Fmi2StatusReply); 
+	rpc fmi2SetInteger(SetIntegerRequest) returns(Fmi2StatusReply); 
+	rpc fmi2SetBoolean(SetBooleanRequest) returns(Fmi2StatusReply); 
+	rpc fmi2SetString(SetStringRequest) returns(Fmi2StatusReply); 
+
+	rpc fmi2DoStep(DoStepRequest) returns(Fmi2StatusReply);
+	//rpc fmi2GetStatus
+	rpc fmi2GetMaxStepSize(Empty) returns(GetMaxStepSizeReply);
+}
+
+message SetupExperimentRequest{
+	bool toleranceDefined=1;
+	double tolerance=2;
+	double startTime=3;
+	bool stopTimeDefined=4;
+	double stopTime=5;
+}
+
+
+message SetDebugLoggingRequest{
+	bool loggingOn =1;
+	int32 categoriesSize=2;
+	repeated string catogories = 3;
+}
+
+
+
+//
+// Get
+//
+message GetRequest{
+	repeated int32 valueReference=1; //slidly too small
+	int32 size=2;
+}
+
+message GetRealReply{
+	repeated double values=1;
+}
+
+message GetIntegerReply{
+	repeated int32 values=1;
+}
+
+message GetBooleanReply{
+	repeated bool values=1;
+}
+
+message GetStringReply{
+	repeated string values=1;
+}
+
+//
+// Set
+//
+message SetRealRequest{
+	repeated int32 valueReference=1;
+	repeated double values=2;
+}
+
+message SetIntegerRequest{
+	repeated int32 valueReference=1;
+	repeated int32 values=2;
+}
+
+message SetBooleanRequest{
+	repeated int32 valueReference=1;
+	repeated bool values=2;
+}
+
+message SetStringRequest{
+	repeated int32 valueReference=1;
+	repeated string values=2;
+}
+
+//
+// do step
+//
+message DoStepRequest{
+	double currentCommunicationPoint = 1;
+	double communicationStepSize = 2;
+}
+
+//
+// Other
+//
+message Empty{}
+
+message Fmi2StatusReply{
+	//the status
+	enum Status{
+		Ok = 0;
+		Warning = 1;
+		Discard = 2;
+		Error = 3;
+		Fatal = 4;
+		Pending = 5;
+	}
+	Status status = 1;
+}
+
+message VersionRequest
+{
+	int32 version=1;
+
+}
+
+message VersionReply
+{
+	int32 version=1;
+
+}
+
+
+
+message InstantiateRequest{
+//fmi2Type fmuType, fmi2String fmuGUID,
+//		fmi2String fmuResourceLocation, const fmi2CallbackFunctions *functions, fmi2Boolean visible,
+//		fmi2Boolean loggingOn
+
+string instanceName=1;
+string fmuGuid=2;
+string fmuResourceLocation=3;
+bool visible = 4;
+bool logginOn=5;
+string callbackAddress=6;
+int32 callbackPort=7;
+
+}
+
+message InstantiateReply
+{
+//skip
+}
+
+
+message GetMaxStepSizeReply
+{
+	double maxStepSize =1;
+}
