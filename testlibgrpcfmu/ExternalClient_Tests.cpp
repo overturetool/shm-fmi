@@ -25,7 +25,7 @@ int r =fmu.enterInitializationMode(0);
 
 EXPECT_EQ(1,1);
 
-dlclose(h);
+//dlclose(h);
 }
 
 

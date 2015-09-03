@@ -97,7 +97,6 @@ ExternalClient_Tests.o : ExternalClient_Tests.cpp $(GTEST_HEADERS) fmu-loader.h
 DEPS = fmu-loader.h
 %.o: %.c $(DEPS)
 	$(CC) $(CFLAGS) -DFMI_COSIMULATION -Iinclude -Iinclude/fmi -c -o $@ $<
-	
 
 external_client_unittests : ExternalClient_Tests.o fmu-loader.o gtest_main.a
 	$(CXX) $^ $(LDFLAGS) -lpthread -o $@
@@ -110,6 +109,6 @@ fmu:
 
 test: external_client_unittests fmu ../grpcfmi-server/target/fmi-server-7-jar-with-dependencies.jar
 	../grpcfmi-server/start-debug-server.sh
-	./external_client_unittests
+	LD_LIBRARY_PATH=../libgrpcfmi ./external_client_unittests
 	../grpcfmi-server/stop-debug-server.sh
 

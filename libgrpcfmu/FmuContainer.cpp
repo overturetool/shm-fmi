@@ -5,12 +5,13 @@
  *      Author: parallels
  */
 
-#include <FmuContainer.h>
+#include "FmuContainer.h"
 
-FmuContainer::FmuContainer()
+FmuContainer::FmuContainer(ExternalClient *client, const fmi2CallbackFunctions *functions)
 {
-	// TODO Auto-generated constructor stub
 
+  this->m_functions=functions;
+  this->m_client=client;
 }
 
 FmuContainer::~FmuContainer()
