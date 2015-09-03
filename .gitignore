@@ -14,3 +14,6 @@ client_unit/Debug/
 *.pid
 testlibgrpcfmi/external_client_unittests
 testlibgrpcfmu/external_client_unittests
+
+*.project
+*.classpath

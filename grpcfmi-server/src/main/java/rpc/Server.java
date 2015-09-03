@@ -72,8 +72,13 @@ public class Server {
 
 	public static void main(String[] args) throws Exception {
 		Server server = new Server(8980);
-		server.start();
-		
+
+		try {
+			server.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 
 	/**
@@ -101,7 +106,7 @@ public class Server {
 				StreamObserver<InstantiateReply> responseObserver) {
 			// TODO Auto-generated method stub
 			System.out.println("Called fmi2Instantiate");
-			
+
 			responseObserver.onValue(InstantiateReply.newBuilder().build());
 			responseObserver.onCompleted();
 		}
@@ -267,7 +272,7 @@ public class Server {
 
 			for (int i = 0; i < request.getValueReferenceCount(); i++) {
 				strings.put(request.getValueReference(i), request.getValues(i));
-				System.out.println("\t"+request.getValues(i));
+				System.out.println("\t" + request.getValues(i));
 			}
 
 			status(responseObserver);
