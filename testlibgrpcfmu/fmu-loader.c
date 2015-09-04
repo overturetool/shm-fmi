@@ -68,7 +68,8 @@ static void *getAdr(int *success, HMODULE dllHandle, const char *functionName) {
 
     if (!h) {
         printf("error: Could not load %s\n", dllPath);
-        fprintf(stderr,dlerror());
+        fputs(dlerror(),stderr);
+//        fprintf(stderr,dlerror());
         fflush(stderr);
         return 0; // failure
     }
