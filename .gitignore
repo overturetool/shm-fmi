@@ -15,5 +15,9 @@ client_unit/Debug/
 testlibgrpcfmi/external_client_unittests
 testlibgrpcfmu/external_client_unittests
 
+*.cproject
 *.project
 *.classpath
+
+
+*.log

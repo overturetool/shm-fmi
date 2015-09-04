@@ -15,12 +15,13 @@
 class FmuContainer
 {
 public:
-	FmuContainer(ExternalClient *client, const fmi2CallbackFunctions *functions);
+	FmuContainer(ExternalClient *client, const char* name, const fmi2CallbackFunctions *functions);
 	virtual ~FmuContainer();
 
 public:
 	const fmi2CallbackFunctions *m_functions;
 	ExternalClient* m_client;
+	const char* m_name;
 };
 
 #endif /* FMUCONTAINER_H_ */
