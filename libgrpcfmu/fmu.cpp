@@ -40,8 +40,22 @@ static FmuContainer* getFmuContainer(fmi2Component c)
 
 static fmi2Status convertStatus(ExternalClient::fmi2Status status)
 {
-	//TODO wirte the switch to make this safe
-	return (fmi2Status) status;
+	switch (status)
+	{
+	case ExternalClient::fmi2Status::fmi2Discard:
+		return fmi2Discard;
+	case ExternalClient::fmi2Status::fmi2Error:
+		return fmi2Error;
+	case ExternalClient::fmi2Status::fmi2Fatal:
+		return fmi2Fatal;
+	case ExternalClient::fmi2Status::fmi2OK:
+		return fmi2OK;
+	case ExternalClient::fmi2Status::fmi2Pending:
+		return fmi2Pending;
+	case ExternalClient::fmi2Status::fmi2Warning:
+		return fmi2Warning;
+	}
+	return fmi2Error;
 }
 
 static void log(const fmi2CallbackFunctions *functions,
