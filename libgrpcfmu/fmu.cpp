@@ -112,8 +112,6 @@ extern "C" fmi2Status fmi2SetupExperiment(fmi2Component c,
 		fmi2Boolean toleranceDefined, fmi2Real tolerance, fmi2Real startTime,
 		fmi2Boolean stopTimeDefined, fmi2Real stopTime)
 {
-	printf("c++ fmi2SetupExperiment");
-
 	FmuContainer* fmu = getFmuContainer(c);
 
 	if (fmu != NULL)

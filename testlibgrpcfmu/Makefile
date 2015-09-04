@@ -103,7 +103,7 @@ DEPS = fmu-loader.h
 %.o: %.c $(DEPS)
 	$(CC) $(CFLAGS) -DFMI_COSIMULATION -Iinclude -Iinclude/fmi -c -o $@ $<
 
-external_client_unittests : FMU_Tests.o LibraryLoad_Tests.o fmu-loader.o gtest_main.a
+external_client_unittests : LibraryLoad_Tests.o FMU_Tests.o fmu-loader.o gtest_main.a
 	$(CXX) $^ $(LDFLAGS) -lpthread -o $@
 
 fmu:
