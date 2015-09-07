@@ -109,6 +109,10 @@ static void *getAdr(int *success, HMODULE dllHandle, const char *functionName) {
     fmu->getIntegerStatus          = (fmi2GetIntegerStatusTYPE *)      getAdr(&s, h, "fmi2GetIntegerStatus");
     fmu->getBooleanStatus          = (fmi2GetBooleanStatusTYPE *)      getAdr(&s, h, "fmi2GetBooleanStatus");
     fmu->getStringStatus           = (fmi2GetStringStatusTYPE *)       getAdr(&s, h, "fmi2GetStringStatus");
+
+    int s2=1;
+    fmu->getMaxStepsize           = (fmi2GetMaxStepsizeTYPE *)       	getAdr(&s2, h, "fmi2GetMaxStepsize");
+
 #else // FMI2 for Model Exchange
     fmu->enterEventMode            = (fmi2EnterEventModeTYPE *)        getAdr(&s, h, "fmi2EnterEventMode");
     fmu->newDiscreteStates         = (fmi2NewDiscreteStatesTYPE *)     getAdr(&s, h, "fmi2NewDiscreteStates");

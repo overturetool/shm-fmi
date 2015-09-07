@@ -46,7 +46,7 @@
    - Nov. 14, 2011: First public Version
 
 
-   Copyright © 2011 MODELISAR consortium,
+   Copyright ï¿½ 2011 MODELISAR consortium,
                2012-2013 Modelica Association Project "FMI"
                All rights reserved.
    This file is licensed by the copyright holders under the BSD 2-Clause License
@@ -195,6 +195,9 @@ Types for Common Functions
    typedef fmi2Status fmi2GetDirectionalDerivativeTYPE(fmi2Component, const fmi2ValueReference[], size_t,
                                                                    const fmi2ValueReference[], size_t,
                                                                    const fmi2Real[], fmi2Real[]);
+
+   /* into-cps specific*/
+   typedef fmi2Status fmi2GetMaxStepsizeTYPE(fmi2Component, fmi2Real*);
 
 /***************************************************
 Types for Functions for FMI2 for Model Exchange

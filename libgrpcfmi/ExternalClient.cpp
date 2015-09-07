@@ -144,6 +144,23 @@ ExternalClient::fmi2Status ExternalClient::fmi2Terminate()
 	return ExternalClient::fmi2Status::fmi2Fatal;
 }
 
+
+ExternalClient::fmi2Status ExternalClient::fmi2Reset()
+{
+	Empty request;
+	Fmi2StatusReply reply;
+	ClientContext context;
+
+	Status status = stub_->fmi2Reset(&context, request, &reply);
+	if (status.ok())
+	{
+		return getStatus(reply);
+	}
+
+	return ExternalClient::fmi2Status::fmi2Fatal;
+}
+
+
 ExternalClient::fmi2Status ExternalClient::fmi2SetDebugLogging(
 		fmi2Boolean loggingOn, size_t nCategories,
 		const fmi2String categories[])
@@ -404,4 +421,26 @@ ExternalClient::fmi2Status ExternalClient::fmi2DoStep(
 	}
 
 	return ExternalClient::fmi2Status::fmi2Fatal;
+}
+
+//
+// INTOS specific
+//
+
+ExternalClient::fmi2Status ExternalClient::fmi2GetMaxStepsize(fmi2Real* size)
+{
+	Empty request;
+		GetMaxStepSizeReply reply;
+		ClientContext context;
+
+		Status status = stub_->fmi2GetMaxStepSize(&context, request,
+				&reply);
+		if (status.ok())
+		{
+			*size = reply.maxstepsize();
+			return ExternalClient::fmi2Status::fmi2OK;
+			//return getStatus(reply);
+		}
+
+		return ExternalClient::fmi2Status::fmi2Fatal;
 }

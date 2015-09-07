@@ -71,7 +71,7 @@ typedef unsigned int    fmi2ValueReference;
 	fmi2Status fmi2EnterInitializationMode();
 	fmi2Status fmi2ExitInitializationMode();
 	fmi2Status fmi2Terminate();
-//	fmi2Status fmi2Reset(fmi2Component c);
+	fmi2Status fmi2Reset();
 	//void fmi2FreeInstance(fmi2Component c);
 	fmi2Status fmi2SetDebugLogging( fmi2Boolean loggingOn, size_t nCategories, const fmi2String categories[]);
 	fmi2Status fmi2GetReal ( const fmi2ValueReference vr[], size_t nvr, fmi2Real value[]);
@@ -85,6 +85,9 @@ typedef unsigned int    fmi2ValueReference;
 
 	fmi2Status fmi2DoStep( fmi2Real currentCommunicationPoint,
 	                    fmi2Real communicationStepSize, fmi2Boolean noSetFMUStatePriorToCurrentPoint);
+
+	//INTO specific
+	fmi2Status fmi2GetMaxStepsize(fmi2Real* size);
 
 private:
 	std::unique_ptr<Fmu::Stub> stub_;

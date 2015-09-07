@@ -160,9 +160,13 @@ extern "C" fmi2Status fmi2Terminate(fmi2Component c)
 
 extern "C" fmi2Status fmi2Reset(fmi2Component c)
 {
-	notimplemented(c, "fmi2Reset");
+	FmuContainer* fmu = getFmuContainer(c);
 
-	return fmi2Error;
+	if (fmu != NULL)
+	{
+		return convertStatus(fmu->m_client->fmi2Reset());
+	}
+	return fmi2Fatal;
 }
 
 extern "C" void fmi2FreeInstance(fmi2Component c)
@@ -420,6 +424,19 @@ extern "C" fmi2Status fmi2GetStringStatus(fmi2Component c,
 {
 	notimplemented(c, "fmi2GetStringStatus");
 	return fmi2Error;
+}
+
+/* INTO cps specific*/
+extern "C" fmi2Status fmi2GetMaxStepsize(fmi2Component c, fmi2Real* size)
+{
+	FmuContainer* fmu = getFmuContainer(c);
+
+	if (fmu != NULL)
+	{
+		return convertStatus(fmu->m_client->fmi2GetMaxStepsize(size));
+	}
+
+	return fmi2Fatal;
 }
 
 // ---------------------------------------------------------------------------

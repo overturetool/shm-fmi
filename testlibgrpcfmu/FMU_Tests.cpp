@@ -14,10 +14,17 @@ extern "C"
 #define stopTimeDefined true
 #define stopTime 1.0
 
+//set
 #define realId 1
 #define intId 2
 #define boolId 3
 #define stringId 4
+
+//get
+#define realIdGet 10
+#define intIdGet 11
+#define boolIdGet 12
+#define stringIdGet 13
 
 static FMU s_fmu;
 static bool s_libLoaded = false;
@@ -74,7 +81,7 @@ static fmi2Component initialized(FMU fmu)
 
 	status = fmu.exitInitializationMode(comp);
 
-		EXPECT_EQ(fmi2OK, status);
+	EXPECT_EQ(fmi2OK, status);
 	return comp;
 }
 
@@ -155,7 +162,7 @@ TEST(FMU, reset)
  *
  *******************************************/
 
-TEST(FMU, fmi2EnterInitializationMode)
+TEST(FMU, enterInitializationMode)
 {
 	FMU fmu = setup();
 	fmi2Component comp = setuped(fmu);
@@ -164,8 +171,6 @@ TEST(FMU, fmi2EnterInitializationMode)
 
 	EXPECT_EQ(fmi2OK, status);
 }
-
-
 
 TEST(FMU, setReal)
 {
@@ -213,7 +218,8 @@ TEST(FMU, setRealInputDerivatives)
 	{ 1 }, new double[1]
 	{ 1.1 });
 
-	EXPECT_EQ(fmi2OK, status);
+	//not FW'ed to receiver
+	EXPECT_EQ(fmi2Error, status);
 }
 
 // State stuff
@@ -224,7 +230,9 @@ TEST(FMU, getsetFMUstate)
 	fmi2Component comp = initializing(fmu);
 	fmi2FMUstate* state;
 	fmi2Status status = fmu.getFMUstate(comp, state);
-	EXPECT_EQ(fmi2OK, status);
+
+	//not FW'ed to receiver
+	EXPECT_EQ(fmi2Error, status);
 
 	if (status == fmi2OK)
 	{
@@ -258,10 +266,10 @@ TEST(FMU, getReal)
 	fmi2Component comp = initializing(fmu);
 
 	const fmi2ValueReference vr[1] =
-		{ realId };
+	{ realIdGet };
 
 	double values[1];
-		fmi2Status status = fmu.getReal(comp, vr, 1, values);
+	fmi2Status status = fmu.getReal(comp, vr, 1, values);
 
 	EXPECT_EQ(fmi2OK, status);
 
@@ -274,10 +282,10 @@ TEST(FMU, getBoolean)
 	fmi2Component comp = initializing(fmu);
 
 	const fmi2ValueReference vr[1] =
-		{ realId };
+	{ boolIdGet };
 
 	fmi2Boolean values[1];
-		fmi2Status status = fmu.getBoolean(comp, vr, 1, values);
+	fmi2Status status = fmu.getBoolean(comp, vr, 1, values);
 
 	EXPECT_EQ(fmi2OK, status);
 
@@ -290,16 +298,15 @@ TEST(FMU, getInteger)
 	fmi2Component comp = initializing(fmu);
 
 	const fmi2ValueReference vr[1] =
-		{ realId };
+	{ intIdGet };
 
 	int values[1];
-		fmi2Status status = fmu.getInteger(comp, vr, 1, values);
+	fmi2Status status = fmu.getInteger(comp, vr, 1, values);
 
 	EXPECT_EQ(fmi2OK, status);
 
 	EXPECT_EQ(1, values[0]);
 }
-
 
 TEST(FMU, getString)
 {
@@ -307,17 +314,16 @@ TEST(FMU, getString)
 	fmi2Component comp = initializing(fmu);
 
 	const fmi2ValueReference vr[1] =
-		{ realId };
+	{ stringIdGet };
 
 	const char* values[1];
-		fmi2Status status = fmu.getString(comp, vr, 1, values);
+	fmi2Status status = fmu.getString(comp, vr, 1, values);
 
 	EXPECT_EQ(fmi2OK, status);
 
-	EXPECT_TRUE(values[0]!=0);
+	EXPECT_TRUE(values[0] != 0);
 	EXPECT_STREQ("undefined", values[0]);
 }
-
 
 TEST(FMU, getDirectionalDerivative)
 {
@@ -328,25 +334,23 @@ TEST(FMU, getDirectionalDerivative)
 
 	fmi2Real values[1];
 
-	fmi2Status status = fmu.getDirectionalDerivative(comp, vr, 1,
-	vr,1, new double[1]
-	{ 1.1 },values);
+	fmi2Status status = fmu.getDirectionalDerivative(comp, vr, 1, vr, 1,
+			new double[1]
+			{ 1.1 }, values);
 
 	/*
 	 *    typedef fmi2Status fmi2GetDirectionalDerivativeTYPE(fmi2Component, const fmi2ValueReference[], size_t,
-                                                                   const fmi2ValueReference[], size_t,
-                                                                   const fmi2Real[], fmi2Real[]);*/
-
-	EXPECT_EQ(fmi2OK, status);
+	 const fmi2ValueReference[], size_t,
+	 const fmi2Real[], fmi2Real[]);*/
+	//not FW'ed to receiver
+	EXPECT_EQ(fmi2Error, status);
 }
-
 
 /*******************************************
  *
  * initialized
  *
  *******************************************/
-
 
 TEST(FMU, terminate)
 {
@@ -363,10 +367,25 @@ TEST(FMU, doStep)
 	FMU fmu = setup();
 	fmi2Component comp = initialized(fmu);
 
-	fmi2Status status = fmu.doStep(comp,0.0,1.0,false);
+	fmi2Status status = fmu.doStep(comp, 0.0, 1.0, false);
 
 	EXPECT_EQ(fmi2OK, status);
 }
 
-
 //TODO: getRealOutputDerivatives
+
+//INTO specific
+
+TEST(FMU, getMaxStepsize)
+{
+	FMU fmu = setup();
+	fmi2Component comp = initialized(fmu);
+
+	if (fmu.getMaxStepsize != NULL)
+	{
+		double size;
+		fmi2Status status = fmu.getMaxStepsize(comp, &size);
+		EXPECT_EQ(fmi2OK, status);
+		EXPECT_EQ(100, size);
+	}
+}

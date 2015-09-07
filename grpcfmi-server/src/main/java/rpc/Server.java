@@ -90,6 +90,11 @@ public class Server {
 	private static class RouteGuideService implements FmuGrpc.Fmu {
 
 		RouteGuideService() {
+
+			reals.put(10, 9.9);
+			integers.put(11, 1);
+			booleans.put(12, true);
+			strings.put(13, "undefined");
 		}
 
 		@Override
@@ -291,6 +296,11 @@ public class Server {
 				StreamObserver<GetMaxStepSizeReply> responseObserver) {
 			// TODO Auto-generated method stub
 			System.out.println("Called fmi2GetMaxStepSize");
+			
+			GetMaxStepSizeReply reply =GetMaxStepSizeReply.newBuilder().setMaxStepSize(100).build();
+			responseObserver.onValue(reply);
+			responseObserver.onCompleted();
+			
 		}
 
 		@Override

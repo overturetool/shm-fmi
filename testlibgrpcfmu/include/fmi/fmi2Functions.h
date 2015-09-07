@@ -100,7 +100,7 @@
                     meeting with additional improvements (by Martin Otter, DLR).
    - Dec. 3 , 2008: First version by Martin Otter (DLR) and Hans Olsson (Dynasim).
 
-   Copyright © 2008-2011 MODELISAR consortium,
+   Copyright ï¿½ 2008-2011 MODELISAR consortium,
                2012-2013 Modelica Association Project "FMI"
                All rights reserved.
    This file is licensed by the copyright holders under the BSD 2-Clause License
@@ -287,6 +287,8 @@ Common Functions
    FMI2_Export fmi2GetDirectionalDerivativeTYPE fmi2GetDirectionalDerivative;
 
 
+/* custom INTO-CPS*/
+   FMI2_Export fmi2GetMaxStepsizeTYPE    fmi2GetMaxStepsize;
 /***************************************************
 Functions for FMI2 for Model Exchange
 ****************************************************/
