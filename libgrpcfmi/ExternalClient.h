@@ -26,8 +26,6 @@ using grpc::ChannelArguments;
 using grpc::ChannelInterface;
 using grpc::ClientContext;
 using grpc::Status;
-using service::VersionRequest;
-using service::VersionReply;
 using service::Fmu;
 using service::GetRequest;
 using service::GetRealReply;

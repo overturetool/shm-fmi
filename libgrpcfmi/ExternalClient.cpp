@@ -61,7 +61,7 @@ bool ExternalClient::fmi2Instantiate(fmi2String instanceName,  fmi2String fmuGUI
 	request.set_visible(visible);
 	request.set_logginon(loggingOn);
 
-	InstantiateReply reply;
+	Fmi2StatusReply reply;
 	ClientContext context;
 
 	Status status = stub_->fmi2Instantiate(&context, request, &reply);

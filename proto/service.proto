@@ -10,8 +10,8 @@ package service;
 service Fmu
 {
 
-	rpc GetVersion(VersionRequest) returns(VersionReply);
-	rpc fmi2Instantiate(InstantiateRequest) returns(InstantiateReply);
+//	rpc fmi2GetVersion(Empty) returns(VersionReply);
+	rpc fmi2Instantiate(InstantiateRequest) returns(Fmi2StatusReply);
 
 	rpc fmi2SetupExperiment(SetupExperimentRequest) returns(Fmi2StatusReply);
 	rpc fmi2EnterInitializationMode(Empty) returns(Fmi2StatusReply);
@@ -127,17 +127,11 @@ message Fmi2StatusReply{
 	Status status = 1;
 }
 
-message VersionRequest
-{
-	int32 version=1;
 
-}
-
-message VersionReply
-{
-	int32 version=1;
-
-}
+//message VersionReply
+//{
+//	string version=1;
+//}
 
 
 
@@ -156,10 +150,10 @@ int32 callbackPort=7;
 
 }
 
-message InstantiateReply
-{
+//message InstantiateReply
+//{
 //skip
-}
+//}
 
 
 message GetMaxStepSizeReply
