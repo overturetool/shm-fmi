@@ -98,6 +98,12 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 
 	FmuContainer *container = new FmuContainer(client, instanceName, functions);
 
+	//do not return null
+	if(clients.size()==0)
+	{
+		clients.push_back(NULL); //Dummy var
+	}
+
 	clients.push_back(container);
 
 	client->fmi2Instantiate(instanceName, fmuGUID, fmuResourceLocation, "",
