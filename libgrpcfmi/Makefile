@@ -45,14 +45,13 @@ PROTOS_PATH = ../proto/
 
 vpath %.proto $(PROTOS_PATH)
 
-all: system-check libgrpcfmi.so
-# libgrpcfmi.a
+all: system-check libgrpcfmi.a libgrpcfmi.so
 
 libgrpcfmi.so: service.pb.o service.grpc.pb.o ExternalClient.o
 	$(CXX) $^ $(LDFLAGS) -shared -o $@
 
-#libgrpcfmi.a: service.pb.o service.grpc.pb.o ExternalClient.o
-#	ar rvs $@ $^ 
+libgrpcfmi.a: service.pb.o service.grpc.pb.o ExternalClient.o
+	ar rvs $@ $^ 
 
 
 
