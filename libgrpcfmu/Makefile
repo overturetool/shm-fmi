@@ -4,7 +4,7 @@ CXX = g++
 CPPFLAGS += -I/usr/local/include -Iincludes/fmi -I../libgrpcfmi -pthread -g -fPIC -DFMI_COSIMULATION
 CFLAGS += -g -fPIC
 CXXFLAGS += -std=c++11
-LDFLAGS += -L/usr/local/lib  -lgrpc -lgpr -lprotobuf -lgrpc++_unsecure -lpthread -ldl -L../libgrpcfmi -lgrpcfmi
+LDFLAGS += -L/usr/local/lib -Wl,-Bstatic    -L../libgrpcfmi -lgrpcfmi -Wl,-Bdynamic -lpthread -lprotobuf -ldl -lgrpc -lgpr  -lgrpc++_unsecure
 
 
 #LDFLAGS += -L/usr/local/lib  /usr/local/lib/libgrpc.a /usr/local/lib/libgpr.a /usr/local/lib/libprotobuf.a -lpthread -ldl /usr/local/lib/libgrpc++_unsecure.a -shared
@@ -12,7 +12,7 @@ LDFLAGS += -L/usr/local/lib  -lgrpc -lgpr -lprotobuf -lgrpc++_unsecure -lpthread
 #/usr/local/lib/libprotobuf.a
 #LDFLAGS += -L/usr/local/lib  /usr/local/lib/libgrpc.a /usr/local/lib/libgpr.a /usr/local/lib/libprotobuf.a -lpthread -ldl /usr/local/lib/libgrpc++_unsecure.a
 
-DEPS = FmuContainer.h ExternalClient.h freeport.h JavaLauncher.h
+DEPS = FmuContainer.h ExternalClient.h freeport.h JavaLauncher.h ConfigFile.h
 
 
 all: libgrpcfmu.so

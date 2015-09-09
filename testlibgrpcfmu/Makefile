@@ -114,6 +114,7 @@ fmu:
 
 test: external_client_unittests fmu ../grpcfmi-server/target/fmi-server-7-jar-with-dependencies.jar
 	../grpcfmi-server/start-debug-server.sh
-	LD_LIBRARY_PATH=../libgrpcfmi ./external_client_unittests
+#	LD_LIBRARY_PATH=../libgrpcfmi 
+	./external_client_unittests
 	../grpcfmi-server/stop-debug-server.sh
 
