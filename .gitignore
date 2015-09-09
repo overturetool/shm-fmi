@@ -21,3 +21,16 @@ testlibgrpcfmu/external_client_unittests
 
 
 *.log
+
+#VDM stuff
+*.covtbl
+*.vdmrtcov
+*.logtv
+*.logrt
+*.logrt.rtbin
+
+coe-test/**/*.json
+coe-test/**/*.jar
+coe-test/**/*.log*
+coe-test/**/*.pdf
+coe-test/**/*.fmu
