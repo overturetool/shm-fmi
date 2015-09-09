@@ -1,0 +1,17 @@
+{
+	"fmus":[
+		"../fmus/fmu2watertank.fmu",
+		"../fmus/vdm-tankcontroller"
+	],
+	"connections":{
+		"{8c4e810f-3df3-4a00-8276-176fa3c9f003}.controller.System.valveActuator.valveState":["{8c4e810f-3df3-4a00-8276-176fa3c9f001}.tank.valve"],
+		"{8c4e810f-3df3-4a00-8276-176fa3c9f001}.tank.level":["{8c4e810f-3df3-4a00-8276-176fa3c9f003}.controller.System.levelSensor.level"]
+	},
+	"parameters":{
+
+	},
+	"algorithm":{
+		"type":"fixed-step",
+		"size":0.1
+	}
+}

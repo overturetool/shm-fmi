@@ -1,0 +1,5 @@
+true
+java
+-jar
+/home/parallels/Downloads/crescendo-fmi/crescendo-fmi/target/crescendo-fmi-2.0.7-SNAPSHOT-jar-with-dependencies.jar
+-p

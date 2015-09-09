@@ -1,0 +1,12 @@
+
+-- connect shared variables to DE model
+input level = System.levelSensor.level; 
+output valve = System.valveActuator.valveState;
+
+-- connect shared design parameters to DE model
+sdp maxlevel = Controller.maxLevel;
+sdp minlevel = Controller.minLevel;
+	
+-- other linked names used in scenarios
+model isLevelSensorBroken = System.levelSensor.isLevelSensorBroken;
+model isValveBroken = System.valveActuator.isValveBroken;
