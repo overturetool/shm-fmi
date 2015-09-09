@@ -24,6 +24,13 @@
 //static std::map <int, ExternalClient> clients;
 #include <vector>
 #include "FmuContainer.h"
+#include "freeport.h"
+#include <sstream>
+#include "JavaLauncher.h"
+#include "ConfigFile.h"
+
+#define SSTR( x ) dynamic_cast< std::ostringstream & >( \
+        ( std::ostringstream() << std::dec << x ) ).str()
 
 std::vector<FmuContainer*> clients;
 
@@ -40,8 +47,22 @@ static FmuContainer* getFmuContainer(fmi2Component c)
 
 static fmi2Status convertStatus(ExternalClient::fmi2Status status)
 {
-	//TODO wirte the switch to make this safe
-	return (fmi2Status) status;
+	switch (status)
+	{
+	case ExternalClient::fmi2Status::fmi2Discard:
+		return fmi2Discard;
+	case ExternalClient::fmi2Status::fmi2Error:
+		return fmi2Error;
+	case ExternalClient::fmi2Status::fmi2Fatal:
+		return fmi2Fatal;
+	case ExternalClient::fmi2Status::fmi2OK:
+		return fmi2OK;
+	case ExternalClient::fmi2Status::fmi2Pending:
+		return fmi2Pending;
+	case ExternalClient::fmi2Status::fmi2Warning:
+		return fmi2Warning;
+	}
+	return fmi2Error;
 }
 
 static void log(const fmi2CallbackFunctions *functions,
@@ -78,11 +99,42 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 {
 	//printf("c++ fmi2Instantiate");
 
-	std::string url = "localhost:8980";
+	std::string port = SSTR(getFreePort());
+
+	//char buffer[10];
+	//snprintf(buffer, 10, "%u", getFreePort());
+//	std::string port(buffer);
+
+	std::string resourceLocationStr(fmuResourceLocation);
+
+	std::string configFile = resourceLocationStr + std::string("/config.txt");
+	ConfigFile config(configFile, port);
+
+	JavaLauncher *launcher = new JavaLauncher(config.m_args);
+
+	if (config.m_skipLaunch)
+	{
+		port = "8980";
+	} else
+	{
+		launcher->launch();
+	}
+
+
+	std::string url = "localhost:" + port;
+	std::cout <<"--External Client Port "<<url<<std::endl;
+
 
 	ExternalClient *client = new ExternalClient(url);
 
-	FmuContainer *container = new FmuContainer(client, instanceName, functions);
+	FmuContainer *container = new FmuContainer(client, instanceName, functions,
+			launcher);
+
+	//do not return null
+	if (clients.size() == 0)
+	{
+		clients.push_back(NULL); //Dummy var
+	}
 
 	clients.push_back(container);
 
@@ -148,14 +200,27 @@ extern "C" fmi2Status fmi2Terminate(fmi2Component c)
 
 extern "C" fmi2Status fmi2Reset(fmi2Component c)
 {
-	notimplemented(c, "fmi2Reset");
+	FmuContainer* fmu = getFmuContainer(c);
 
-	return fmi2Error;
+	if (fmu != NULL)
+	{
+		return convertStatus(fmu->m_client->fmi2Reset());
+	}
+	return fmi2Fatal;
 }
 
 extern "C" void fmi2FreeInstance(fmi2Component c)
 {
-	notimplemented(c, "fmi2FreeInstance");
+	FmuContainer* fmu = getFmuContainer(c);
+
+	if (fmu != NULL)
+	{
+		fmu->m_javaLauncher->terminate();
+		intptr_t index = (intptr_t) c;
+		clients.at(index) = NULL;
+		delete fmu;
+
+	}
 }
 
 // ---------------------------------------------------------------------------
