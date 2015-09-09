@@ -136,6 +136,12 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 		clients.push_back(NULL); //Dummy var
 	}
 
+	//do not return null
+	if(clients.size()==0)
+	{
+		clients.push_back(NULL); //Dummy var
+	}
+
 	clients.push_back(container);
 
 	client->fmi2Instantiate(instanceName, fmuGUID, fmuResourceLocation, "",
@@ -150,8 +156,6 @@ extern "C" fmi2Status fmi2SetupExperiment(fmi2Component c,
 		fmi2Boolean toleranceDefined, fmi2Real tolerance, fmi2Real startTime,
 		fmi2Boolean stopTimeDefined, fmi2Real stopTime)
 {
-	printf("c++ fmi2SetupExperiment");
-
 	FmuContainer* fmu = getFmuContainer(c);
 
 	if (fmu != NULL)
@@ -473,6 +477,19 @@ extern "C" fmi2Status fmi2GetStringStatus(fmi2Component c,
 {
 	notimplemented(c, "fmi2GetStringStatus");
 	return fmi2Error;
+}
+
+/* INTO cps specific*/
+extern "C" fmi2Status fmi2GetMaxStepsize(fmi2Component c, fmi2Real* size)
+{
+	FmuContainer* fmu = getFmuContainer(c);
+
+	if (fmu != NULL)
+	{
+		return convertStatus(fmu->m_client->fmi2GetMaxStepsize(size));
+	}
+
+	return fmi2Fatal;
 }
 
 // ---------------------------------------------------------------------------

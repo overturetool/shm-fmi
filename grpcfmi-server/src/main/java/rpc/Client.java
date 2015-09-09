@@ -10,7 +10,6 @@ import com.lausdahl.examples.Service.GetRealReply;
 import com.lausdahl.examples.Service.GetRequest;
 import com.lausdahl.examples.Service.SetRealRequest;
 import com.lausdahl.examples.Service.SetRealRequest.Builder;
-import com.lausdahl.examples.Service.VersionRequest;
 
 public class Client {
 
@@ -21,10 +20,10 @@ public class Client {
 
 		FmuBlockingStub blockingStub = FmuGrpc.newBlockingStub(channel);
 
-		System.out.println("Version from server is: "
-				+ blockingStub.getVersion(
-						VersionRequest.newBuilder().setVersion(100).build())
-						.getVersion());
+//		System.out.println("Version from server is: "
+//				+ blockingStub.getVersion(
+//						Empty.newBuilder().build())
+//						.getVersion());
 		
 		System.out.println("Calling set reals");
 		

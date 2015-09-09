@@ -91,14 +91,19 @@ gtest_main.a : gtest-all.o gtest_main.o
 
 
 
-ExternalClient_Tests.o : ExternalClient_Tests.cpp $(GTEST_HEADERS) fmu-loader.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -Iinclude -Iinclude/fmi -DFMULIB=\"../libgrpcfmu/libgrpcfmu.so\" -pthread -c ExternalClient_Tests.cpp
+#ExternalClient_Tests.o : ExternalClient_Tests.cpp $(GTEST_HEADERS) fmu-loader.h
+#	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -Iinclude -Iinclude/fmi -DFMULIB=\"../libgrpcfmu/libgrpcfmu.so\" -pthread -c ExternalClient_Tests.cpp
+	
+
+%.o: %.cpp $(DEPS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -Iinclude -Iinclude/fmi -DFMULIB=\"../libgrpcfmu/libgrpcfmu.so\" -pthread -c -o $@ $<
+	
 
 DEPS = fmu-loader.h
 %.o: %.c $(DEPS)
 	$(CC) $(CFLAGS) -DFMI_COSIMULATION -Iinclude -Iinclude/fmi -c -o $@ $<
 
-external_client_unittests : ExternalClient_Tests.o fmu-loader.o gtest_main.a
+external_client_unittests : LibraryLoad_Tests.o FMU_Tests.o fmu-loader.o gtest_main.a
 	$(CXX) $^ $(LDFLAGS) -lpthread -o $@
 
 fmu:

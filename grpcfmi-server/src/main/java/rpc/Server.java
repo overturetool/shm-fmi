@@ -20,7 +20,6 @@ import com.lausdahl.examples.Service.GetRealReply;
 import com.lausdahl.examples.Service.GetRequest;
 import com.lausdahl.examples.Service.GetStringReply;
 import com.lausdahl.examples.Service.GetStringReply.Builder;
-import com.lausdahl.examples.Service.InstantiateReply;
 import com.lausdahl.examples.Service.InstantiateRequest;
 import com.lausdahl.examples.Service.SetBooleanRequest;
 import com.lausdahl.examples.Service.SetDebugLoggingRequest;
@@ -28,8 +27,6 @@ import com.lausdahl.examples.Service.SetIntegerRequest;
 import com.lausdahl.examples.Service.SetRealRequest;
 import com.lausdahl.examples.Service.SetStringRequest;
 import com.lausdahl.examples.Service.SetupExperimentRequest;
-import com.lausdahl.examples.Service.VersionReply;
-import com.lausdahl.examples.Service.VersionRequest;
 
 public class Server {
 
@@ -90,25 +87,20 @@ public class Server {
 	private static class RouteGuideService implements FmuGrpc.Fmu {
 
 		RouteGuideService() {
+
+			reals.put(10, 9.9);
+			integers.put(11, 1);
+			booleans.put(12, true);
+			strings.put(13, "undefined");
 		}
 
-		@Override
-		public void getVersion(VersionRequest request,
-				StreamObserver<VersionReply> responseObserver) {
-			responseObserver.onValue(VersionReply.newBuilder()
-					.setVersion(request.getVersion()).build());
-			responseObserver.onCompleted();
-
-		}
 
 		@Override
 		public void fmi2Instantiate(InstantiateRequest request,
-				StreamObserver<InstantiateReply> responseObserver) {
+				StreamObserver<Fmi2StatusReply> responseObserver) {
 			// TODO Auto-generated method stub
 			System.out.println("Called fmi2Instantiate");
-
-			responseObserver.onValue(InstantiateReply.newBuilder().build());
-			responseObserver.onCompleted();
+			status(responseObserver);
 		}
 
 		@Override
@@ -291,6 +283,11 @@ public class Server {
 				StreamObserver<GetMaxStepSizeReply> responseObserver) {
 			// TODO Auto-generated method stub
 			System.out.println("Called fmi2GetMaxStepSize");
+			
+			GetMaxStepSizeReply reply =GetMaxStepSizeReply.newBuilder().setMaxStepSize(100).build();
+			responseObserver.onValue(reply);
+			responseObserver.onCompleted();
+			
 		}
 
 		@Override
