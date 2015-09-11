@@ -4,7 +4,7 @@ CXX = g++
 CPPFLAGS += -I/usr/local/include -Iincludes/fmi -I../libgrpcfmi -pthread -g -fPIC -DFMI_COSIMULATION
 CFLAGS += -g -fPIC
 CXXFLAGS += -std=c++11
-LDFLAGS += -L/usr/local/lib -Wl,-Bstatic    -L../libgrpcfmi -lgrpcfmi -Wl,-Bdynamic -lpthread -lprotobuf -ldl -lgrpc -lgpr  -lgrpc++_unsecure
+LDFLAGS += -L/usr/local/lib -Wl,-Bstatic    -L../libgrpcfmi -lgrpcfmi -lprotobuf -lgrpc++ -lgrpc -lgpr  -lgrpc++_unsecure /home/parallels/Downloads/grpc/third_party/zlib/libz.a -Wl,-Bdynamic -lpthread  -ldl 
 
 
 #LDFLAGS += -L/usr/local/lib  /usr/local/lib/libgrpc.a /usr/local/lib/libgpr.a /usr/local/lib/libprotobuf.a -lpthread -ldl /usr/local/lib/libgrpc++_unsecure.a -shared
