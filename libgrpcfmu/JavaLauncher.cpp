@@ -7,9 +7,9 @@
 
 #include "JavaLauncher.h"
 
-JavaLauncher::JavaLauncher(char** args)
+JavaLauncher::JavaLauncher(const char* workingDir, char** args)
 {
-
+	this->m_workingDir = workingDir;
 	this->m_launched = false;
 	this->pid = -1;
 	this->m_args = args;
@@ -36,6 +36,8 @@ int JavaLauncher::launch()
 		 printf("%s ",m_args[i]);
 		 }
 		 printf("\n");*/
+		if(m_workingDir!=NULL)
+			chdir(m_workingDir);
 
 		status = execvp(m_args[0], m_args);
 		printf("Execvp status: %d\n", status);

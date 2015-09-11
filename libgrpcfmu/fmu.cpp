@@ -110,7 +110,7 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 	std::string configFile = resourceLocationStr + std::string("/config.txt");
 	ConfigFile config(configFile, port);
 
-	JavaLauncher *launcher = new JavaLauncher(config.m_args);
+	JavaLauncher *launcher = new JavaLauncher(resourceLocationStr.c_str(), config.m_args);
 
 	if (config.m_skipLaunch)
 	{

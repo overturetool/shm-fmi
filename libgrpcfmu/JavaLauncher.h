@@ -22,19 +22,19 @@
 //sleep
 #include <unistd.h>
 
-
-	#include <errno.h>
+#include <errno.h>
 
 class JavaLauncher
 {
 public:
-	JavaLauncher( char** args);
+	JavaLauncher(const char* workingDir, char** args);
 	virtual ~JavaLauncher();
 	int launch();
 	void terminate();
 private:
 
-	 char **m_args;
+	const char* m_workingDir;
+	char **m_args;
 	bool m_launched;
 	pid_t pid;
 };
