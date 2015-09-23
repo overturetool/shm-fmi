@@ -6,3 +6,4 @@
 	path = third_party/zlib
 	url = https://github.com/madler/zlib
 	depth = 1
+	ignore = dirty
