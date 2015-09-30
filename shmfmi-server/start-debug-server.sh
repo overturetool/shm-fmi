@@ -1,5 +1,5 @@
 #!/bin/bash
-java -jar ../grpcfmi-server/target/fmi-server-7-jar-with-dependencies.jar >server.log 2>&1 &
+java -jar ../shmfmi-server/target/fmi-shm-server-7-jar-with-dependencies.jar >server.log 2>&1 &
 pid=$!
 echo $pid
 echo $pid > server.pid

@@ -24,7 +24,13 @@ public class ProtocolDriver implements Runnable {
 	public ProtocolDriver(String id, IServiceProtocol service) {
 
 		this.mem = new SharedMemory();
-		this.mem.setId(id);
+		while (!this.mem.setId(id)) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// don't care
+			}
+		}
 		this.service = service;
 
 		thread = new Thread(this);

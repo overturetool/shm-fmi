@@ -1,23 +1,23 @@
-package rpc;
+package org.intocps.java.fmi.service.test;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.intocps.java.fmi.service.IServiceProtocol;
+import org.intocps.java.fmi.service.ProtocolDriver;
 
-import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.lausdahl.examples.Service.DoStepRequest;
 import com.lausdahl.examples.Service.Empty;
 import com.lausdahl.examples.Service.Fmi2StatusReply;
 import com.lausdahl.examples.Service.Fmi2StatusReply.Status;
-import com.lausdahl.examples.Service.GetStringReply.Builder;
 import com.lausdahl.examples.Service.GetBooleanReply;
 import com.lausdahl.examples.Service.GetIntegerReply;
 import com.lausdahl.examples.Service.GetMaxStepSizeReply;
 import com.lausdahl.examples.Service.GetRealReply;
 import com.lausdahl.examples.Service.GetRequest;
 import com.lausdahl.examples.Service.GetStringReply;
+import com.lausdahl.examples.Service.GetStringReply.Builder;
 import com.lausdahl.examples.Service.InstantiateRequest;
 import com.lausdahl.examples.Service.SetBooleanRequest;
 import com.lausdahl.examples.Service.SetDebugLoggingRequest;
@@ -27,6 +27,25 @@ import com.lausdahl.examples.Service.SetStringRequest;
 import com.lausdahl.examples.Service.SetupExperimentRequest;
 
 public class TestResponder implements IServiceProtocol{
+	
+	public static void main(String[] args) throws InterruptedException {
+		
+		
+		String memoryKey = "shmFmiTest";//"OvertureFmiFileMappingObject";
+		if(args.length>0)
+		{
+			memoryKey = args[0];
+		}
+		
+		
+		ProtocolDriver driver = new ProtocolDriver(memoryKey, new TestResponder());
+
+		driver.start();
+
+		while (true)
+			Thread.sleep(30000);
+
+	}
 
 	Map<Integer, Double> reals = new HashMap<Integer, Double>();
 	Map<Integer, Boolean> booleans = new HashMap<Integer, Boolean>();

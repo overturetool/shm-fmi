@@ -10,14 +10,20 @@
 
 FmiIpc::Client* client;
 
-JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setId(
+JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setId(
 		JNIEnv *env, jobject obj, jstring id) {
 
 	const char * idString = env->GetStringUTFChars(id, NULL);
 	printf("%s\n",idString);
+	fflush(stdout);
+	bool success;
 
+	client = new FmiIpc::Client(idString,&success);
 
-	client = new FmiIpc::Client("Local\\MyFileMappingObject2");
+	if(!success)
+		client =NULL;
+
+	return success;
 
 }
 
@@ -54,7 +60,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_read(
 
 	//printf("############## Type: %i Size: %i\n",msg->cmd,size);
 
-	printf("Reading: ");
+	//printf("Reading: ");
 	for (int i = 0; i < size; i++) {
 		fill[i] = msg->protoBufMsg[i];
 		//printf("%u",msg->protoBufMsg[i]);
