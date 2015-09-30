@@ -1,5 +1,6 @@
 *.pb.h
 *.grpc.pb.h
+*.pb.cc
 *.o
 *.so
 *.class
@@ -35,5 +36,8 @@ coe-test/**/*.log*
 coe-test/**/*.pdf
 coe-test/**/*.fmu
 
+*.exe
+*.dll
 
+shmfmi-server/src/native/org_intocps_java_fmi_shm_SharedMemory.h
 
