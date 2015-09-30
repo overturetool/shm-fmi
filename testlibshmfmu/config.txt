@@ -1,0 +1,5 @@
+true
+java
+-jar
+../grpcfmi-server/target/fmi-server-7-jar-with-dependencies.jar
+-p
