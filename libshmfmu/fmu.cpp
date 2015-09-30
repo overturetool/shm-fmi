@@ -24,7 +24,6 @@
 //static std::map <int, ExternalClient> clients;
 #include <vector>
 #include "FmuContainer.h"
-#include "freeport.h"
 #include <sstream>
 #include "JavaLauncher.h"
 #include "ConfigFile.h"
@@ -114,15 +113,15 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 
 	if (config.m_skipLaunch)
 	{
-		port = "8980";
+		port = "shmFmiTest";
 	} else
 	{
 		launcher->launch();
 	}
 
 
-	std::string url = "localhost:" + port;
-	std::cout <<"--External Client Port "<<url<<std::endl;
+	std::string url = port;
+	std::cout <<"--Launching with shared memory key: "<<url<<std::endl;
 
 
 	ExternalClient *client = new ExternalClient(url);

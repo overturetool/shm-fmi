@@ -10,6 +10,11 @@
 #include <stdio.h>
 #include <cstdio>
 #include <stddef.h>
+#include <string>
+
+const char* FmiIpc::SHARED_MEM_BASE_NAME="Local\\";
+const char* FmiIpc::SIGNAL_AVALIABLE_NAME="sigAvail";
+const char* FmiIpc::SIGNAL_NAME="sig";
 
 FmiIpc::FmiIpc() {
 	// TODO Auto-generated constructor stub
@@ -20,7 +25,15 @@ FmiIpc::~FmiIpc() {
 	// TODO Auto-generated destructor stub
 }
 
-FmiIpc::Server::Server() {
+std::string* getMappedName(const char* baseName, const char* name) {
+	std::string* nameOfMapping = new std::string(baseName);
+	*nameOfMapping += std::string(name);
+	return nameOfMapping;
+}
+
+
+
+FmiIpc::Server::Server(const char* connectionName) {
 	// Set default params
 	m_hMapFile = 0;
 	m_hSignal = 0;
@@ -31,7 +44,7 @@ FmiIpc::Server::Server() {
 	//szName = TEXT("Local\\MyFileMappingObject");
 
 	// create the server
-	create();
+	create(connectionName);
 }
 
 FmiIpc::Server::~Server() {
@@ -76,17 +89,19 @@ void FmiIpc::Server::close() {
 }
 ;
 
-void FmiIpc::Server::create() {
+void FmiIpc::Server::create(const char* name) {
 	// Determine the name of the memory
 	DWORD ProcessID = GetCurrentProcessId();
 	DWORD ThreadID = GetCurrentThreadId();
 	//DWORD ServerID = ""//osIPC::GetID();
-	TCHAR szName[] = TEXT("Local\\MyFileMappingObject2");
+	//TCHAR szName[] = TEXT("Local\\MyFileMappingObject2");
+
+	/*
+
 	m_sAddr = (char*) malloc(IPC_MAX_ADDR);
 	if (!m_sAddr)
 		return;
-	sprintf(m_sAddr,"IPC_%04u_%04u_%04u", ProcessID, ThreadID,
-			szName);
+	sprintf(m_sAddr, "IPC_%04u_%04u_%04u", ProcessID, ThreadID, szName);
 
 	char *m_sEvtAvail = (char*) malloc(IPC_MAX_ADDR);
 	if (!m_sEvtAvail) {
@@ -110,31 +125,47 @@ void FmiIpc::Server::create() {
 		return;
 	}
 	sprintf(m_sMemName, "%s_mem", m_sAddr);
+
+	*/
+
+
+	std::string* signalName = getMappedName(SIGNAL_NAME,name);
 	// Create the events
-	m_hSignal = CreateEventA(NULL, FALSE, FALSE, "sigSig"); //(LPCSTR) m_sEvtFilled);
+	m_hSignal = CreateEventA(NULL, FALSE, FALSE, signalName->c_str()); //(LPCSTR) m_sEvtFilled);
+	delete signalName;
+
 	if (m_hSignal == NULL || m_hSignal == INVALID_HANDLE_VALUE) {
-		free(m_sEvtAvail);
-		free(m_sEvtFilled);
-		free(m_sMemName);
+//		free(m_sEvtAvail);
+//		free(m_sEvtFilled);
+//		free(m_sMemName);
 		printf("server_create: failed: %01d\n", __LINE__);
 		return;
 	}
-	m_hAvail = CreateEventA(NULL, FALSE, FALSE, "sigAvail"); /// (LPCSTR) m_sEvtAvail);
+
+
+	std::string* signalAvailName = getMappedName(SIGNAL_AVALIABLE_NAME,name);
+	m_hAvail = CreateEventA(NULL, FALSE, FALSE, signalAvailName->c_str()); /// (LPCSTR) m_sEvtAvail);
+	delete signalAvailName;
+
 	if (m_hAvail == NULL || m_hSignal == INVALID_HANDLE_VALUE) {
-		free(m_sEvtAvail);
-		free(m_sEvtFilled);
-		free(m_sMemName);
+//		free(m_sEvtAvail);
+//		free(m_sEvtFilled);
+//		free(m_sMemName);
 		printf("server_create: failed: %01d\n", __LINE__);
 		return;
 	}
+
+	std::string* nameOfMapping = getMappedName(SHARED_MEM_BASE_NAME,name);
 	// Create the file mapping
 	m_hMapFile = CreateFileMapping( INVALID_HANDLE_VALUE,
 	NULL,
-	PAGE_READWRITE, 0, sizeof(SharedFmiMem), szName);
+	PAGE_READWRITE, 0, sizeof(SharedFmiMem), nameOfMapping->c_str());
+	delete nameOfMapping;
+
 	if (m_hMapFile == NULL || m_hMapFile == INVALID_HANDLE_VALUE) {
-		free(m_sEvtAvail);
-		free(m_sEvtFilled);
-		free(m_sMemName);
+//		free(m_sEvtAvail);
+//		free(m_sEvtFilled);
+//		free(m_sMemName);
 		printf("server_create: failed: %01d\n", __LINE__);
 		return;
 	}
@@ -143,9 +174,9 @@ void FmiIpc::Server::create() {
 			FILE_MAP_ALL_ACCESS,	// read/write permission
 			0, 0, sizeof(SharedFmiMem));
 	if (m_pBuf == NULL) {
-		free(m_sEvtAvail);
-		free(m_sEvtFilled);
-		free(m_sMemName);
+//		free(m_sEvtAvail);
+//		free(m_sEvtFilled);
+//		free(m_sMemName);
 		printf("server_create: failed: %01d\n", __LINE__);
 		return;
 	}
@@ -154,9 +185,9 @@ void FmiIpc::Server::create() {
 	m_pBuf->message.cmd = fmi2Reset;
 
 	// Release memory
-	free(m_sEvtAvail);
-	free(m_sEvtFilled);
-	free(m_sMemName);
+//	free(m_sEvtAvail);
+//	free(m_sEvtFilled);
+//	free(m_sMemName);
 }
 
 SharedFmiMessage* FmiIpc::Server::send(SharedFmiMessage* message,
@@ -185,7 +216,7 @@ FmiIpc::Client::Client() {
 	m_sAddr = NULL;
 }
 
-FmiIpc::Client::Client(const char* connectAddr) {
+FmiIpc::Client::Client(const char* connectAddr, bool* success) {
 	// Set default params
 	m_hMapFile = 0;
 	m_hSignal = 0;
@@ -194,19 +225,26 @@ FmiIpc::Client::Client(const char* connectAddr) {
 
 	// Determine the name of the memory
 	m_sAddr = (char*) malloc(IPC_MAX_ADDR);
-	if (!m_sAddr)
+	if (!m_sAddr) {
+		*success = false;
 		return;
+	}
 	strcpy_s(m_sAddr, IPC_MAX_ADDR, connectAddr);
 
 	char *m_sEvtAvail = (char*) malloc(IPC_MAX_ADDR);
-	if (!m_sEvtAvail)
+	if (!m_sEvtAvail) {
+		*success = false;
 		return;
+	}
 	sprintf_s(m_sEvtAvail, IPC_MAX_ADDR, "%s_evt_avail", m_sAddr);
 
 	char *m_sEvtFilled = (char*) malloc(IPC_MAX_ADDR);
 	if (!m_sEvtFilled) {
 		free(m_sEvtAvail);
-		return;
+		{
+			*success = false;
+			return;
+		}
 	}
 	sprintf_s(m_sEvtFilled, IPC_MAX_ADDR, "%s_evt_filled", m_sAddr);
 
@@ -214,36 +252,59 @@ FmiIpc::Client::Client(const char* connectAddr) {
 	if (!m_sMemName) {
 		free(m_sEvtAvail);
 		free(m_sEvtFilled);
-		return;
+		{
+			*success = false;
+			return;
+		}
 	}
 	sprintf_s(m_sMemName, IPC_MAX_ADDR, "%s_mem", m_sAddr);
 
+	std::string* signalName = getMappedName(SIGNAL_NAME,connectAddr);
+
 	// Create the events
-	m_hSignal = CreateEventA(NULL, FALSE, FALSE, "sigSig");	// (LPCSTR) m_sEvtFilled);
+	m_hSignal = CreateEventA(NULL, FALSE, FALSE, signalName->c_str());	// (LPCSTR) m_sEvtFilled);
+	delete signalName;
+
 	if (m_hSignal == NULL || m_hSignal == INVALID_HANDLE_VALUE) {
 		free(m_sEvtAvail);
 		free(m_sEvtFilled);
 		free(m_sMemName);
-		return;
+
+		{
+			*success = false;
+			return;
+		}
 	}
-	m_hAvail = CreateEventA(NULL, FALSE, FALSE, "sigAvail");// (LPCSTR) m_sEvtAvail);
+
+	std::string* signalAvailName = getMappedName(SIGNAL_AVALIABLE_NAME,connectAddr);
+	m_hAvail = CreateEventA(NULL, FALSE, FALSE, signalAvailName->c_str());// (LPCSTR) m_sEvtAvail);
+	delete signalAvailName;
 	if (m_hAvail == NULL || m_hSignal == INVALID_HANDLE_VALUE) {
 		free(m_sEvtAvail);
 		free(m_sEvtFilled);
 		free(m_sMemName);
-		return;
+		{
+			*success = false;
+			return;
+		}
 	}
+
+	std::string* nameOfMapping = getMappedName(SHARED_MEM_BASE_NAME,connectAddr);
 
 	// Open the shared file
 	m_hMapFile = OpenFileMapping( FILE_MAP_ALL_ACCESS,	// read/write access
 			FALSE,					// do not inherit the name
-			connectAddr);	// name of mapping object
+			nameOfMapping->c_str());	// name of mapping object
+	delete nameOfMapping;
 
 	if (m_hMapFile == NULL || m_hMapFile == INVALID_HANDLE_VALUE) {
 		free(m_sEvtAvail);
 		free(m_sEvtFilled);
 		free(m_sMemName);
-		return;
+		{
+			*success = false;
+			return;
+		}
 	}
 
 	// Map to the file
@@ -254,14 +315,17 @@ FmiIpc::Client::Client(const char* connectAddr) {
 		free(m_sEvtAvail);
 		free(m_sEvtFilled);
 		free(m_sMemName);
-		return;
+		{
+			*success = false;
+			return;
+		}
 	}
 
 	// Release memory
 	free(m_sEvtAvail);
 	free(m_sEvtFilled);
 	free(m_sMemName);
-
+	*success = true;
 }
 
 FmiIpc::Client::~Client() {

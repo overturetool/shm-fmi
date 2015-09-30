@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <conio.h>
 #include <tchar.h>
+#include <string>
 
 #include "SharedFmiMessage.h"
 using namespace sharedfmimemory;
@@ -27,10 +28,14 @@ public:
 	FmiIpc();
 	virtual ~FmiIpc();
 
+	static const char* SIGNAL_NAME;
+	static const char* SIGNAL_AVALIABLE_NAME;
+	static const char* SHARED_MEM_BASE_NAME;
+
 	class Server {
 	public:
 		// Construct / Destruct
-		Server();
+		Server(const char* name ="server");
 		~Server();
 
 	private:
@@ -42,7 +47,7 @@ public:
 		SharedFmiMem *m_pBuf;		// Buffer that points to the shared memory
 	public:
 		// Create and destroy functions
-		void create(void);
+		void create(const char* name);
 		void close(void);
 
 		// TCHAR szName[];
@@ -54,7 +59,7 @@ public:
 	public:
 		// Construct / Destruct
 		Client(void);
-		Client(const char *connectAddr);
+		Client(const char *connectAddr, bool* success);
 		~Client();
 
 	private:

@@ -7,13 +7,8 @@
 
 #include "ExternalClient.h"
 
-/*ExternalClient::ExternalClient(std::shared_ptr<ChannelInterface> channel) :
- stub_(Fmu::NewStub(channel))
- {
- }*/
-
 ExternalClient::ExternalClient(std::string url) {
-	this->server = new FmiIpc::Server(); //FIXME &url.c_str());
+	this->server = new FmiIpc::Server(url.c_str());
 }
 
 ExternalClient::~ExternalClient() {
@@ -46,7 +41,7 @@ google::protobuf::Message* ExternalClient::send(
 		SetDebugLoggingRequest* im = (SetDebugLoggingRequest*) msg;
 		m.protoBufMsgSize = im->ByteSize();
 		im->SerializeWithCachedSizesToArray(m.protoBufMsg);
-printf("buf size set deubg logging %i\n",m.protoBufMsgSize);
+
 	}
 		break;
 	case sharedfmimemory::fmi2Instantiate: {
