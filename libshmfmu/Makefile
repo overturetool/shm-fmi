@@ -4,7 +4,7 @@ CXX = g++
 CPPFLAGS += -I/usr/local/include -Iincludes/fmi -I../libshmfmi -pthread -g -fPIC -DFMI_COSIMULATION -Ic:/msys32/usr/local/include
 CFLAGS += -g -fPIC
 CXXFLAGS += -std=c++11
-LDFLAGS += -L/usr/local/lib -LC:/msys32/usr/local/lib -lprotobuf  -L../libshmfmi/ -lshmfmi C:/msys32/usr/local/lib/libprotobuf.a -Wl,-Bstatic    -L../libshmfmi -lshmfmi -lprotobuf -Wl,-Bdynamic -lpthread  
+LDFLAGS += -static-libstdc++  -L/usr/local/lib -LC:/msys32/usr/local/lib C:/msys32/usr/local/lib/libprotobuf.a -Wl,-Bstatic    -L../libshmfmi -lshmfmi -lprotobuf -lstdc++ -lpthread  -Wl,-Bdynamic 
 
 
 #LDFLAGS += -L/usr/local/lib  /usr/local/lib/libgrpc.a /usr/local/lib/libgpr.a /usr/local/lib/libprotobuf.a -lpthread -ldl /usr/local/lib/libgrpc++_unsecure.a -shared
