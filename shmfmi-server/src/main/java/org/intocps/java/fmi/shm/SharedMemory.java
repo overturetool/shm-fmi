@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 public class SharedMemory {
 	
-	public final static String DEFAULT_MEMORY_NAME="Local\\MyFileMappingObject2";
+	public final static String DEFAULT_MEMORY_NAME="shmFmiTest";
 	
 	private final static String LIBRARY_NAME="sharedmemory";
 
