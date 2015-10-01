@@ -1,10 +1,14 @@
 package org.intocps.java.fmi.service;
 
 import org.intocps.java.fmi.shm.SharedMemory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.lausdahl.examples.Service.DoStepRequest;
 import com.lausdahl.examples.Service.Empty;
+import com.lausdahl.examples.Service.Fmi2StatusReply;
+import com.lausdahl.examples.Service.Fmi2StatusReply.Status;
 import com.lausdahl.examples.Service.GetRequest;
 import com.lausdahl.examples.Service.InstantiateRequest;
 import com.lausdahl.examples.Service.SetBooleanRequest;
@@ -16,6 +20,7 @@ import com.lausdahl.examples.Service.SetupExperimentRequest;
 
 public class ProtocolDriver implements Runnable {
 
+	final static Logger logger = LoggerFactory.getLogger(ProtocolDriver.class);
 	final IServiceProtocol service;
 	final Thread thread;
 	final SharedMemory mem;
@@ -24,6 +29,9 @@ public class ProtocolDriver implements Runnable {
 	public ProtocolDriver(String id, IServiceProtocol service) {
 
 		this.mem = new SharedMemory();
+		
+		System.out.println("Starting shared memory with key: "+id);
+		logger.debug("Starting shared memory with key: {}",id);
 		while (!this.mem.setId(id)) {
 			try {
 				Thread.sleep(100);
@@ -124,6 +132,8 @@ public class ProtocolDriver implements Runnable {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				service.error(e);
+				//This may be the wrong reply but better than nothing
+				reply=Fmi2StatusReply.newBuilder().setStatus(Status.Fatal).build();
 			}
 
 			if (reply != null)
