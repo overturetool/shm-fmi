@@ -6,7 +6,7 @@
  */
 
 #include "FmiIpc.h"
-#include <windows.h>
+
 #include <stdio.h>
 #include <cstdio>
 #include <stddef.h>
