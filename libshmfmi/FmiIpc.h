@@ -8,10 +8,27 @@
 #ifndef FMIIPC_H_
 #define FMIIPC_H_
 
+#ifdef _WIN32
 #include <windows.h>
-#include <stdio.h>
 #include <conio.h>
 #include <tchar.h>
+#elif __APPLE__ ||  __linux
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+typedef unsigned long DWORD;
+typedef unsigned char BYTE;
+typedef int HANDLE;
+typedef bool BOOL;
+#define INFINITE 0
+#endif
+
+
+#include <stdio.h>
+
 #include <string>
 
 #include "SharedFmiMessage.h"
