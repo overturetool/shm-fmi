@@ -98,7 +98,9 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 {
 	//printf("c++ fmi2Instantiate");
 
-	std::string port = "TODO";//SSTR(getFreePort());
+	std::string port(fmuGUID);// = "TODO";//SSTR(getFreePort());
+
+	port+=instanceName;
 
 	//char buffer[10];
 	//snprintf(buffer, 10, "%u", getFreePort());
