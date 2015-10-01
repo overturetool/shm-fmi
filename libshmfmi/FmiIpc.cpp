@@ -156,6 +156,7 @@ void FmiIpc::Server::create(const char* name) {
 	}
 
 	std::string* nameOfMapping = getMappedName(SHARED_MEM_BASE_NAME,name);
+	printf("Starting server with key: %s\n",nameOfMapping->c_str());
 	// Create the file mapping
 	m_hMapFile = CreateFileMapping( INVALID_HANDLE_VALUE,
 	NULL,
@@ -222,6 +223,8 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success) {
 	m_hSignal = 0;
 	m_hAvail = 0;
 	m_pBuf = NULL;
+
+	printf("Client key %s\n",connectAddr);
 
 	// Determine the name of the memory
 	m_sAddr = (char*) malloc(IPC_MAX_ADDR);
@@ -290,7 +293,7 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success) {
 	}
 
 	std::string* nameOfMapping = getMappedName(SHARED_MEM_BASE_NAME,connectAddr);
-
+	printf("Starting client with key: %s\n",nameOfMapping->c_str());
 	// Open the shared file
 	m_hMapFile = OpenFileMapping( FILE_MAP_ALL_ACCESS,	// read/write access
 			FALSE,					// do not inherit the name
@@ -298,6 +301,7 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success) {
 	delete nameOfMapping;
 
 	if (m_hMapFile == NULL || m_hMapFile == INVALID_HANDLE_VALUE) {
+		printf("Starting client with key: %s - faild\n",nameOfMapping->c_str());
 		free(m_sEvtAvail);
 		free(m_sEvtFilled);
 		free(m_sMemName);
