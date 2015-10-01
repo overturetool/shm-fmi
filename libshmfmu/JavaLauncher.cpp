@@ -88,23 +88,23 @@ int JavaLauncher::launch() {
 	int i = 0;
 	while (m_args[i] != NULL) {
 
-		if (i > 0) {
+		//if (i > 0) {
 			cmd += m_args[i];
 			cmd += " ";
-		}
+	//	}
 		i++;
 	}
 
-	char m[cmd.size()];
-	for (int i = 0; i < cmd.size(); i++) {
-		m[i] = cmd.at(i);
-	}
+	int kk = cmd.length();
+		char * buf = new char[cmd.length()];
+		memcpy(buf,cmd.c_str(),cmd.length());
+		buf[kk-1]=NULL;
 
-	printf("Launching process: '%s' with arguments: '%s' in folder '%s'\n",m_args[0],m,m_workingDir);
+	printf("Launching process: '%s' with arguments: '%s' in folder '%s'\n",m_args[0],buf,m_workingDir);
 
 	// Start the child process.
-	if (!CreateProcess(m_args[0],   // No module name (use command line)
-			m,        // Command line
+	if (!CreateProcess(NULL,//m_args[0],   // No module name (use command line)
+			buf,        // Command line
 			NULL,           // Process handle not inheritable
 			NULL,           // Thread handle not inheritable
 			FALSE,          // Set handle inheritance to FALSE
@@ -116,9 +116,11 @@ int JavaLauncher::launch() {
 			) {
 		//printf("CreateProcess failed (%d).\n", GetLastError());
 		printf("---CresteProcess failed %s\n",GetLastErrorStdStr());
+		delete buf;
 		return 1;
 	}
-
+	delete buf;
+printf("Process launched continuing main thread.\n");
 	return 0;
 #elif __APPLE__ ||  __linux
 
