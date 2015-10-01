@@ -40,7 +40,6 @@ public:
 
 	private:
 		// Internal variables
-		char *m_sAddr;		// Address of this server
 		HANDLE m_hMapFile;		// Handle to the mapped memory file
 		HANDLE m_hSignal;		// Event used to signal when data exists
 		HANDLE m_hAvail;// Event used to signal when some blocks become available
@@ -64,7 +63,6 @@ public:
 
 	private:
 		// Internal variables
-		char *m_sAddr;		// Address of this server
 		HANDLE m_hMapFile;		// Handle to the mapped memory file
 		HANDLE m_hSignal;		// Event used to signal when data exists
 		HANDLE m_hAvail;// Event used to signal when some blocks become available
