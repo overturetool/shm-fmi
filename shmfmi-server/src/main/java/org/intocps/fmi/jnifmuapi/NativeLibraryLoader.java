@@ -11,6 +11,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,7 +92,7 @@ public class NativeLibraryLoader
 				+ System.getProperty("os.arch"));
 		outputFolder.mkdirs();
 
-		File library = new File(outputFolder, name );
+		File library = new File(outputFolder, name+ new Random().nextInt() );
 
 		InputStream in = this.getClass().getClassLoader().getResourceAsStream(relativeLibraryPath);
 		if (in != null)
