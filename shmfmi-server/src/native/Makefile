@@ -13,26 +13,26 @@ vpath %.class $(CLASS_PATH)
 #PATH=C:/data/compiler/mingw32/bin:$PATH
 
 #PATH=C:/msys32/mingw32/bin:$PATH
-
+#JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
 #PATH=C:/msys32:$PATH
 
-all : sharedmemory.dll
+all : sharedmemory.so
 
 
 # $@ matches the target, $< matches the first dependancy
-sharedmemory.dll : sharedmemory.o
+sharedmemory.so : sharedmemory.o
 	$(CC) -v
-	$(CC) -std=c++11  -m32 -Wl,--add-stdcall-alias -static -static-libstdc++ -shared -o $@ $< ../../../libshmfmi/libshmfmi.a -L"C:\msys64\usr\32bit\lib" -lprotobuf
-	mkdir -p $(CLASS_PATH)/lib/Windows-x86
-	cp sharedmemory.dll $(CLASS_PATH)/lib/Windows-x86/
+	$(CC) -std=c++11 -fPIC  -static-libstdc++    -Wl,-Bstatic -lprotobuf    -Wl,-Bdynamic  -ldl -lpthread -lprotobuf -shared -o $@ $<   ../../../libshmfmi/libshmfmi.a -lrt
+	mkdir -p $(CLASS_PATH)/lib/Linux-amd64
+	cp sharedmemory.so $(CLASS_PATH)/lib/Linux-amd64/libsharedmemory.so
 #-Wl,--add-stdcall-alias
 # $@ matches the target, $< matches the first dependancy
 sharedmemory.o : sharedmemory.cpp $(CLASS_PATH)/org_intocps_java_fmi_shm_SharedMemory.h
-	$(CC) -m32 -std=c++11 -I$(CLASS_PATH) -I../../../libshmfmi/ -I"C:/Program Files (x86)/Java/jdk1.7.0_79/include/" -I"C:/Program Files (x86)/Java/jdk1.7.0_79/include/win32" -c $< -o $@
+	$(CC)  -std=c++11 -fPIC -I$(CLASS_PATH) -I../../../libshmfmi/ -I/usr/lib/jvm/java-7-openjdk-amd64/include -I/usr/lib/jvm/java-7-openjdk-amd64/include/linux -c $< -o $@
 
 # $* matches the target filename without the extension
 $(CLASS_PATH)/org_intocps_java_fmi_shm_SharedMemory.h :$(CLASS_PATH)/org/intocps/java/fmi/shm/SharedMemory.class
-	"C:/Program Files (x86)/Java/jdk1.7.0_79/bin/javah" -classpath $(CLASS_PATH) org.intocps.java.fmi.shm.SharedMemory
+	javah -classpath $(CLASS_PATH) org.intocps.java.fmi.shm.SharedMemory
 	
 	
 	

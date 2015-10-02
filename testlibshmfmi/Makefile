@@ -1,11 +1,12 @@
 
 
 CXX = g++
-CPPFLAGS += -I/usr/local/include  -g -Ic:/msys32/usr/local/include
+CPPFLAGS += -I/usr/local/include  -g
+# -Ic:/msys32/usr/local/include
 CXXFLAGS += -std=c++11
-LDFLAGS += -L/usr/local/lib -LC:/msys32/usr/local/lib -lprotobuf  -L../libshmfmi/ -lshmfmi C:/msys32/usr/local/lib/libprotobuf.a
+#LDFLAGS += -L/usr/local/lib -lprotobuf -Wl,-Bstatic -L../libshmfmi -lshmfmi -Wl,-Bdynamic -lrt -ldl -lpthread 
 
-
+LDFLAGS += -L/usr/local/lib  ../libshmfmi/libshmfmi.a -lrt -ldl -lpthread -lprotobuf 
 #test: MainTest.o ExternalClient_Tests.o
 
 #MainTest.o :
@@ -104,8 +105,8 @@ external_client_unittests : ExternalClient_Tests.o gtest_main.a
  ../grpcfmi-server/target/fmi-server-7-jar-with-dependencies.jar:
 	cd ../grpcfmi-server/ && mvn package -q
 
-test: external_client_unittests libgrpcfmi.so  ../grpcfmi-server/target/fmi-server-7-jar-with-dependencies.jar
-	../grpcfmi-server/start-debug-server.sh
-	LD_LIBRARY_PATH=../libgrpcfmi/ ./external_client_unittests
-	../grpcfmi-server/stop-debug-server.sh
+test: external_client_unittests libshmfmi.so  ../shmfmi-server/target/fmi-server-7-jar-with-dependencies.jar
+	../shmfmi-server/start-debug-server.sh
+	LD_LIBRARY_PATH=../libshmfmi/ ./external_client_unittests
+	../shmfmi-server/stop-debug-server.sh
 

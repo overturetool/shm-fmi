@@ -1,8 +1,10 @@
 CXX = g++
-CPPFLAGS += -I/usr/local/include -pthread -g -fPIC -Ic:/msys32/usr/local/include
+CPPFLAGS += -I/usr/local/include -pthread -g -fPIC 
+#-Ic:/msys32/usr/local/include
 #-Ic:/msys64/usr/32bit/include
 CXXFLAGS += -std=c++11
-LDFLAGS += -L/usr/local/lib   -lprotobuf  -LC:/msys32/usr/local/lib
+LDFLAGS += -L/usr/local/lib   -lprotobuf  
+#-LC:/msys32/usr/local/lib
 #-LC:/msys64/usr/32bit/lib
 PROTOC = protoc
 
