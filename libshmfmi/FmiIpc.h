@@ -24,6 +24,13 @@ typedef unsigned char BYTE;
 typedef int HANDLE;
 typedef bool BOOL;
 #define INFINITE 0
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/file.h>
+#include <sys/mman.h>
+#include <sys/wait.h>
 #endif
 
 
@@ -49,6 +56,31 @@ public:
 	static const char* SIGNAL_AVALIABLE_NAME;
 	static const char* SHARED_MEM_BASE_NAME;
 
+	static void close(HANDLE handle){
+#ifdef _WIN32
+		CloseHandle(handle);
+#elif __APPLE__ ||  __linux
+//POSIX
+	close(handle);
+#endif
+	}
+
+	static void unmap(void* ptr, std::string* name)
+	{
+	#ifdef _WIN32
+		UnmapViewOfFile(ptr);
+	#elif __APPLE__ ||  __linux
+	//POSIX
+		int r = munmap(ptr, sizeof(SharedFmiMem));
+		  if (r != 0)
+		    printf("munmap");
+
+		  r = shm_unlink(name->c_str());
+		  if (r != 0)
+			  printf("shm_unlink");
+	#endif
+		}
+
 	class Server {
 	public:
 		// Construct / Destruct
@@ -60,6 +92,7 @@ public:
 		HANDLE m_hMapFile;		// Handle to the mapped memory file
 		HANDLE m_hSignal;		// Event used to signal when data exists
 		HANDLE m_hAvail;// Event used to signal when some blocks become available
+		std::string* m_name;
 		SharedFmiMem *m_pBuf;		// Buffer that points to the shared memory
 	public:
 		// Create and destroy functions
@@ -83,6 +116,7 @@ public:
 		HANDLE m_hMapFile;		// Handle to the mapped memory file
 		HANDLE m_hSignal;		// Event used to signal when data exists
 		HANDLE m_hAvail;// Event used to signal when some blocks become available
+		std::string* m_name;
 		SharedFmiMem *m_pBuf;		// Buffer that points to the shared memory
 
 		// Exposed functions

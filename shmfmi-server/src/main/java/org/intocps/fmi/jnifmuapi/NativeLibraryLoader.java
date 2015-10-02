@@ -92,7 +92,7 @@ public class NativeLibraryLoader
 				+ System.getProperty("os.arch"));
 		outputFolder.mkdirs();
 
-		File library = new File(outputFolder, name+ new Random().nextInt() );
+		File library = new File(outputFolder, name );
 
 		InputStream in = this.getClass().getClassLoader().getResourceAsStream(relativeLibraryPath);
 		if (in != null)
