@@ -41,3 +41,4 @@ coe-test/**/*.fmu
 
 shmfmi-server/src/native/org_intocps_java_fmi_shm_SharedMemory.h
 
+**/build
