@@ -3,7 +3,7 @@
 CXX = g++
 CPPFLAGS += -I/usr/local/include  -g
 CXXFLAGS += -std=c++11
-LDFLAGS += -L/usr/local/lib -LC:/msys32/usr/local/lib -lprotobuf  -L../libshmfmi/ -lshmfmi C:/msys32/usr/local/lib/libprotobuf.a -lpthread  
+LDFLAGS += -L/usr/local/lib  -Wl,-Bstatic    -L../libshmfmi -lshmfmi -lprotobuf -lstdc++   -Wl,-Bdynamic -lpthread  -ldl -lrt
 
 
 #test: MainTest.o ExternalClient_Tests.o
@@ -97,15 +97,15 @@ gtest_main.a : gtest-all.o gtest_main.o
 	
 
 %.o: %.cpp $(DEPS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -Iinclude -Iinclude/fmi -DFMULIB=\"../libshmfmu/libshmfmu.so\" -pthread -c -o $@ $<
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I../libshmfmi/ -Iinclude -Iinclude/fmi -DFMULIB=\"../libshmfmu/libshmfmu.so\" -pthread -c -o $@ $<
 	
 
 DEPS = fmu-loader.h
 %.o: %.c $(DEPS)
 	$(CC) $(CFLAGS) -DFMI_COSIMULATION -Iinclude -Iinclude/fmi -c -o $@ $<
 
-external_client_unittests : LibraryLoad_Tests.o FMU_Tests.o fmu-loader.o gtest_main.a
-	$(CXX) $^ $(LDFLAGS) -lpthread -o $@
+external_client_unittests : LibraryLoad_Tests.o FMU_Tests.o fmu-loader.o gtest_main.a RemoteTestDriver.o
+	$(CXX) $^ $(LDFLAGS)  -lpthread -o $@
 
 fmu:
 	make -C ../libshmfmi

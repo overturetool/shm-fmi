@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 2.8.5)
 project (testlibshmfmi CXX)
 
+enable_testing()
 include(CheckCXXCompilerFlag)
 
 set(CMAKE_VERBOSE_MAKEFILE on)
@@ -9,7 +10,7 @@ set(CMAKE_VERBOSE_MAKEFILE on)
 find_package(Protobuf REQUIRED)
 include_directories(${PROTOBUF_INCLUDE_DIRS})
 
-PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ../proto/service.proto)
+#PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ../proto/service.proto)
 
 
 if (LINUX)
@@ -55,4 +56,6 @@ target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} rt)
 target_link_libraries(${PROJECT_NAME} dl)
 #target_link_libraries(${PROJECT_NAME} pthread)
+
+add_test(AllTestsIn-testlibshmfmi ${PROJECT_NAME})
 

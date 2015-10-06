@@ -36,7 +36,8 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ -Wl,-Bstatic -lprotobuf -lstdc++ -lpthread  -Wl,-Bdynamic")
 
-set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-DFMI_COSIMULATION")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DFMI_COSIMULATION")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DFMI_COSIMULATION")
 
 include_directories(includes/fmi)
 include_directories(${libshmfmi_SOURCE_DIR})
@@ -51,11 +52,11 @@ add_library(${PROJECT_NAME} SHARED fmu.cpp FmuContainer.cpp JavaLauncher.cpp Con
 target_link_libraries(${PROJECT_NAME} libshmfmi)
 
 
-# add_library(imp_protobuf STATIC IMPORTED)
- #set_property(TARGET imp_protobuf PROPERTY IMPORTED_LOCATION /usr/local/lib/libprotobuf.a)
+ add_library(imp_protobuf STATIC IMPORTED)
+ set_property(TARGET imp_protobuf PROPERTY IMPORTED_LOCATION /usr/local/lib/libprotobuf.a)
 
 #message(STATUS "protobuf libs = ${PROTOBUF_LIBRARIES}")
-#target_link_libraries(${PROJECT_NAME} imp_protobuf)
+target_link_libraries(${PROJECT_NAME} imp_protobuf)
 
 
 

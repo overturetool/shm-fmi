@@ -94,11 +94,14 @@ gtest_main.a : gtest-all.o gtest_main.o
 
 ExternalClient_Tests.o : ExternalClient_Tests.cpp $(GTEST_HEADERS) libshmfmi.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS)  -pthread  -I../libshmfmi/ -c ExternalClient_Tests.cpp
+	
+RemoteTestDriver.o : RemoteTestDriver.cpp libshmfmi.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS)  -pthread  -I../libshmfmi/ -c RemoteTestDriver.cpp
 
 libshmfmi.a:
 	make -C ../libshmfmi
 
-external_client_unittests : ExternalClient_Tests.o gtest_main.a 
+external_client_unittests : ExternalClient_Tests.o  RemoteTestDriver.o gtest_main.a 
 	$(CC) -v
 	$(CXX) $^ $(LDFLAGS) -lpthread -o $@
 

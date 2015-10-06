@@ -9,7 +9,7 @@ set(CMAKE_VERBOSE_MAKEFILE on)
 find_package(Protobuf REQUIRED)
 
 
-
+enable_testing()
 
 
 if (LINUX)
@@ -35,12 +35,18 @@ else()
         message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-pthread")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
+#set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -pthread")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ -Wl,-Bstatic -lprotobuf -lstdc++ -lpthread  -Wl,-Bdynamic")
 
 #get path to the FMU in libshmfmu
 # We need to configure the FMU location to be used in the test
 get_property(libshmfmu_lib_location TARGET libshmfmu PROPERTY LOCATION)
 #message (STATUS "libshmfmu_lib_location == ${libshmfmu_lib_location}")
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DFMI_COSIMULATION")
+set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -DFMI_COSIMULATION")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DFMULIB=\\\"${libshmfmu_lib_location}\\\"")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DFMULIB=\\\"${libshmfmu_lib_location}\\\"")
@@ -56,10 +62,14 @@ add_executable(${PROJECT_NAME} ${CPP_FILES} ${C_FILES})
 include_directories(${libshmfmi_SOURCE_DIR})
 target_link_libraries(${PROJECT_NAME} gtest_main)
 include_directories(${gtest_SOURCE_DIR}/include)
+
+
 target_link_libraries(${PROJECT_NAME} libshmfmi)
 
 target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} rt)
 target_link_libraries(${PROJECT_NAME} dl)
 #target_link_libraries(${PROJECT_NAME} pthread)
+
+add_test(AllTestsIn-testlibshmfmu ${PROJECT_NAME})
 

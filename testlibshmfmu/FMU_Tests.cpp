@@ -3,6 +3,10 @@
 #include <string>
 #include <iostream>
 
+#include "RemoteTestDriver.h"
+#include <thread>
+#include <chrono>
+
 extern "C"
 {
 #include "fmu-loader.h"
@@ -26,8 +30,30 @@ extern "C"
 #define boolIdGet 12
 #define stringIdGet 13
 
+#define GUID "{GUID}"
+#define INSTANCE_NAME "instance1"
+
+
+#include "FMU_TestsFixture.h"
+
+
+
 static FMU s_fmu;
 static bool s_libLoaded = false;
+
+static std::thread* t1 = NULL;
+
+void remoteClientThread()
+{
+	std::this_thread::sleep_for(std::chrono::milliseconds
+(100));
+	printf("Starting service test responder thread\n");
+	std::string port(GUID);
+
+	port += std::string(INSTANCE_NAME);
+	while (true)
+		remoteTestDriver("shmFmiTest");
+}
 
 static FMU setup()
 {
@@ -41,13 +67,25 @@ static FMU setup()
 
 	s_fmu = fmu;
 	s_libLoaded = true;
+
+	if (t1 == NULL)
+		{
+			t1 = new std::thread(remoteClientThread);
+			t1->detach();
+		}
+
 	return fmu;
 }
 
+fmi2Component gcomp = NULL;
+
 static fmi2Component instantiated(FMU fmu)
 {
-	return fmu.instantiate("A", fmi2CoSimulation, "{348783748923}", ".", NULL,
-			true, true);
+	if (gcomp == NULL)
+		gcomp = fmu.instantiate(INSTANCE_NAME, fmi2CoSimulation, GUID, ".",
+		NULL, true, true);
+
+	return gcomp;
 }
 
 static fmi2Component setuped(FMU fmu)
@@ -106,8 +144,9 @@ TEST(FMU, getVersion)
 TEST(FMU, instantiate)
 {
 	FMU fmu = setup();
-	fmu.instantiate("A", fmi2CoSimulation, "{348783748923}", ".", NULL, true,
-			true);
+//fmu.instantiate("A", fmi2CoSimulation, "{348783748923}", ".", NULL, true,
+//	true);
+	instantiated(fmu);
 }
 
 /*******************************************
@@ -132,7 +171,7 @@ TEST(FMU, freeInstance)
 	FMU fmu = setup();
 	fmi2Component comp = instantiated(fmu);
 
-	fmu.freeInstance(comp);
+	//fmu.freeInstance(comp);
 }
 
 TEST(FMU, setupExperiment)
@@ -212,13 +251,14 @@ TEST(FMU, setRealInputDerivatives)
 {
 	FMU fmu = setup();
 	fmi2Component comp = initializing(fmu);
+	printf("before setRealInputDerivatives\n");
 	const fmi2ValueReference vr[1] =
 	{ stringId };
 	fmi2Status status = fmu.setRealInputDerivatives(comp, vr, 1, new int[1]
 	{ 1 }, new double[1]
 	{ 1.1 });
-
-	//not FW'ed to receiver
+	printf("after setRealInputDerivatives\n");
+//not FW'ed to receiver
 	EXPECT_EQ(fmi2Error, status);
 }
 
@@ -231,7 +271,7 @@ TEST(FMU, getsetFMUstate)
 	fmi2FMUstate* state;
 	fmi2Status status = fmu.getFMUstate(comp, state);
 
-	//not FW'ed to receiver
+//not FW'ed to receiver
 	EXPECT_EQ(fmi2Error, status);
 
 	if (status == fmi2OK)
@@ -342,7 +382,7 @@ TEST(FMU, getDirectionalDerivative)
 	 *    typedef fmi2Status fmi2GetDirectionalDerivativeTYPE(fmi2Component, const fmi2ValueReference[], size_t,
 	 const fmi2ValueReference[], size_t,
 	 const fmi2Real[], fmi2Real[]);*/
-	//not FW'ed to receiver
+//not FW'ed to receiver
 	EXPECT_EQ(fmi2Error, status);
 }
 
