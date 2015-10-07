@@ -35,17 +35,19 @@ endif()
 set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-pthread")
 
 
-
+#add_library(${PROJECT_NAME}-cc ${PROTO_SRCS})
 
 add_library(${PROJECT_NAME} FmiIpc.cpp ${PROTO_SRCS} ${PROTO_HDRS} ExternalClient.cpp)
-add_library(${PROJECT_NAME}-shared SHARED FmiIpc.cpp ${PROTO_SRCS} ${PROTO_HDRS} ExternalClient.cpp)
-target_link_libraries(${PROJECT_NAME}-shared ${PROTOBUF_LIBRARIES})
+#add_library(${PROJECT_NAME}-shared SHARED FmiIpc.cpp ExternalClient.cpp ${PROTO_SRCS})
+#${PROTO_SRCS} ${PROTO_HDRS}
+#target_link_libraries(${PROJECT_NAME}-shared ${PROTOBUF_LIBRARIES})
+#target_link_libraries(${PROJECT_NAME}-shared ${PROJECT_NAME}-cc)
 
 set_target_properties(${PROJECT_NAME}
                       PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-set_target_properties(${PROJECT_NAME}-shared
-                      PROPERTIES POSITION_INDEPENDENT_CODE ON)
+#set_target_properties(${PROJECT_NAME}-shared
+#                      PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 
 # Expose A's public includes (including the ones of A's dependencies

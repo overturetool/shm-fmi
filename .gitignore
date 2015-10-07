@@ -43,3 +43,7 @@ shmfmi-server/src/native/org_intocps_java_fmi_shm_SharedMemory.h
 
 **/build
 **/win-build
+builds/
+testlibshmfmi/external_client_unittests
+testlibshmfmu/core
+testlibshmfmu/external_client_unittests
