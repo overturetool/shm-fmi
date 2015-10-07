@@ -116,7 +116,7 @@ int JavaLauncher::launch() {
 			&pi)           // Pointer to PROCESS_INFORMATION structure
 			) {
 		//printf("CreateProcess failed (%d).\n", GetLastError());
-		printf("---CresteProcess failed %s\n",GetLastErrorStdStr());
+		printf("---CresteProcess failed %s\n",GetLastErrorStdStr().c_str());
 		delete buf;
 		return 1;
 	}
