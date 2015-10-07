@@ -121,7 +121,9 @@ int JavaLauncher::launch() {
 		return 1;
 	}
 	delete buf;
-printf("Process launched continuing main thread.\n");
+	printf("Process launched continuing main thread.\n");
+	this->pid=pi;
+	this->m_launched=true;
 	return 0;
 #elif __APPLE__ ||  __linux
 
@@ -170,5 +172,6 @@ void JavaLauncher::terminate() {
 #elif __APPLE__ ||  __linux
 		kill(pid, SIGKILL);
 #endif
+		m_launched = false;
 	}
 }
