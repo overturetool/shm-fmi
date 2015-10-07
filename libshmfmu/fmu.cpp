@@ -115,6 +115,7 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 
 	if (config.m_skipLaunch)
 	{
+		printf("FMU Debug skipping launch of external FMU\n");
 		port = "shmFmiTest";
 	} else
 	{
