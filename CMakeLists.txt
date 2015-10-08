@@ -22,10 +22,12 @@ endif ()
 # When done tweaking common stuff, configure the components (subprojects).
 # NOTE: The order matters! The most independent ones should go first.
 add_subdirectory(libshmfmi) # B is a static library (depends on Boost)
-add_subdirectory(testlibshmfmi) # C is a shared library (depends on B and external XXX)
-add_subdirectory(third_party/googletest/googletest)
 add_subdirectory(libshmfmu)
+add_subdirectory(shmfmi-server)
+add_subdirectory(testlibshmfmi) # C is a shared library (depends on B and external XXX)
 add_subdirectory(testlibshmfmu)
+add_subdirectory(third_party/googletest/googletest)
+
 
 #add_subdirectory(components/A) # A is a shared library (depends on C and B)
 

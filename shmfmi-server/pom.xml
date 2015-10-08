@@ -122,6 +122,13 @@
 									<arg value="--proto_path=../proto" />
 									<arg value="../proto/service.proto" />
 								</exec>
+								<exec dir="${project.basedir}" executable="mkdir"
+									failonerror="true">
+									<arg value="-p" />
+									<arg value="target/classes/lib/Windows-x86" />
+								</exec>
+								
+								
 							</tasks>
 						</configuration>
 						<goals>

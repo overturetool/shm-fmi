@@ -28,7 +28,9 @@ function prepareMingw()
 ARCH=$1
 COMPILER=$2
 TOOLCHAIN=$3
-
+J_HOME=`cd "$4"; pwd`
+echo "Javahome is now: ${J_HOME}"
+echo "4-th were $4"
 WIN32_BUILD_DIR=builds/$ARCH
 
 PROTOBUF_BUILD_DIR=$WIN32_BUILD_DIR/protobuf/
@@ -71,14 +73,15 @@ cd shm
 
 pwd
 
-cmake -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN -DPROTOBUF_INCLUDE_DIR=$PROTOBUF_WIN32/include -DPROTOBUF_LIBRARY=$PROTOBUF_WIN32/lib/libprotobuf.a ../../../
+JAVA_HOME=$J_HOME cmake -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN -DPROTOBUF_INCLUDE_DIR=$PROTOBUF_WIN32/include -DPROTOBUF_LIBRARY=$PROTOBUF_WIN32/lib/libprotobuf.a ../../../
 
 cd ../../../
 pwd
 }
 
 echo WIN32
-prepareMingw win32 i686-w64-mingw32 ../../../third_party/cmake-toolchains/Toolchain-Ubuntu-mingw32.cmake
+prepareMingw win32 i686-w64-mingw32 ../../../third_party/cmake-toolchains/Toolchain-Ubuntu-mingw32.cmake shmfmi-server/src/jni/java-win32
 
 echo WIN64
-prepareMingw win64 x86_64-w64-mingw32 ../../../third_party/cmake-toolchains/Toolchain-Ubuntu-mingw64.cmake
+prepareMingw win64 x86_64-w64-mingw32 ../../../third_party/cmake-toolchains/Toolchain-Ubuntu-mingw64.cmake shmfmi-server/src/jni/java-win64
+
