@@ -40,4 +40,4 @@ java:
 #	protoc --java_out=src --proto_path=$PROTO_ROOT $PROTO_ROOT/service.proto
 	C:/msys64/usr/32bit/bin/protoc --java_out=src --proto_path=~/grpc-fmi/protoc ~/grpc-fmi/proto/service.proto
 clean :
-	rm -f org_intocps_java_fmi_shm_SharedMemory.h org_intocps_java_fmi_shm_SharedMemory_NativeFmuApi.h sharedmemory.o sharedmemory.dll
+	rm -f org_intocps_java_fmi_shm_SharedMemory.h org_intocps_java_fmi_shm_SharedMemory_NativeFmuApi.h *.o *.dll *.so *.dylib
