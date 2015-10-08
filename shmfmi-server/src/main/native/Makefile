@@ -3,9 +3,8 @@
 CC=g++
 
 # Define a variable for classpath
-CLASS_PATH = ../../target/classes
+CLASS_PATH = ../../../target/classes
 
-PROTO_ROOT=C:/msys64/home/kel/grpc-fmi/proto
 
 # Define a virtual path for .class in the bin directory
 vpath %.class $(CLASS_PATH)
@@ -34,10 +33,5 @@ sharedmemory.o : sharedmemory.cpp $(CLASS_PATH)/org_intocps_java_fmi_shm_SharedM
 $(CLASS_PATH)/org_intocps_java_fmi_shm_SharedMemory.h :$(CLASS_PATH)/org/intocps/java/fmi/shm/SharedMemory.class
 	javah -classpath $(CLASS_PATH) org.intocps.java.fmi.shm.SharedMemory
 	
-	
-	
-java:
-#	protoc --java_out=src --proto_path=$PROTO_ROOT $PROTO_ROOT/service.proto
-	C:/msys64/usr/32bit/bin/protoc --java_out=src --proto_path=~/grpc-fmi/protoc ~/grpc-fmi/proto/service.proto
 clean :
 	rm -f org_intocps_java_fmi_shm_SharedMemory.h org_intocps_java_fmi_shm_SharedMemory_NativeFmuApi.h *.o *.dll *.so *.dylib
