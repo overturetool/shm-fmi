@@ -102,7 +102,7 @@
 
 
 
-			<!-- plugin>
+			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>1.7</version>
 				<executions>
@@ -110,9 +110,17 @@
 						<phase>generate-sources</phase>
 						<configuration>
 							<tasks>
-								<exec dir="${project.basedir}/src/main/sh" executable="${project.basedir}/src/main/sh/generate.sh"
+								<exec dir="${project.basedir}" executable="mkdir"
+									failonerror="true">
+									<arg value="-p" />
+									<arg value="target/generated-protoc/" />
+								</exec>
+								<exec dir="${project.basedir}" executable="protoc"
 									failonerror="true">
 
+									<arg value="--java_out=target/generated-protoc/" />
+									<arg value="--proto_path=../proto" />
+									<arg value="../proto/service.proto" />
 								</exec>
 							</tasks>
 						</configuration>
@@ -121,7 +129,7 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin-->
+			</plugin>
 
 
 
