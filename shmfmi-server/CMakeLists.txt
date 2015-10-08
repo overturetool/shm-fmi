@@ -42,8 +42,15 @@ include_directories($ENV{JAVA_HOME}/include $ENV{JAVA_HOME}/include/win32)
 
 if (UNIX)
 #message(FATAL_ERROR "JAVAHOME=$ENV{JAVA_HOME}")
-include_directories($ENV{JAVA_HOME}/include $ENV{JAVA_HOME}/include/linux)
+include_directories($ENV{JAVA_HOME}/include)
 #      set(CMAKE_CXX_FLAGS ${CMAKE_CSS_FLAGS} "-fPIC")
+
+if(APPLE)
+include_directories($ENV{JAVA_HOME}/include/darwin)
+else()
+include_directories($ENV{JAVA_HOME}/include/linux)
+endif()
+
 endif()
 
 
