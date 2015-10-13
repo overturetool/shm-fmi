@@ -1,5 +1,7 @@
 #!/bin/bash
 #set -x #echo on
+git submodule update --init
+
 
 echo Checking X compiler for windows mingw
 
@@ -62,10 +64,14 @@ cd ../../$PROTOBUF_BUILD_DIR
 
 pwd
 
+if [ ! -f $PROTOBUF_WIN32/lib/libprotobuf.a ]; then
+	echo "protobuf not installed"
+
 ../../../third_party/protobuf/configure --host=$COMPILER --build=i686-pc-linux-gnu --with-protoc=protoc --disable-shared --prefix=$PROTOBUF_WIN32
 #--disable-tests --disable-failing-tests
 make
 make install
+fi
 
 cd ../
 mkdir -p shm
@@ -78,6 +84,13 @@ JAVA_HOME=$J_HOME cmake -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN -DPROTOBUF_INCLUDE_DIR
 cd ../../../
 pwd
 }
+
+echo Linux64
+LINUX64_BUILD=builds/linux64/shm
+mkdir -p $LINUX64_BUILD
+cd $LINUX64_BUILD
+cmake ../../../
+cd ../../../
 
 echo WIN32
 prepareMingw win32 i686-w64-mingw32 ../../../third_party/cmake-toolchains/Toolchain-Ubuntu-mingw32.cmake shmfmi-server/src/jni/java-win32
