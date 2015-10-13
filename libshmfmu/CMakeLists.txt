@@ -36,14 +36,35 @@ add_library(${PROJECT_NAME} SHARED fmu.cpp FmuContainer.cpp JavaLauncher.cpp Con
 target_link_libraries(${PROJECT_NAME} libshmfmi)
 target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
 
+
+#target_link_libraries(${PROJECT_NAME} "/usr/lib/gcc/i686-w64-mingw32/4.8/libstdc++.a")
+#find_library(STDCPP_LIBRARY NAMES libstdc++.a PATHS ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
+
+foreach(LETTER ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
+	
+if(EXISTS "${LETTER}/libstdc++.a")
+#   message (STATUS "${LETTER}")
+	set(STDCPP_LIBRARY "${LETTER}/libstdc++.a")
+else()
+#  message (STATUS "${LETTER} ---- not these")
+endif()
+endforeach()
+
+message(STATUS "Static linking with libstdc++.a in ${STDCPP_LIBRARY}")
+target_link_libraries(${PROJECT_NAME} ${STDCPP_LIBRARY})
+
+
 find_library(PTHREAD_LIBRARY NAMES libpthread.a)
 target_link_libraries(${PROJECT_NAME} ${PTHREAD_LIBRARY})
 
 
 # I need this: -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic
 
+#message(FATAL "${PTHREAD_LIBRARY}")
+
 #find_library(STDCPP_LIBRARY NAMES libstdc++.a)
-#target_link_libraries(${PROJECT_NAME} ${STDCPP_LIBRARY})
+
+
 
 
 
@@ -55,11 +76,10 @@ else()
 endif()
 
 
-	if (WIN32)
-		#windows	
-		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libstdc++ -static-libgcc -Wl,-Bstatic -lstdc++  -Wl,-Bdynamic")
-
-	endif() 
+if (WIN32)
+	#windows	
+	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+endif() 
 
 
 ##
