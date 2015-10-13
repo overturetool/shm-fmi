@@ -30,7 +30,7 @@ make -C builds/linux64/shm
 mkdir -p $out_bin_root/linux64/
 cp builds/linux64/shm/libshmfmu/liblibshmfmu.so $out_bin_root/linux64/libshmfmu.so
 mkdir -p $out_server_lib/Linux-amd64/
-cp builds/linux64/shm/shmfmi-server/libsharedmemory.so $out_server_lib/Linux-amd64/sharedmemory.so
+cp builds/linux64/shm/shmfmi-server/libsharedmemory.so $out_server_lib/Linux-amd64/libsharedmemory.so
 
 echo building win32 
 make -C builds/win32/shm/libshmfmu
