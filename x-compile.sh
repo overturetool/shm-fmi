@@ -1,7 +1,8 @@
 #!/bin/bash
 
 out_bin_root=builds/output/fmu/binaries
-out_server_lib=builds/output/sharedmemory-server
+#out_server_lib=builds/output/sharedmemory-server
+out_server_lib=shmfmi-server/target/classes/lib/
 
 mkdir -p $out_bin_root
 mkdir -p $out_server_lib
