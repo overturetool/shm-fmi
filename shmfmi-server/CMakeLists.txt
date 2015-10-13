@@ -62,7 +62,29 @@ add_library(sharedmemory SHARED src/main/native/sharedmemory.cpp ${PROTO_SRCS} $
 target_link_libraries(sharedmemory libshmfmi)
 target_link_libraries(sharedmemory ${PROTOBUF_LIBRARIES})
 
+foreach(LETTER ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
+	
+if(EXISTS "${LETTER}/libstdc++.a")
+#   message (STATUS "${LETTER}")
+	set(STDCPP_LIBRARY "${LETTER}/libstdc++.a")
+else()
+#  message (STATUS "${LETTER} ---- not these")
+endif()
+endforeach()
+
+message(STATUS "Static linking with libstdc++.a in ${STDCPP_LIBRARY}")
+target_link_libraries(sharedmemory ${STDCPP_LIBRARY})
+
 find_library(PTHREAD_LIBRARY NAMES libpthread.a)
 target_link_libraries(sharedmemory ${PTHREAD_LIBRARY})
+
+if (UNIX)
+	if(APPLE)
+
+	else()
+ 		target_link_libraries(sharedmemory rt)
+		target_link_libraries(sharedmemory dl)
+	endif()
+endif()
 
 

@@ -60,19 +60,14 @@ target_link_libraries(${PROJECT_NAME} ${PTHREAD_LIBRARY})
 
 # I need this: -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic
 
-#message(FATAL "${PTHREAD_LIBRARY}")
 
-#find_library(STDCPP_LIBRARY NAMES libstdc++.a)
+if (UNIX)
+	if(APPLE)
 
-
-
-
-
-if (LINUX)
- 	target_link_libraries(${PROJECT_NAME} rt)
-	target_link_libraries(${PROJECT_NAME} dl)
-else()
-	
+	else()
+ 		target_link_libraries(${PROJECT_NAME} rt)
+		target_link_libraries(${PROJECT_NAME} dl)
+	endif()
 endif()
 
 
