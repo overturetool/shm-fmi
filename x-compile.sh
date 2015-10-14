@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# protblem with protoc in cmake is fixed here
+cd libshmfmi
+protoc -I../proto --cpp_out=. ../proto/service.proto
+
+cd ..
+
+
+
 out_bin_root=builds/output/fmu/binaries
 #out_server_lib=builds/output/sharedmemory-server
 out_server_lib=shmfmi-server/target/classes/lib/
