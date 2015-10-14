@@ -39,9 +39,11 @@ if [ ! -f /usr/local/lib/libprotobuf.a ] || [ ! -f /usr/local/bin/protoc ]; then
 
 mkdir -p $repo_root/builds/linux64/protobuf
 cd $repo_root/builds/linux64/protobuf
-$repo_root/third_party/protobuf/configure --disable-shared
+$repo_root/third_party/protobuf/configure --enable-static
 make
-make install
+echo -e "\033[32m echo Please install using `make install && ldconfig /usr/local/lib`"
+exit
+#make install
 fi
 
 #####################################################################################
