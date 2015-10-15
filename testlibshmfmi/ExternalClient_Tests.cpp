@@ -17,8 +17,13 @@ void clientThread()
 {
 	bool success;
 	FmiIpc::Client client(MEM_KEY, &success);
-
-	SharedFmiMessage* msg = client.getMessage(0);
+	if(!success)
+	{
+	//recurse until connected
+clientThread();
+return ;
+	}
+SharedFmiMessage* msg = client.getMessage(0);
 	printf("Client got message\n");
 	msg->cmd = fmi2DoStep;
 
@@ -81,24 +86,24 @@ TEST(ExternalClient, fmi2Instantiate)
 
 TEST(ExternalClient, fmi2EnterInitializationMode)
 {
-	std::thread t1(remoteClientThread);
-	ExternalClient client(MEM_KEY);
+
+	ExternalClient client(MEM_KEY);std::thread t1(remoteClientThread);
 	EXPECT_EQ(ExternalClient::fmi2OK, client.fmi2EnterInitializationMode());
 	t1.join();
 }
 
 TEST(ExternalClient, fmi2ExitInitializationMode)
 {
-	std::thread t1(remoteClientThread);
-	ExternalClient client(MEM_KEY);
+
+	ExternalClient client(MEM_KEY);std::thread t1(remoteClientThread);
 	EXPECT_EQ(ExternalClient::fmi2OK, client.fmi2ExitInitializationMode());
 	t1.join();
 }
 
 TEST(ExternalClient, fmi2SetupExperiment)
 {
-	std::thread t1(remoteClientThread);
-	ExternalClient client(MEM_KEY);
+
+	ExternalClient client(MEM_KEY);std::thread t1(remoteClientThread);
 
 	bool toleranceDefined = true;
 	double tolerance = 0.1;
@@ -114,8 +119,8 @@ TEST(ExternalClient, fmi2SetupExperiment)
 
 TEST(ExternalClient, fmi2Terminate)
 {
-	std::thread t1(remoteClientThread);
-	ExternalClient client(MEM_KEY);
+
+	ExternalClient client(MEM_KEY);std::thread t1(remoteClientThread);
 
 	EXPECT_EQ(ExternalClient::fmi2OK, client.fmi2Terminate());
 	t1.join();
@@ -123,8 +128,8 @@ TEST(ExternalClient, fmi2Terminate)
 
 TEST(ExternalClient, fmi2SetDebugLogging)
 {
-	std::thread t1(remoteClientThread);
-	ExternalClient client(MEM_KEY);
+
+	ExternalClient client(MEM_KEY);std::thread t1(remoteClientThread);
 
 	int loggingOn = true;
 	size_t nCategories = 3;
@@ -138,9 +143,9 @@ TEST(ExternalClient, fmi2SetDebugLogging)
 
 TEST(ExternalClient, SetGetReals)
 {
-	std::thread t1(remoteClientThread);
-	ExternalClient client(MEM_KEY);
 
+	ExternalClient client(MEM_KEY);
+std::thread t1(remoteClientThread);
 	unsigned int vr[] =
 	{ 1, 2, 3 };
 	double vals[] =
@@ -164,8 +169,8 @@ TEST(ExternalClient, SetGetReals)
 
 TEST(ExternalClient, SetGetBools)
 {
-	std::thread t1(remoteClientThread);
-	ExternalClient client(MEM_KEY);
+
+	ExternalClient client(MEM_KEY);std::thread t1(remoteClientThread);
 
 	unsigned int vr[] =
 	{ 1, 2, 3 };
@@ -189,8 +194,8 @@ TEST(ExternalClient, SetGetBools)
 
 TEST(ExternalClient, SetGetIntegers)
 {
-	std::thread t1(remoteClientThread);
-	ExternalClient client(MEM_KEY);
+
+	ExternalClient client(MEM_KEY);std::thread t1(remoteClientThread);
 
 	unsigned int vr[] =
 	{ 1, 2, 3 };
@@ -214,8 +219,8 @@ TEST(ExternalClient, SetGetIntegers)
 
 TEST(ExternalClient, SetGetStrings)
 {
-	std::thread t1(remoteClientThread);
-	ExternalClient client(MEM_KEY);
+
+	ExternalClient client(MEM_KEY);std::thread t1(remoteClientThread);
 
 	unsigned int vr[] =
 	{ 1, 2, 3 };
@@ -247,8 +252,8 @@ TEST(ExternalClient, SetGetStrings)
 
 TEST(ExternalClient, fmi2DoStep)
 {
-	std::thread t1(remoteClientThread);
-	ExternalClient client(MEM_KEY);
+
+	ExternalClient client(MEM_KEY);std::thread t1(remoteClientThread);
 
 	double currentCommunicationPoint = 0.0;
 	double communicationStepSize = 0.1;
