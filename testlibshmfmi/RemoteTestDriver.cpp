@@ -45,8 +45,17 @@ void remoteTestDriver(const char * shmKey)
 
 	FmiIpc::Client* client = globalClient;
 
-	if (globalClient == NULL)
+	//if (globalClient == NULL)
+	{
 		client = new FmiIpc::Client(shmKey, &success);
+		if(!success)
+		{
+			remoteTestDriver(shmKey);
+			return;
+		}
+	}
+
+	printf("Client successfully created\n");
 
 	SharedFmiMessage* msg = client->getMessage(0);
 	printf("Client got message\n");
