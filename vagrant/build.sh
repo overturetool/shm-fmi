@@ -6,7 +6,7 @@ vagrant up
 
 vagrant ssh -c "export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64; rm -rf shm && cp -r /repos/ shm && \
 								cd shm && \
-								mvn -f shmfmi-server/pom package && \
+								mvn -f shmfmi-server/pom.xml package && \
 								./ccompile.sh && \
 								./x-compile.sh"
 # && \
