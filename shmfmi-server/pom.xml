@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+				 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -104,30 +104,35 @@
 
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.7</version>
+				<version>1.8</version>
 				<executions>
 					<execution>
 						<phase>generate-sources</phase>
+						<id>protoc</id>
 						<configuration>
 							<tasks>
 								<exec dir="${project.basedir}" executable="mkdir"
-									failonerror="true">
+											failonerror="true">
 									<arg value="-p" />
 									<arg value="target/generated-protoc/" />
 								</exec>
 								<exec dir="${project.basedir}" executable="protoc"
-									failonerror="true">
+											failonerror="true">
 
 									<arg value="--java_out=target/generated-protoc/" />
 									<arg value="--proto_path=../proto" />
 									<arg value="../proto/service.proto" />
 								</exec>
 								<exec dir="${project.basedir}" executable="mkdir"
-									failonerror="true">
+											failonerror="true">
 									<arg value="-p" />
 									<arg value="target/classes/lib/Windows-x86" />
 								</exec>
-								
+									<exec dir="${project.basedir}" executable="mkdir"
+											failonerror="true">
+									<arg value="-p" />
+									<arg value="target/classes/lib/Mac-x86_64" />
+								</exec>
 								
 							</tasks>
 						</configuration>
@@ -135,37 +140,32 @@
 							<goal>run</goal>
 						</goals>
 					</execution>
-				</executions>
-			</plugin>
 
-				<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.7</version>
-				<executions>
 					<execution>
+						<id>javah</id>
 						<phase>process-classes</phase>
 						<configuration>
 							<tasks>
-							
+								
 								<exec dir="${project.basedir}/src/main/native" executable="javah"
-									failonerror="true">
+											failonerror="true">
 
 
 									<arg value="-classpath"/>
-<arg value="../../../target/classes" />
+									<arg value="../../../target/classes" />
 									<arg value="org.intocps.java.fmi.shm.SharedMemory" />
 
- <redirector outputproperty="redirector.out"
-                                       errorproperty="redirector.err">
-                             <inputfilterchain>
-                               <replacestring from="before" to="after" />
-                             </inputfilterchain>
-                             <outputmapper type="merge" to="target/redirector-mac.out" />
-                             <errormapper type="merge" to="target/redirector-mac.err" />
-                           </redirector>
+									<redirector outputproperty="redirector.out"
+                              errorproperty="redirector.err">
+                    <inputfilterchain>
+                      <replacestring from="before" to="after" />
+                    </inputfilterchain>
+                    <outputmapper type="merge" to="target/redirector-mac.out" />
+                    <errormapper type="merge" to="target/redirector-mac.err" />
+                  </redirector>
 									
 								</exec>
-							
+								
 								
 								
 							</tasks>
@@ -174,8 +174,11 @@
 							<goal>run</goal>
 						</goals>
 					</execution>
+					
 				</executions>
 			</plugin>
+
+			
 
 
 
@@ -205,7 +208,7 @@
 		<pluginManagement>
 			<plugins>
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
+						only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
