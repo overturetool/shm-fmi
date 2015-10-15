@@ -1,0 +1,34 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "puphpet/ubuntu1404-x64"
+
+  config.vm.synced_folder "../", "/repos"
+  config.vm.synced_folder "output", "/build-output"
+  config.vm.box_check_update = false
+
+
+  config.vm.provider :libvirt do |libvirt, override|
+    #libvirt.host = "example.com"
+    override.vm.box = "naelyn/ubuntu-trusty64-libvirt"
+    libvirt.default_prefix ="shm_fmi_ubuntu64"	
+  end
+
+
+
+    config.vm.provision "shell", inline: <<-SHELL
+     sudo apt-get update
+     sudo apt-get install -y nano curl autoconf libtool automake autoconf libtool build-essential git mingw-w64 g++-mingw-w64 make cmake openjdk-7-jdk
+			echo 'export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64' >> ~/.bashrc
+			source ~/.bashrc
+			git clone https://github.com/google/protobuf.git protobuf
+			cd protobuf
+			git checkout 5d4a856
+			./autogen.sh
+			./configure --enable-static
+			make
+			make install
+			ldconfig /usr/local/lib
+   SHELL
+end
