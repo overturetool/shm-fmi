@@ -6,6 +6,7 @@ vagrant up
 
 vagrant ssh -c "export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64; rm -rf shm && cp -r /repos/ shm && \
 								cd shm && \
+								mvn -f shmfmi-server/pom package && \
 								./ccompile.sh && \
 								./x-compile.sh"
 # && \
@@ -30,6 +31,6 @@ chmod 600 ssh/id_rsa
 
 rsync -e "ssh -o StrictHostKeyChecking=no -i ssh/id_rsa" -rv --prune-empty-dirs --include '*/' --include '*.so' --include '*.dll' --include 'redirector-*.err' --include 'redirector-*.out' --exclude '*' vagrant@$VMIP:/home/vagrant/shm/builds/output/ $TT
 
-rsync -e "ssh -o StrictHostKeyChecking=no -i ssh/id_rsa" -rv --prune-empty-dirs --include '*/' --include '*.so' --include '*.dll' --include 'redirector-*.err' --include 'redirector-*.out' --exclude '*' vagrant@$VMIP:/home/vagrant/shm/shmfmi-server/target/classes/lib $TT
+rsync -e "ssh -o StrictHostKeyChecking=no -i ssh/id_rsa" -rv --prune-empty-dirs --include '*/' --include '*.so' --include '*.dll' --include '*.java' --include 'redirector-*.err' --include 'redirector-*.out' --exclude '*' vagrant@$VMIP:/home/vagrant/shm/shmfmi-server/target $TT
 
 vagrant halt
