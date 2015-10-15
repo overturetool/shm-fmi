@@ -42,6 +42,14 @@ ConfigFile::ConfigFile(std::string configFile,std::string port)
 		this->m_args[i] = new char[arguments.at(i).size()];
 		strcpy(this->m_args[i], arguments.at(i).c_str() );
 
+		for(int j=0; j < arguments.at(i).length();j++)
+		{
+			char *cp= this->m_args[i];
+			char c=cp[j];
+			if(c=='\r')
+				cp[j]=NULL;
+		}
+
 
 		//printf("Inserted char* %s\n",this->m_args[i]);
 	}
