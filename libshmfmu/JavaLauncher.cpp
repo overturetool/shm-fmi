@@ -128,7 +128,8 @@ int JavaLauncher::launch() {
 #elif __APPLE__ ||  __linux
 
 	int status;
-	if ((pid = fork()) == 0)
+	pid = fork();
+	if (pid == 0)
 	{
 		printf("Fork application %s\n", m_args[0]);
 		// Child process will return 0 from fork()
@@ -142,16 +143,35 @@ int JavaLauncher::launch() {
 		 }
 		 printf("\n");*/
 		if(m_workingDir!=NULL)
-		chdir(m_workingDir);
+		{
+		if(chdir(m_workingDir)==0){
+			printf("Changed dir to: %s\n",m_workingDir);
+		}else{
+			printf("server_create: failed to fork and change dir: %01d %s\n", __LINE__,strerror( errno ));
+		}
+
+		}
+		int i = 0;
+		while (m_args[i] != NULL) {
+
+				//if (i > 0) {
+					printf("%s\n", m_args[i]);
+				i++;
+			}
 
 		status = execvp(m_args[0], m_args);
+		printf("server_create: failed to fork and execvp: %01d %s\n", __LINE__,strerror( errno ));
+//		printf("program %s, arg 1: %s\n",m_args[0],m_args[1]);
 		printf("Execvp status: %d\n", status);
 		printf("Execvp error: %d", errno);
 		exit(0);
-	} else
+	} else if(pid==-1)
 	{
 		// Parent process will return a non-zero value from fork()
+		printf("server_create: failed to fork: %01d %s\n", __LINE__,strerror( errno ));
 
+		m_launched = false;
+	}else{
 		m_launched = true;
 	}
 
