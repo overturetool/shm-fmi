@@ -31,6 +31,16 @@ typedef bool BOOL;
 #include <sys/file.h>
 #include <sys/mman.h>
 #include <sys/wait.h>
+#include <semaphore.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/stat.h>
+#endif
+
+#ifdef __APPLE__
+typedef sem_t* SIGNAL_HANDLE;
+#else
+typedef HANDLE SIGNAL_HANDLE;
 #endif
 
 
@@ -65,6 +75,13 @@ public:
 #endif
 	}
 
+#ifdef __APPLE__
+	static void close(SIGNAL_HANDLE handle){
+		sem_close(handle);
+	}
+
+#endif
+
 	static void unmap(void* ptr, std::string* name)
 	{
 	#ifdef _WIN32
@@ -90,8 +107,8 @@ public:
 	private:
 		// Internal variables
 		HANDLE m_hMapFile;		// Handle to the mapped memory file
-		HANDLE m_hSignal;		// Event used to signal when data exists
-		HANDLE m_hAvail;// Event used to signal when some blocks become available
+		SIGNAL_HANDLE m_hSignal;		// Event used to signal when data exists
+		SIGNAL_HANDLE m_hAvail;// Event used to signal when some blocks become available
 		std::string* m_name;
 		SharedFmiMem *m_pBuf;		// Buffer that points to the shared memory
 	public:
@@ -114,8 +131,8 @@ public:
 	private:
 		// Internal variables
 		HANDLE m_hMapFile;		// Handle to the mapped memory file
-		HANDLE m_hSignal;		// Event used to signal when data exists
-		HANDLE m_hAvail;// Event used to signal when some blocks become available
+		SIGNAL_HANDLE m_hSignal;		// Event used to signal when data exists
+		SIGNAL_HANDLE m_hAvail;// Event used to signal when some blocks become available
 		std::string* m_name;
 		SharedFmiMem *m_pBuf;		// Buffer that points to the shared memory
 
