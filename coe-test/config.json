@@ -1,6 +1,6 @@
 {
 	"fmus":[
-		"../fmus/fmu2watertank.fmu",
+		"../fmus/tank",
 		"../fmus/vdm-tankcontroller"
 	],
 	"connections":{
