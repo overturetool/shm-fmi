@@ -29,7 +29,7 @@ google::protobuf::Message* ExternalClient::send(
 	case sharedfmimemory::fmi2Terminate:
 	case sharedfmimemory::fmi2Reset:
 	case sharedfmimemory::fmi2GetMaxStepSize: {
-		Empty* im = (Empty*) msg;
+		Fmi2Empty* im = (Fmi2Empty*) msg;
 		m.protoBufMsgSize = im->ByteSize();
 		im->SerializeWithCachedSizesToArray(m.protoBufMsg);
 
@@ -38,14 +38,14 @@ google::protobuf::Message* ExternalClient::send(
 		break;
 
 	case sharedfmimemory::fmi2SetDebugLogging: {
-		SetDebugLoggingRequest* im = (SetDebugLoggingRequest*) msg;
+		Fmi2SetDebugLoggingRequest* im = (Fmi2SetDebugLoggingRequest*) msg;
 		m.protoBufMsgSize = im->ByteSize();
 		im->SerializeWithCachedSizesToArray(m.protoBufMsg);
 
 	}
 		break;
 	case sharedfmimemory::fmi2Instantiate: {
-		InstantiateRequest* im = (InstantiateRequest*) msg;
+		Fmi2InstantiateRequest* im = (Fmi2InstantiateRequest*) msg;
 		m.protoBufMsgSize = im->ByteSize();
 		im->SerializeWithCachedSizesToArray(m.protoBufMsg);
 
@@ -53,7 +53,7 @@ google::protobuf::Message* ExternalClient::send(
 		break;
 		//case sharedfmimemory::fmi2FreeInstance,
 	case sharedfmimemory::fmi2SetupExperiment: {
-		SetupExperimentRequest* im = (SetupExperimentRequest*) msg;
+		Fmi2SetupExperimentRequest* im = (Fmi2SetupExperimentRequest*) msg;
 		m.protoBufMsgSize = im->ByteSize();
 		im->SerializeWithCachedSizesToArray(m.protoBufMsg);
 
@@ -62,7 +62,7 @@ google::protobuf::Message* ExternalClient::send(
 		break;
 
 	case sharedfmimemory::fmi2DoStep: {
-		DoStepRequest* im = (DoStepRequest*) msg;
+		Fmi2DoStepRequest* im = (Fmi2DoStepRequest*) msg;
 		m.protoBufMsgSize = im->ByteSize();
 		im->SerializeWithCachedSizesToArray(m.protoBufMsg);
 
@@ -73,7 +73,7 @@ google::protobuf::Message* ExternalClient::send(
 	case sharedfmimemory::fmi2GetInteger:
 	case sharedfmimemory::fmi2GetBoolean:
 	case sharedfmimemory::fmi2GetString: {
-		GetRequest* im = (GetRequest*) msg;
+		Fmi2GetRequest* im = (Fmi2GetRequest*) msg;
 		m.protoBufMsgSize = im->ByteSize();
 		im->SerializeWithCachedSizesToArray(m.protoBufMsg);
 
@@ -81,7 +81,7 @@ google::protobuf::Message* ExternalClient::send(
 		break;
 
 	case sharedfmimemory::fmi2SetReal: {
-		SetRealRequest* im = (SetRealRequest*) msg;
+		Fmi2SetRealRequest* im = (Fmi2SetRealRequest*) msg;
 		m.protoBufMsgSize = im->ByteSize();
 		im->SerializeWithCachedSizesToArray(m.protoBufMsg);
 
@@ -89,14 +89,14 @@ google::protobuf::Message* ExternalClient::send(
 	}
 		break;
 	case sharedfmimemory::fmi2SetInteger: {
-		SetIntegerRequest* im = (SetIntegerRequest*) msg;
+		Fmi2SetIntegerRequest* im = (Fmi2SetIntegerRequest*) msg;
 		m.protoBufMsgSize = im->ByteSize();
 		im->SerializeWithCachedSizesToArray(m.protoBufMsg);
 
 	}
 		break;
 	case sharedfmimemory::fmi2SetBoolean: {
-		SetBooleanRequest* im = (SetBooleanRequest*) msg;
+		Fmi2SetBooleanRequest* im = (Fmi2SetBooleanRequest*) msg;
 		m.protoBufMsgSize = im->ByteSize();
 		im->SerializeWithCachedSizesToArray(m.protoBufMsg);
 
@@ -104,7 +104,7 @@ google::protobuf::Message* ExternalClient::send(
 		break;
 
 	case sharedfmimemory::fmi2SetString: {
-		SetStringRequest* im = (SetStringRequest*) msg;
+		Fmi2SetStringRequest* im = (Fmi2SetStringRequest*) msg;
 		m.protoBufMsgSize = im->ByteSize();
 		im->SerializeWithCachedSizesToArray(m.protoBufMsg);
 
@@ -140,28 +140,28 @@ google::protobuf::Message* ExternalClient::send(
 	}
 
 	case sharedfmimemory::fmi2GetReal: {
-		GetRealReply* r = new GetRealReply();
+		Fmi2GetRealReply* r = new Fmi2GetRealReply();
 		r->ParseFromArray(reply->protoBufMsg, reply->protoBufMsgSize);
 		return r;
 	}
 	case sharedfmimemory::fmi2GetInteger: {
-		GetIntegerReply* r = new GetIntegerReply();
+		Fmi2GetIntegerReply* r = new Fmi2GetIntegerReply();
 		r->ParseFromArray(reply->protoBufMsg, reply->protoBufMsgSize);
 		return r;
 	}
 	case sharedfmimemory::fmi2GetBoolean: {
-		GetBooleanReply* r = new GetBooleanReply();
+		Fmi2GetBooleanReply* r = new Fmi2GetBooleanReply();
 		r->ParseFromArray(reply->protoBufMsg, reply->protoBufMsgSize);
 		return r;
 	}
 	case sharedfmimemory::fmi2GetString: {
-		GetStringReply* r = new GetStringReply();
+		Fmi2GetStringReply* r = new Fmi2GetStringReply();
 		r->ParseFromArray(reply->protoBufMsg, reply->protoBufMsgSize);
 		return r;
 	}
 
 	case sharedfmimemory::fmi2GetMaxStepSize: {
-		GetMaxStepSizeReply* r = new GetMaxStepSizeReply();
+		Fmi2GetMaxStepSizeReply* r = new Fmi2GetMaxStepSizeReply();
 		r->ParseFromArray(reply->protoBufMsg, reply->protoBufMsgSize);
 		return r;
 	}
@@ -210,7 +210,7 @@ bool ExternalClient::fmi2Instantiate(fmi2String instanceName,
 		const char* callbackAddress, int callbackPort, fmi2Boolean visible,
 		fmi2Boolean loggingOn) {
 
-	InstantiateRequest request;
+	Fmi2InstantiateRequest request;
 	request.set_instancename(instanceName);
 	request.set_fmuguid(fmuGUID);
 	request.set_fmuresourcelocation(fmuResourceLocation);
@@ -232,7 +232,7 @@ bool ExternalClient::fmi2Instantiate(fmi2String instanceName,
 ExternalClient::fmi2Status ExternalClient::fmi2SetupExperiment(
 		fmi2Boolean toleranceDefined, fmi2Real tolerance, fmi2Real startTime,
 		fmi2Boolean stopTimeDefined, fmi2Real stopTime) {
-	SetupExperimentRequest request;
+	Fmi2SetupExperimentRequest request;
 	request.set_tolerancedefined(toleranceDefined);
 	request.set_tolerance(tolerance);
 	request.set_starttime(startTime);
@@ -244,29 +244,29 @@ ExternalClient::fmi2Status ExternalClient::fmi2SetupExperiment(
 }
 
 ExternalClient::fmi2Status ExternalClient::fmi2EnterInitializationMode() {
-	Empty request;
+	Fmi2Empty request;
 	return sendRetStatus(sharedfmimemory::fmi2EnterInitializationMode, &request);
 }
 
 ExternalClient::fmi2Status ExternalClient::fmi2ExitInitializationMode() {
-	Empty request;
+	Fmi2Empty request;
 	return sendRetStatus(sharedfmimemory::fmi2ExitInitializationMode, &request);
 }
 
 ExternalClient::fmi2Status ExternalClient::fmi2Terminate() {
-	Empty request;
+	Fmi2Empty request;
 	return sendRetStatus(sharedfmimemory::fmi2Terminate, &request);
 }
 
 ExternalClient::fmi2Status ExternalClient::fmi2Reset() {
-	Empty request;
+	Fmi2Empty request;
 	return sendRetStatus(sharedfmimemory::fmi2Reset, &request);
 }
 
 ExternalClient::fmi2Status ExternalClient::fmi2SetDebugLogging(
 		fmi2Boolean loggingOn, size_t nCategories,
 		const fmi2String categories[]) {
-	SetDebugLoggingRequest request;
+	Fmi2SetDebugLoggingRequest request;
 
 	request.set_loggingon(loggingOn);
 	request.set_categoriessize(nCategories);
@@ -278,9 +278,9 @@ ExternalClient::fmi2Status ExternalClient::fmi2SetDebugLogging(
 	return sendRetStatus(sharedfmimemory::fmi2SetDebugLogging, &request);
 }
 
-GetRequest createGetRequest(const ExternalClient::fmi2ValueReference vr[],
+Fmi2GetRequest createGetRequest(const ExternalClient::fmi2ValueReference vr[],
 		size_t nvr) {
-	GetRequest request;
+	Fmi2GetRequest request;
 
 	request.set_size(nvr);
 
@@ -295,9 +295,9 @@ GetRequest createGetRequest(const ExternalClient::fmi2ValueReference vr[],
 //
 ExternalClient::fmi2Status ExternalClient::fmi2GetReal(
 		const fmi2ValueReference vr[], size_t nvr, fmi2Real value[]) {
-	GetRequest request = createGetRequest(vr, nvr);
+	Fmi2GetRequest request = createGetRequest(vr, nvr);
 
-	GetRealReply* reply = (GetRealReply*) send(sharedfmimemory::fmi2GetReal,
+	Fmi2GetRealReply* reply = (Fmi2GetRealReply*) send(sharedfmimemory::fmi2GetReal,
 			&request);
 
 	if (reply == NULL)
@@ -311,9 +311,9 @@ ExternalClient::fmi2Status ExternalClient::fmi2GetReal(
 
 ExternalClient::fmi2Status ExternalClient::fmi2GetInteger(
 		const fmi2ValueReference vr[], size_t nvr, fmi2Integer value[]) {
-	GetRequest request = createGetRequest(vr, nvr);
+	Fmi2GetRequest request = createGetRequest(vr, nvr);
 
-	GetIntegerReply* reply = (GetIntegerReply*) send(
+	Fmi2GetIntegerReply* reply = (Fmi2GetIntegerReply*) send(
 			sharedfmimemory::fmi2GetInteger, &request);
 
 	if (reply == NULL)
@@ -328,9 +328,9 @@ ExternalClient::fmi2Status ExternalClient::fmi2GetInteger(
 
 ExternalClient::fmi2Status ExternalClient::fmi2GetBoolean(
 		const fmi2ValueReference vr[], size_t nvr, fmi2Boolean value[]) {
-	GetRequest request = createGetRequest(vr, nvr);
+	Fmi2GetRequest request = createGetRequest(vr, nvr);
 
-	GetBooleanReply* reply = (GetBooleanReply*) send(
+	Fmi2GetBooleanReply* reply = (Fmi2GetBooleanReply*) send(
 			sharedfmimemory::fmi2GetBoolean, &request);
 
 	if (reply == NULL)
@@ -345,9 +345,9 @@ ExternalClient::fmi2Status ExternalClient::fmi2GetBoolean(
 
 ExternalClient::fmi2Status ExternalClient::fmi2GetString(
 		const fmi2ValueReference vr[], size_t nvr, fmi2String value[]) {
-	GetRequest request = createGetRequest(vr, nvr);
+	Fmi2GetRequest request = createGetRequest(vr, nvr);
 
-	GetStringReply* reply = (GetStringReply*) send(
+	Fmi2GetStringReply* reply = (Fmi2GetStringReply*) send(
 			sharedfmimemory::fmi2GetString, &request);
 
 	if (reply == NULL)
@@ -366,7 +366,7 @@ ExternalClient::fmi2Status ExternalClient::fmi2GetString(
 
 ExternalClient::fmi2Status ExternalClient::fmi2SetReal(
 		const fmi2ValueReference vr[], size_t nvr, const fmi2Real value[]) {
-	SetRealRequest* request = new SetRealRequest();
+	Fmi2SetRealRequest* request = new Fmi2SetRealRequest();
 
 	for (size_t i = 0; i < nvr; i++) {
 		request->add_valuereference(vr[i]);
@@ -381,7 +381,7 @@ ExternalClient::fmi2Status ExternalClient::fmi2SetReal(
 
 ExternalClient::fmi2Status ExternalClient::fmi2SetInteger(
 		const fmi2ValueReference vr[], size_t nvr, const fmi2Integer value[]) {
-	SetIntegerRequest request;
+	Fmi2SetIntegerRequest request;
 
 	for (size_t i = 0; i < nvr; i++) {
 		request.add_valuereference(vr[i]);
@@ -396,7 +396,7 @@ ExternalClient::fmi2Status ExternalClient::fmi2SetInteger(
 
 ExternalClient::fmi2Status ExternalClient::fmi2SetBoolean(
 		const fmi2ValueReference vr[], size_t nvr, const fmi2Boolean value[]) {
-	SetBooleanRequest request;
+	Fmi2SetBooleanRequest request;
 
 	for (size_t i = 0; i < nvr; i++) {
 		request.add_valuereference(vr[i]);
@@ -411,7 +411,7 @@ ExternalClient::fmi2Status ExternalClient::fmi2SetBoolean(
 
 ExternalClient::fmi2Status ExternalClient::fmi2SetString(
 		const fmi2ValueReference vr[], size_t nvr, const fmi2String value[]) {
-	SetStringRequest request;
+	Fmi2SetStringRequest request;
 
 	for (size_t i = 0; i < nvr; i++) {
 		request.add_valuereference(vr[i]);
@@ -431,7 +431,7 @@ ExternalClient::fmi2Status ExternalClient::fmi2SetString(
 ExternalClient::fmi2Status ExternalClient::fmi2DoStep(
 		fmi2Real currentCommunicationPoint, fmi2Real communicationStepSize,
 		fmi2Boolean noSetFMUStatePriorToCurrentPoint) {
-	DoStepRequest request;
+	Fmi2DoStepRequest request;
 	request.set_currentcommunicationpoint(currentCommunicationPoint);
 	request.set_communicationstepsize(communicationStepSize);
 
@@ -443,8 +443,8 @@ ExternalClient::fmi2Status ExternalClient::fmi2DoStep(
 //
 
 ExternalClient::fmi2Status ExternalClient::fmi2GetMaxStepsize(fmi2Real* size) {
-	Empty request;
-	GetMaxStepSizeReply* reply = (GetMaxStepSizeReply*) send(
+	Fmi2Empty request;
+	Fmi2GetMaxStepSizeReply* reply = (Fmi2GetMaxStepSizeReply*) send(
 			sharedfmimemory::fmi2GetMaxStepSize, &request);
 
 	if (reply == NULL)

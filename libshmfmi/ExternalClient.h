@@ -19,13 +19,13 @@
 #include "SharedFmiMessage.h"
 
 
-using service::GetRequest;
-using service::GetRealReply;
+using service::Fmi2GetRequest;
+using service::Fmi2GetRealReply;
 using service::Fmi2StatusReply;
-using service::Empty;
-using service::SetDebugLoggingRequest;
-using service::GetRequest;
-using service::GetRealReply;
+using service::Fmi2Empty;
+using service::Fmi2SetDebugLoggingRequest;
+using service::Fmi2GetRequest;
+using service::Fmi2GetRealReply;
 using service::Fmi2StatusReply;
 using namespace service;
 

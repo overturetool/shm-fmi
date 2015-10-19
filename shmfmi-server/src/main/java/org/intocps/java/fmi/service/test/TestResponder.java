@@ -7,24 +7,24 @@ import org.intocps.java.fmi.service.IServiceProtocol;
 import org.intocps.java.fmi.service.ProtocolDriver;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.lausdahl.examples.Service.DoStepRequest;
-import com.lausdahl.examples.Service.Empty;
+import com.lausdahl.examples.Service.Fmi2DoStepRequest;
+import com.lausdahl.examples.Service.Fmi2Empty;
 import com.lausdahl.examples.Service.Fmi2StatusReply;
 import com.lausdahl.examples.Service.Fmi2StatusReply.Status;
-import com.lausdahl.examples.Service.GetBooleanReply;
-import com.lausdahl.examples.Service.GetIntegerReply;
-import com.lausdahl.examples.Service.GetMaxStepSizeReply;
-import com.lausdahl.examples.Service.GetRealReply;
-import com.lausdahl.examples.Service.GetRequest;
-import com.lausdahl.examples.Service.GetStringReply;
-import com.lausdahl.examples.Service.GetStringReply.Builder;
-import com.lausdahl.examples.Service.InstantiateRequest;
-import com.lausdahl.examples.Service.SetBooleanRequest;
-import com.lausdahl.examples.Service.SetDebugLoggingRequest;
-import com.lausdahl.examples.Service.SetIntegerRequest;
-import com.lausdahl.examples.Service.SetRealRequest;
-import com.lausdahl.examples.Service.SetStringRequest;
-import com.lausdahl.examples.Service.SetupExperimentRequest;
+import com.lausdahl.examples.Service.Fmi2GetBooleanReply;
+import com.lausdahl.examples.Service.Fmi2GetIntegerReply;
+import com.lausdahl.examples.Service.Fmi2GetMaxStepSizeReply;
+import com.lausdahl.examples.Service.Fmi2GetRealReply;
+import com.lausdahl.examples.Service.Fmi2GetRequest;
+import com.lausdahl.examples.Service.Fmi2GetStringReply;
+import com.lausdahl.examples.Service.Fmi2GetStringReply.Builder;
+import com.lausdahl.examples.Service.Fmi2InstantiateRequest;
+import com.lausdahl.examples.Service.Fmi2SetBooleanRequest;
+import com.lausdahl.examples.Service.Fmi2SetDebugLoggingRequest;
+import com.lausdahl.examples.Service.Fmi2SetIntegerRequest;
+import com.lausdahl.examples.Service.Fmi2SetRealRequest;
+import com.lausdahl.examples.Service.Fmi2SetStringRequest;
+import com.lausdahl.examples.Service.Fmi2SetupExperimentRequest;
 
 public class TestResponder implements IServiceProtocol{
 	
@@ -70,34 +70,34 @@ public class TestResponder implements IServiceProtocol{
 	}
 
 	@Override
-	public Fmi2StatusReply DoStep(DoStepRequest parseFrom) {
+	public Fmi2StatusReply DoStep(Fmi2DoStepRequest parseFrom) {
 		System.out.println("Called fmi2DoStep");
 		return ok();
 	}
 
 	@Override
-	public Fmi2StatusReply Terminate(Empty parseFrom) {
+	public Fmi2StatusReply Terminate(Fmi2Empty parseFrom) {
 		System.out.println("Called fmi2Terminate");
 		return ok();
 	}
 
 	@Override
-	public Fmi2StatusReply EnterInitializationMode(Empty parseFrom) {
+	public Fmi2StatusReply EnterInitializationMode(Fmi2Empty parseFrom) {
 		System.out.println("Called fmi2EnterInitializationMode");
 		return ok();
 	}
 
 	@Override
-	public Fmi2StatusReply ExitInitializationMode(Empty parseFrom) {
+	public Fmi2StatusReply ExitInitializationMode(Fmi2Empty parseFrom) {
 		System.out.println("Called fmi2ExitInitializationMode");
 		return ok();
 	}
 
 	@Override
-	public GetBooleanReply GetBoolean(GetRequest parseFrom) {
+	public Fmi2GetBooleanReply GetBoolean(Fmi2GetRequest parseFrom) {
 		System.out.println("Called fmi2GetBoolean");
 
-		com.lausdahl.examples.Service.GetBooleanReply.Builder builder = GetBooleanReply
+		Fmi2GetBooleanReply.Builder builder = Fmi2GetBooleanReply
 				.newBuilder();
 
 		for (Integer id : parseFrom.getValueReferenceList()) {
@@ -109,10 +109,10 @@ public class TestResponder implements IServiceProtocol{
 	}
 
 	@Override
-	public GetIntegerReply GetInteger(GetRequest parseFrom) {
+	public Fmi2GetIntegerReply GetInteger(Fmi2GetRequest parseFrom) {
 		System.out.println("Called fmi2GetInteger");
 
-		com.lausdahl.examples.Service.GetIntegerReply.Builder builder = GetIntegerReply
+		Fmi2GetIntegerReply.Builder builder = Fmi2GetIntegerReply
 				.newBuilder();
 
 		for (Integer id : parseFrom.getValueReferenceList()) {
@@ -124,18 +124,18 @@ public class TestResponder implements IServiceProtocol{
 	}
 
 	@Override
-	public GetMaxStepSizeReply GetMaxStepSize(Empty parseFrom) {
+	public Fmi2GetMaxStepSizeReply GetMaxStepSize(Fmi2Empty parseFrom) {
 		System.out.println("Called fmi2GetMaxStepSize");
 		
-		GetMaxStepSizeReply reply =GetMaxStepSizeReply.newBuilder().setMaxStepSize(100).build();
+		Fmi2GetMaxStepSizeReply reply =Fmi2GetMaxStepSizeReply.newBuilder().setMaxStepSize(100).build();
 		return (reply);
 	}
 
 	@Override
-	public GetRealReply GetReal(GetRequest parseFrom) {
+	public Fmi2GetRealReply GetReal(Fmi2GetRequest parseFrom) {
 		System.out.println("Called fmi2GetReal");
 
-		com.lausdahl.examples.Service.GetRealReply.Builder builder = GetRealReply
+		Fmi2GetRealReply.Builder builder = Fmi2GetRealReply
 				.newBuilder();
 
 		for (Integer id : parseFrom.getValueReferenceList()) {
@@ -147,10 +147,10 @@ public class TestResponder implements IServiceProtocol{
 	}
 
 	@Override
-	public GetStringReply GetString(GetRequest parseFrom) {
+	public Fmi2GetStringReply GetString(Fmi2GetRequest parseFrom) {
 		System.out.println("Called fmi2GetString");
 
-		Builder builder = GetStringReply.newBuilder();
+		Builder builder = Fmi2GetStringReply.newBuilder();
 
 		for (Integer id : parseFrom.getValueReferenceList()) {
 			if (strings.containsKey(id))
@@ -161,19 +161,19 @@ public class TestResponder implements IServiceProtocol{
 	}
 
 	@Override
-	public Fmi2StatusReply Instantiate(InstantiateRequest parseFrom) {
+	public Fmi2StatusReply Instantiate(Fmi2InstantiateRequest parseFrom) {
 		System.out.println("Called fmi2Instantiate");
 		return ok();
 	}
 
 	@Override
-	public Fmi2StatusReply Reset(Empty parseFrom) {
+	public Fmi2StatusReply Reset(Fmi2Empty parseFrom) {
 		System.out.println("Called fmi2Reset");
 		return ok();
 	}
 
 	@Override
-	public Fmi2StatusReply SetBoolean(SetBooleanRequest request) {
+	public Fmi2StatusReply SetBoolean(Fmi2SetBooleanRequest request) {
 		System.out.println("Called fmi2SetBoolean");
 
 		for (int i = 0; i < request.getValueReferenceCount(); i++) {
@@ -183,13 +183,13 @@ public class TestResponder implements IServiceProtocol{
 	}
 
 	@Override
-	public Fmi2StatusReply SetDebugLogging(SetDebugLoggingRequest parseFrom) {
+	public Fmi2StatusReply SetDebugLogging(Fmi2SetDebugLoggingRequest parseFrom) {
 		System.out.println("Called fmi2SetDebugLogging");
 		return ok();
 	}
 
 	@Override
-	public Fmi2StatusReply SetInteger(SetIntegerRequest request) {
+	public Fmi2StatusReply SetInteger(Fmi2SetIntegerRequest request) {
 		System.out.println("Called fmi2SetInteger");
 
 		for (int i = 0; i < request.getValueReferenceCount(); i++) {
@@ -199,7 +199,7 @@ return ok();
 	}
 
 	@Override
-	public Fmi2StatusReply SetReal(SetRealRequest parseFrom) {
+	public Fmi2StatusReply SetReal(Fmi2SetRealRequest parseFrom) {
 		System.out.println("Called fmi2SetReal");
 
 		for (int i = 0; i < parseFrom.getValueReferenceCount(); i++) {
@@ -209,7 +209,7 @@ return ok();
 	}
 
 	@Override
-	public Fmi2StatusReply SetString(SetStringRequest request) {
+	public Fmi2StatusReply SetString(Fmi2SetStringRequest request) {
 		System.out.println("Called fmi2SetString");
 
 		for (int i = 0; i < request.getValueReferenceCount(); i++) {
@@ -220,7 +220,7 @@ return ok();
 	}
 
 	@Override
-	public Fmi2StatusReply SetupExperiment(SetupExperimentRequest parseFrom) {
+	public Fmi2StatusReply SetupExperiment(Fmi2SetupExperimentRequest parseFrom) {
 		System.out.println("Called fmi2SetupExperiment");
 		return ok();
 	}

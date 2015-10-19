@@ -11,33 +11,33 @@ service Fmu
 {
 
 //	rpc fmi2GetVersion(Empty) returns(VersionReply);
-	rpc fmi2Instantiate(InstantiateRequest) returns(Fmi2StatusReply);
+	rpc fmi2Instantiate(Fmi2InstantiateRequest) returns(Fmi2StatusReply);
 
-	rpc fmi2SetupExperiment(SetupExperimentRequest) returns(Fmi2StatusReply);
-	rpc fmi2EnterInitializationMode(Empty) returns(Fmi2StatusReply);
-	rpc fmi2ExitInitializationMode(Empty) returns(Fmi2StatusReply);
-	rpc fmi2Terminate(Empty) returns(Fmi2StatusReply);
-	rpc fmi2Reset(Empty) returns(Fmi2StatusReply);
+	rpc fmi2SetupExperiment(Fmi2SetupExperimentRequest) returns(Fmi2StatusReply);
+	rpc fmi2EnterInitializationMode(Fmi2Empty) returns(Fmi2StatusReply);
+	rpc fmi2ExitInitializationMode(Fmi2Empty) returns(Fmi2StatusReply);
+	rpc fmi2Terminate(Fmi2Empty) returns(Fmi2StatusReply);
+	rpc fmi2Reset(Fmi2Empty) returns(Fmi2StatusReply);
 	//Maybe just kill the process! rpc fmi2FreeInstance
 
-	rpc fmi2SetDebugLogging(SetDebugLoggingRequest) returns(Fmi2StatusReply);
+	rpc fmi2SetDebugLogging(Fmi2SetDebugLoggingRequest) returns(Fmi2StatusReply);
 
-	rpc fmi2GetReal(GetRequest) returns(GetRealReply);
-	rpc fmi2GetInteger(GetRequest) returns(GetIntegerReply);
-	rpc fmi2GetBoolean(GetRequest) returns(GetBooleanReply);
-	rpc fmi2GetString(GetRequest) returns(GetStringReply);
+	rpc fmi2GetReal(Fmi2GetRequest) returns(Fmi2GetRealReply);
+	rpc fmi2GetInteger(Fmi2GetRequest) returns(Fmi2GetIntegerReply);
+	rpc fmi2GetBoolean(Fmi2GetRequest) returns(Fmi2GetBooleanReply);
+	rpc fmi2GetString(Fmi2GetRequest) returns(Fmi2GetStringReply);
 
-	rpc fmi2SetReal(SetRealRequest) returns(Fmi2StatusReply); 
-	rpc fmi2SetInteger(SetIntegerRequest) returns(Fmi2StatusReply); 
-	rpc fmi2SetBoolean(SetBooleanRequest) returns(Fmi2StatusReply); 
-	rpc fmi2SetString(SetStringRequest) returns(Fmi2StatusReply); 
+	rpc fmi2SetReal(Fmi2SetRealRequest) returns(Fmi2StatusReply); 
+	rpc fmi2SetInteger(Fmi2SetIntegerRequest) returns(Fmi2StatusReply); 
+	rpc fmi2SetBoolean(Fmi2SetBooleanRequest) returns(Fmi2StatusReply); 
+	rpc fmi2SetString(Fmi2SetStringRequest) returns(Fmi2StatusReply); 
 
-	rpc fmi2DoStep(DoStepRequest) returns(Fmi2StatusReply);
+	rpc fmi2DoStep(Fmi2DoStepRequest) returns(Fmi2StatusReply);
 	//rpc fmi2GetStatus
-	rpc fmi2GetMaxStepSize(Empty) returns(GetMaxStepSizeReply);
+	rpc fmi2GetMaxStepSize(Fmi2Empty) returns(Fmi2GetMaxStepSizeReply);
 }
 
-message SetupExperimentRequest{
+message Fmi2SetupExperimentRequest{
 	bool toleranceDefined=1;
 	double tolerance=2;
 	double startTime=3;
@@ -46,7 +46,7 @@ message SetupExperimentRequest{
 }
 
 
-message SetDebugLoggingRequest{
+message Fmi2SetDebugLoggingRequest{
 	bool loggingOn =1;
 	int32 categoriesSize=2;
 	repeated string catogories = 3;
@@ -57,46 +57,46 @@ message SetDebugLoggingRequest{
 //
 // Get
 //
-message GetRequest{
+message Fmi2GetRequest{
 	repeated int32 valueReference=1; //slidly too small
 	int32 size=2;
 }
 
-message GetRealReply{
+message Fmi2GetRealReply{
 	repeated double values=1;
 }
 
-message GetIntegerReply{
+message Fmi2GetIntegerReply{
 	repeated int32 values=1;
 }
 
-message GetBooleanReply{
+message Fmi2GetBooleanReply{
 	repeated bool values=1;
 }
 
-message GetStringReply{
+message Fmi2GetStringReply{
 	repeated string values=1;
 }
 
 //
 // Set
 //
-message SetRealRequest{
+message Fmi2SetRealRequest{
 	repeated int32 valueReference=1;
 	repeated double values=2;
 }
 
-message SetIntegerRequest{
+message Fmi2SetIntegerRequest{
 	repeated int32 valueReference=1;
 	repeated int32 values=2;
 }
 
-message SetBooleanRequest{
+message Fmi2SetBooleanRequest{
 	repeated int32 valueReference=1;
 	repeated bool values=2;
 }
 
-message SetStringRequest{
+message Fmi2SetStringRequest{
 	repeated int32 valueReference=1;
 	repeated string values=2;
 }
@@ -104,7 +104,7 @@ message SetStringRequest{
 //
 // do step
 //
-message DoStepRequest{
+message Fmi2DoStepRequest{
 	double currentCommunicationPoint = 1;
 	double communicationStepSize = 2;
 }
@@ -112,7 +112,7 @@ message DoStepRequest{
 //
 // Other
 //
-message Empty{}
+message Fmi2Empty{}
 
 message Fmi2StatusReply{
 	//the status
@@ -135,7 +135,7 @@ message Fmi2StatusReply{
 
 
 
-message InstantiateRequest{
+message Fmi2InstantiateRequest{
 //fmi2Type fmuType, fmi2String fmuGUID,
 //		fmi2String fmuResourceLocation, const fmi2CallbackFunctions *functions, fmi2Boolean visible,
 //		fmi2Boolean loggingOn
@@ -156,7 +156,7 @@ int32 callbackPort=7;
 //}
 
 
-message GetMaxStepSizeReply
+message Fmi2GetMaxStepSizeReply
 {
 	double maxStepSize =1;
 }

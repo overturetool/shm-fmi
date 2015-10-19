@@ -5,18 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.lausdahl.examples.Service.DoStepRequest;
-import com.lausdahl.examples.Service.Empty;
-import com.lausdahl.examples.Service.Fmi2StatusReply;
-import com.lausdahl.examples.Service.Fmi2StatusReply.Status;
-import com.lausdahl.examples.Service.GetRequest;
-import com.lausdahl.examples.Service.InstantiateRequest;
-import com.lausdahl.examples.Service.SetBooleanRequest;
-import com.lausdahl.examples.Service.SetDebugLoggingRequest;
-import com.lausdahl.examples.Service.SetIntegerRequest;
-import com.lausdahl.examples.Service.SetRealRequest;
-import com.lausdahl.examples.Service.SetStringRequest;
-import com.lausdahl.examples.Service.SetupExperimentRequest;
+import com.lausdahl.examples.Service.*;
 
 public class ProtocolDriver implements Runnable {
 
@@ -72,55 +61,55 @@ public class ProtocolDriver implements Runnable {
 
 				switch (cmd) {
 				case fmi2DoStep:
-					reply = service.DoStep(DoStepRequest.parseFrom(bytes));
+					reply = service.DoStep(Fmi2DoStepRequest.parseFrom(bytes));
 					break;
 				case fmi2EnterInitializationMode:
-					reply = service.EnterInitializationMode(Empty.parseFrom(bytes));
+					reply = service.EnterInitializationMode(Fmi2Empty.parseFrom(bytes));
 					break;
 				case fmi2ExitInitializationMode:
-					reply = service.ExitInitializationMode(Empty.parseFrom(bytes));
+					reply = service.ExitInitializationMode(Fmi2Empty.parseFrom(bytes));
 					break;
 				case fmi2GetBoolean:
-					reply = service.GetBoolean(GetRequest.parseFrom(bytes));
+					reply = service.GetBoolean(Fmi2GetRequest.parseFrom(bytes));
 					break;
 				case fmi2GetInteger:
-					reply = service.GetInteger(GetRequest.parseFrom(bytes));
+					reply = service.GetInteger(Fmi2GetRequest.parseFrom(bytes));
 					break;
 				case fmi2GetMaxStepSize:
-					reply = service.GetMaxStepSize(Empty.parseFrom(bytes));
+					reply = service.GetMaxStepSize(Fmi2Empty.parseFrom(bytes));
 					break;
 				case fmi2GetReal:
-					reply = service.GetReal(GetRequest.parseFrom(bytes));
+					reply = service.GetReal(Fmi2GetRequest.parseFrom(bytes));
 					break;
 				case fmi2GetString:
-					reply = service.GetString(GetRequest.parseFrom(bytes));
+					reply = service.GetString(Fmi2GetRequest.parseFrom(bytes));
 					break;
 				case fmi2Instantiate:
-					reply = service.Instantiate(InstantiateRequest.parseFrom(bytes));
+					reply = service.Instantiate(Fmi2InstantiateRequest.parseFrom(bytes));
 					break;
 				case fmi2Reset:
-					reply = service.Reset(Empty.parseFrom(bytes));
+					reply = service.Reset(Fmi2Empty.parseFrom(bytes));
 					break;
 				case fmi2SetBoolean:
-					reply = service.SetBoolean(SetBooleanRequest.parseFrom(bytes));
+					reply = service.SetBoolean(Fmi2SetBooleanRequest.parseFrom(bytes));
 					break;
 				case fmi2SetDebugLogging:
-					reply = service.SetDebugLogging(SetDebugLoggingRequest.parseFrom(bytes));
+					reply = service.SetDebugLogging(Fmi2SetDebugLoggingRequest.parseFrom(bytes));
 					break;
 				case fmi2SetInteger:
-					reply = service.SetInteger(SetIntegerRequest.parseFrom(bytes));
+					reply = service.SetInteger(Fmi2SetIntegerRequest.parseFrom(bytes));
 					break;
 				case fmi2SetReal:
-					reply = service.SetReal(SetRealRequest.parseFrom(bytes));
+					reply = service.SetReal(Fmi2SetRealRequest.parseFrom(bytes));
 					break;
 				case fmi2SetString:
-					reply = service.SetString(SetStringRequest.parseFrom(bytes));
+					reply = service.SetString(Fmi2SetStringRequest.parseFrom(bytes));
 					break;
 				case fmi2SetupExperiment:
-					reply = service.SetupExperiment(SetupExperimentRequest.parseFrom(bytes));
+					reply = service.SetupExperiment(Fmi2SetupExperimentRequest.parseFrom(bytes));
 					break;
 				case fmi2Terminate:
-					reply = service.Terminate(Empty.parseFrom(bytes));
+					reply = service.Terminate(Fmi2Empty.parseFrom(bytes));
 					break;
 				default:
 
@@ -133,7 +122,7 @@ public class ProtocolDriver implements Runnable {
 				e.printStackTrace();
 				service.error(e);
 				//This may be the wrong reply but better than nothing
-				reply=Fmi2StatusReply.newBuilder().setStatus(Status.Fatal).build();
+				reply=Fmi2StatusReply.newBuilder().setStatus(Fmi2StatusReply.Status.Fatal).build();
 			}
 
 			if (reply != null)

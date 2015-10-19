@@ -83,7 +83,7 @@ void remoteTestDriver(const char * shmKey)
 		break;
 	case sharedfmimemory::fmi2SetReal:
 	{
-		SetRealRequest* r = new SetRealRequest();
+		Fmi2SetRealRequest* r = new Fmi2SetRealRequest();
 		r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
 
 		for (int i = 0; i < r->valuereference_size(); i++)
@@ -97,7 +97,7 @@ void remoteTestDriver(const char * shmKey)
 		break;
 	case sharedfmimemory::fmi2SetInteger:
 	{
-		SetIntegerRequest* r = new SetIntegerRequest();
+		Fmi2SetIntegerRequest* r = new Fmi2SetIntegerRequest();
 		r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
 
 		for (int i = 0; i < r->valuereference_size(); i++)
@@ -110,7 +110,7 @@ void remoteTestDriver(const char * shmKey)
 		break;
 	case sharedfmimemory::fmi2SetBoolean:
 	{
-		SetBooleanRequest* r = new SetBooleanRequest();
+		Fmi2SetBooleanRequest* r = new Fmi2SetBooleanRequest();
 		r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
 
 		for (int i = 0; i < r->valuereference_size(); i++)
@@ -123,7 +123,7 @@ void remoteTestDriver(const char * shmKey)
 		break;
 	case sharedfmimemory::fmi2SetString:
 	{
-		SetStringRequest* r = new SetStringRequest();
+		Fmi2SetStringRequest* r = new Fmi2SetStringRequest();
 				r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
 
 				for (int i = 0; i < r->valuereference_size(); i++)
@@ -139,10 +139,10 @@ void remoteTestDriver(const char * shmKey)
 		break;
 	case sharedfmimemory::fmi2GetReal:
 	{
-		GetRequest* r = new GetRequest();
+		Fmi2GetRequest* r = new Fmi2GetRequest();
 		r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
 
-		GetRealReply* reply = new GetRealReply();
+		Fmi2GetRealReply* reply = new Fmi2GetRealReply();
 
 		for (int i = 0; i < r->valuereference_size(); i++)
 		{
@@ -157,10 +157,10 @@ void remoteTestDriver(const char * shmKey)
 		break;
 	case sharedfmimemory::fmi2GetBoolean:
 	{
-		GetRequest* r = new GetRequest();
+		Fmi2GetRequest* r = new Fmi2GetRequest();
 		r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
 
-		GetBooleanReply* reply = new GetBooleanReply();
+		Fmi2GetBooleanReply* reply = new Fmi2GetBooleanReply();
 
 		for (int i = 0; i < r->valuereference_size(); i++)
 		{
@@ -175,10 +175,10 @@ void remoteTestDriver(const char * shmKey)
 		break;
 	case sharedfmimemory::fmi2GetInteger:
 	{
-		GetRequest* r = new GetRequest();
+		Fmi2GetRequest* r = new Fmi2GetRequest();
 		r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
 
-		GetIntegerReply* reply = new GetIntegerReply();
+		Fmi2GetIntegerReply* reply = new Fmi2GetIntegerReply();
 
 		for (int i = 0; i < r->valuereference_size(); i++)
 		{
@@ -193,10 +193,10 @@ void remoteTestDriver(const char * shmKey)
 		break;
 	case sharedfmimemory::fmi2GetString:
 	{
-		GetRequest* r = new GetRequest();
+		Fmi2GetRequest* r = new Fmi2GetRequest();
 		r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
 
-		GetStringReply* reply = new GetStringReply();
+		Fmi2GetStringReply* reply = new Fmi2GetStringReply();
 
 		for (int i = 0; i < r->valuereference_size(); i++)
 		{
