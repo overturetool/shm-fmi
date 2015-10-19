@@ -35,6 +35,7 @@ else
 
 echo building linux 64
 make -C builds/linux64/shm
+make -C builds/linux64/shm test
 mkdir -p $out_bin_root/linux64/
 cp builds/linux64/shm/libshmfmu/liblibshmfmu.so $out_bin_root/linux64/libshmfmu.so
 mkdir -p $out_server_lib/Linux-amd64/
