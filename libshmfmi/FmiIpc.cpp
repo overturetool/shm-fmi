@@ -83,7 +83,7 @@ void FmiIpc::Server::close()
 	if (m_hSignal)
 	{
 		SIGNAL_HANDLE handle = m_hSignal;
-		m_hSignal = NULL;
+		m_hSignal = 0;
 		FmiIpc::close(handle);
 	}
 
@@ -91,7 +91,7 @@ void FmiIpc::Server::close()
 	if (m_hAvail)
 	{
 		SIGNAL_HANDLE handle = m_hAvail;
-		m_hAvail = NULL;
+		m_hAvail = 0;
 		FmiIpc::close(handle);
 	}
 
@@ -368,6 +368,7 @@ FmiIpc::Client::Client()
 	m_hSignal = 0;
 	m_hAvail = 0;
 	m_pBuf = NULL;
+	m_name=NULL;
 }
 
 FmiIpc::Client::Client(const char* connectAddr, bool* success)
