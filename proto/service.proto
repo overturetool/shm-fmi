@@ -22,19 +22,32 @@ service Fmu
 
 	rpc fmi2SetDebugLogging(Fmi2SetDebugLoggingRequest) returns(Fmi2StatusReply);
 
+	//gets
 	rpc fmi2GetReal(Fmi2GetRequest) returns(Fmi2GetRealReply);
 	rpc fmi2GetInteger(Fmi2GetRequest) returns(Fmi2GetIntegerReply);
 	rpc fmi2GetBoolean(Fmi2GetRequest) returns(Fmi2GetBooleanReply);
 	rpc fmi2GetString(Fmi2GetRequest) returns(Fmi2GetStringReply);
 
+	//sets
 	rpc fmi2SetReal(Fmi2SetRealRequest) returns(Fmi2StatusReply); 
 	rpc fmi2SetInteger(Fmi2SetIntegerRequest) returns(Fmi2StatusReply); 
 	rpc fmi2SetBoolean(Fmi2SetBooleanRequest) returns(Fmi2StatusReply); 
 	rpc fmi2SetString(Fmi2SetStringRequest) returns(Fmi2StatusReply); 
 
 	rpc fmi2DoStep(Fmi2DoStepRequest) returns(Fmi2StatusReply);
-	//rpc fmi2GetStatus
+
+	//status messages
+	rpc fmi2GetStatus(Fmi2StatusRequest) returns (Fmi2StatusReply);
+	rpc fmi2GetRealStatus(Fmi2StatusRequest) returns (Fmi2RealStatusReply);
+	rpc fmi2GetIntegerStatus(Fmi2StatusRequest) returns (Fmi2IntegerStatusReply);
+	rpc fmi2GetBooleanStatus(Fmi2StatusRequest) returns (Fmi2BooleanStatusReply);
+	rpc fmi2GetStringStatus(Fmi2StatusRequest) returns (Fmi2StringStatusReply);
+
+	//into-cps messages
 	rpc fmi2GetMaxStepSize(Fmi2Empty) returns(Fmi2GetMaxStepSizeReply);
+
+	//logging, a mapping of callback functions
+	rpc fmi2Log(Fmi2LogRequest) returns (Fmi2Empty);
 }
 
 message Fmi2SetupExperimentRequest{
@@ -110,10 +123,35 @@ message Fmi2DoStepRequest{
 }
 
 //
+// instantiate
+//
+message Fmi2InstantiateRequest{
+//fmi2Type fmuType, fmi2String fmuGUID,
+//		fmi2String fmuResourceLocation, const fmi2CallbackFunctions *functions, fmi2Boolean visible,
+//		fmi2Boolean loggingOn
+
+	string instanceName=1;
+	string fmuGuid=2;
+	string fmuResourceLocation=3;
+	bool visible = 4;
+	bool logginOn=5;
+	string callbackShmName=6;
+}
+
+//
 // Other
 //
 message Fmi2Empty{}
 
+message Fmi2LogRequest{
+	//fmi2ComponentEnvironment componentEnvironment
+	string instanceName=1;
+	Fmi2StatusReply status=2;
+	string category=3;
+	string logMessage=4;
+}
+
+//status
 message Fmi2StatusReply{
 	//the status
 	enum Status{
@@ -127,36 +165,36 @@ message Fmi2StatusReply{
 	Status status = 1;
 }
 
-
-//message VersionReply
-//{
-//	string version=1;
-//}
-
-
-
-message Fmi2InstantiateRequest{
-//fmi2Type fmuType, fmi2String fmuGUID,
-//		fmi2String fmuResourceLocation, const fmi2CallbackFunctions *functions, fmi2Boolean visible,
-//		fmi2Boolean loggingOn
-
-string instanceName=1;
-string fmuGuid=2;
-string fmuResourceLocation=3;
-bool visible = 4;
-bool logginOn=5;
-string callbackAddress=6;
-int32 callbackPort=7;
-
+message Fmi2StatusRequest
+{
+		enum FmiStatusKind{
+			fmi2DoStepStatus=0;
+			fmi2PendingStatus=1;
+			fmi2LastSuccessfulTime=2;
+			fmi2Terminated=3;
+		}
+	FmiStatusKind status = 1;
 }
 
-//message InstantiateReply
-//{
-//skip
-//}
+message Fmi2RealStatusReply{
+	double value = 1;
+}
 
+message Fmi2IntegerStatusReply{
+	int32 value = 1;
+}
+
+message Fmi2BooleanStatusReply{
+	bool value = 1;
+}
+
+message Fmi2StringStatusReply{
+	string value = 1;
+}
 
 message Fmi2GetMaxStepSizeReply
 {
 	double maxStepSize =1;
 }
+
+

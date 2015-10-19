@@ -274,3 +274,78 @@ TEST(ExternalClient, fmi2DoStep)
 	t1.join();
 }
 
+TEST(ExternalClient, fmi2GetStatus)
+{
+
+	ExternalClient client(MEM_KEY);
+	std::thread t1(remoteClientThread);
+
+	ExternalClient::fmi2StatusKind s = ExternalClient::fmi2LastSuccessfulTime;
+	ExternalClient::fmi2Status value;
+
+	EXPECT_EQ(ExternalClient::fmi2OK, client.fmi2GetStatus(s, &value));
+	EXPECT_EQ(ExternalClient::fmi2OK, value);
+
+	t1.join();
+}
+
+TEST(ExternalClient, fmi2GetRealStatus)
+{
+
+	ExternalClient client(MEM_KEY);
+	std::thread t1(remoteClientThread);
+
+	ExternalClient::fmi2StatusKind s = ExternalClient::fmi2LastSuccessfulTime;
+	double value;
+
+	EXPECT_EQ(ExternalClient::fmi2OK, client.fmi2GetRealStatus(s, &value));
+	EXPECT_EQ(100.5, value);
+
+	t1.join();
+}
+
+TEST(ExternalClient, fmi2GetIntegerStatus)
+{
+
+	ExternalClient client(MEM_KEY);
+	std::thread t1(remoteClientThread);
+
+	ExternalClient::fmi2StatusKind s = ExternalClient::fmi2LastSuccessfulTime;
+	int value;
+
+	EXPECT_EQ(ExternalClient::fmi2OK, client.fmi2GetIntegerStatus(s, &value));
+	EXPECT_EQ(100, value);
+
+	t1.join();
+}
+
+TEST(ExternalClient, fmi2GetBooleanStatus)
+{
+
+	ExternalClient client(MEM_KEY);
+	std::thread t1(remoteClientThread);
+
+	ExternalClient::fmi2StatusKind s = ExternalClient::fmi2Terminated;
+	int value;
+
+	EXPECT_EQ(ExternalClient::fmi2OK, client.fmi2GetBooleanStatus(s, &value));
+	EXPECT_EQ(true, value);
+
+	t1.join();
+}
+
+TEST(ExternalClient, fmi2GetStringStatus)
+{
+
+	ExternalClient client(MEM_KEY);
+	std::thread t1(remoteClientThread);
+
+	ExternalClient::fmi2StatusKind s = ExternalClient::fmi2DoStepStatus;
+	const char* value;
+
+	EXPECT_EQ(ExternalClient::fmi2OK, client.fmi2GetStringStatus(s, &value));
+	ASSERT_STREQ("waiting", value);
+
+	t1.join();
+}
+

@@ -64,6 +64,23 @@ static fmi2Status convertStatus(ExternalClient::fmi2Status status)
 	return fmi2Error;
 }
 
+static ExternalClient::fmi2StatusKind convertStatusKind(fmi2StatusKind kind)
+{
+	switch (kind)
+	{
+	case fmi2DoStepStatus:
+		return ExternalClient::fmi2StatusKind::fmi2DoStepStatus;
+	case fmi2LastSuccessfulTime:
+		return ExternalClient::fmi2StatusKind::fmi2LastSuccessfulTime;
+	case fmi2PendingStatus:
+		return ExternalClient::fmi2StatusKind::fmi2PendingStatus;
+	case fmi2Terminated:
+		return ExternalClient::fmi2StatusKind::fmi2Terminated;
+
+	}
+
+}
+
 static void log(const fmi2CallbackFunctions *functions,
 		fmi2ComponentEnvironment componentEnvironment, fmi2String instanceName,
 		fmi2Status status, fmi2String category, fmi2String message)
@@ -98,9 +115,9 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 {
 	//printf("c++ fmi2Instantiate");
 
-	std::string port(fmuGUID);// = "TODO";//SSTR(getFreePort());
+	std::string port(fmuGUID); // = "TODO";//SSTR(getFreePort());
 
-	port+=instanceName;
+	port += instanceName;
 
 	//char buffer[10];
 	//snprintf(buffer, 10, "%u", getFreePort());
@@ -111,7 +128,8 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 	std::string configFile = resourceLocationStr + std::string("/config.txt");
 	ConfigFile config(configFile, port);
 
-	JavaLauncher *launcher = new JavaLauncher(resourceLocationStr.c_str(), config.m_args);
+	JavaLauncher *launcher = new JavaLauncher(resourceLocationStr.c_str(),
+			config.m_args);
 
 	if (config.m_skipLaunch)
 	{
@@ -122,10 +140,8 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 		launcher->launch();
 	}
 
-
 	std::string url = port;
-	std::cout <<"--Launching with shared memory key: "<<url<<std::endl;
-
+	std::cout << "--Launching with shared memory key: " << url << std::endl;
 
 	ExternalClient *client = new ExternalClient(url);
 
@@ -139,7 +155,7 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 	}
 
 	//do not return null
-	if(clients.size()==0)
+	if (clients.size() == 0)
 	{
 		clients.push_back(NULL); //Dummy var
 	}
@@ -449,36 +465,71 @@ extern "C" fmi2Status fmi2DoStep(fmi2Component c,
 extern "C" fmi2Status fmi2GetStatus(fmi2Component c, const fmi2StatusKind s,
 		fmi2Status *value)
 {
-	notimplemented(c, "fmi2GetStatus");
-	return fmi2Error;
+	FmuContainer* fmu = getFmuContainer(c);
+
+	if (fmu != NULL)
+	{
+		ExternalClient::fmi2Status status;
+		ExternalClient::fmi2StatusKind kind = convertStatusKind(s);
+		fmi2Status s= convertStatus(fmu->m_client->fmi2GetStatus(kind,&status));
+		*value = convertStatus(status);
+		return s;
+	}
+	return fmi2Fatal;
 }
 
 extern "C" fmi2Status fmi2GetRealStatus(fmi2Component c, const fmi2StatusKind s,
 		fmi2Real *value)
 {
-	notimplemented(c, "fmi2GetRealStatus");
-	return fmi2Error;
+	FmuContainer* fmu = getFmuContainer(c);
+
+	if (fmu != NULL)
+	{
+		return convertStatus(
+				fmu->m_client->fmi2GetRealStatus(convertStatusKind(s), value));
+	}
+	return fmi2Fatal;
 }
 
 extern "C" fmi2Status fmi2GetIntegerStatus(fmi2Component c,
 		const fmi2StatusKind s, fmi2Integer *value)
 {
-	notimplemented(c, "fmi2GetIntegerStatus");
-	return fmi2Error;
+	FmuContainer* fmu = getFmuContainer(c);
+
+	if (fmu != NULL)
+	{
+		return convertStatus(
+				fmu->m_client->fmi2GetIntegerStatus(convertStatusKind(s),
+						value));
+	}
+	return fmi2Fatal;
 }
 
 extern "C" fmi2Status fmi2GetBooleanStatus(fmi2Component c,
 		const fmi2StatusKind s, fmi2Boolean *value)
 {
-	notimplemented(c, "fmi2GetBooleanStatus");
-	return fmi2Error;
+	FmuContainer* fmu = getFmuContainer(c);
+
+	if (fmu != NULL)
+	{
+		return convertStatus(
+				fmu->m_client->fmi2GetBooleanStatus(convertStatusKind(s),
+						value));
+	}
+	return fmi2Fatal;
 }
 
 extern "C" fmi2Status fmi2GetStringStatus(fmi2Component c,
 		const fmi2StatusKind s, fmi2String *value)
 {
-	notimplemented(c, "fmi2GetStringStatus");
-	return fmi2Error;
+	FmuContainer* fmu = getFmuContainer(c);
+
+	if (fmu != NULL)
+	{
+		return convertStatus(
+				fmu->m_client->fmi2GetStringStatus(convertStatusKind(s), value));
+	}
+	return fmi2Fatal;
 }
 
 /* INTO cps specific*/

@@ -33,7 +33,15 @@ typedef enum
 	fmi2SetBoolean = 14,
 	fmi2SetString = 15,
 
-	fmi2GetMaxStepSize = 16
+	fmi2GetMaxStepSize = 16,
+
+	//status
+	fmi2GetStatus=17,
+	fmi2GetRealStatus=18,
+	fmi2GetIntegerStatus=19,
+	fmi2GetBooleanStatus=20,
+	fmi2GetStringStatus=21
+
 } fmi2Command;
 
 #define SharedFmiBufferSize 1000

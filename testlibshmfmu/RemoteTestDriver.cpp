@@ -59,19 +59,20 @@ void remoteTestDriver(const char * shmKey)
 
 	if (globalClient == NULL)
 	{
-		printf("Trying to connect client: ");
+	//	printf("Trying to connect client: ");
 		while(!success || client==NULL)
 		{
-		printf(".");
+	//	printf(".");
 			client = new FmiIpc::Client(shmKey, &success);
 		}
-		printf("\n Connected.\n");
+	//	printf("\n Connected.\n");
 
 	}
 
 
 	SharedFmiMessage* msg = client->getMessage(0);
-	printf("Client got message\n");
+
+//	printf("Client got message\n");
 
 	switch (msg->cmd)
 	{
@@ -89,6 +90,7 @@ void remoteTestDriver(const char * shmKey)
 		//case sharedfmimemory::fmi2SetInteger:
 		//case sharedfmimemory::fmi2SetBoolean:
 		//case sharedfmimemory::fmi2SetString:
+	case sharedfmimemory::fmi2GetStatus:
 	{
 		okReply(msg);
 
@@ -229,6 +231,63 @@ void remoteTestDriver(const char * shmKey)
 		Fmi2GetMaxStepSizeReply* reply = new Fmi2GetMaxStepSizeReply();
 
 		reply->set_maxstepsize(100);
+
+		msg->protoBufMsgSize = reply->ByteSize();
+		reply->SerializeWithCachedSizesToArray(msg->protoBufMsg);
+	}
+		break;
+
+	case sharedfmimemory::fmi2GetRealStatus:
+	{
+		Fmi2StatusRequest* r = new Fmi2StatusRequest();
+		r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
+
+		Fmi2RealStatusReply* reply = new Fmi2RealStatusReply();
+
+		if (r->status() == Fmi2StatusRequest::fmi2LastSuccessfulTime)
+			reply->set_value(100.5);
+
+		msg->protoBufMsgSize = reply->ByteSize();
+		reply->SerializeWithCachedSizesToArray(msg->protoBufMsg);
+	}
+		break;
+	case sharedfmimemory::fmi2GetIntegerStatus:
+	{
+		Fmi2StatusRequest* r = new Fmi2StatusRequest();
+		r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
+
+		Fmi2IntegerStatusReply* reply = new Fmi2IntegerStatusReply();
+
+		if (r->status() == Fmi2StatusRequest::fmi2LastSuccessfulTime)
+			reply->set_value(100);
+
+		msg->protoBufMsgSize = reply->ByteSize();
+		reply->SerializeWithCachedSizesToArray(msg->protoBufMsg);
+	}
+		break;
+	case sharedfmimemory::fmi2GetBooleanStatus:
+	{
+		Fmi2StatusRequest* r = new Fmi2StatusRequest();
+		r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
+
+		Fmi2BooleanStatusReply* reply = new Fmi2BooleanStatusReply();
+
+		if (r->status() == Fmi2StatusRequest::fmi2Terminated)
+			reply->set_value(true);
+
+		msg->protoBufMsgSize = reply->ByteSize();
+		reply->SerializeWithCachedSizesToArray(msg->protoBufMsg);
+	}
+		break;
+	case sharedfmimemory::fmi2GetStringStatus:
+	{
+		Fmi2StatusRequest* r = new Fmi2StatusRequest();
+		r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
+
+		Fmi2StringStatusReply* reply = new Fmi2StringStatusReply();
+
+		if (r->status() == Fmi2StatusRequest::fmi2DoStepStatus)
+			reply->set_value("waiting");
 
 		msg->protoBufMsgSize = reply->ByteSize();
 		reply->SerializeWithCachedSizesToArray(msg->protoBufMsg);
