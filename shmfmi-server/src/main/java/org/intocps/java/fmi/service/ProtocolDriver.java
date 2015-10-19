@@ -111,6 +111,25 @@ public class ProtocolDriver implements Runnable {
 				case fmi2Terminate:
 					reply = service.Terminate(Fmi2Empty.parseFrom(bytes));
 					break;
+					
+					//status
+				case fmi2GetStatus:
+					reply = service.GetStatus(Fmi2StatusRequest.parseFrom(bytes));
+					break;
+				case fmi2GetRealStatus:
+					reply = service.GetRealStatus(Fmi2StatusRequest.parseFrom(bytes));
+					break;
+				case fmi2GetIntegerStatus:
+					reply = service.GetIntegerStatus(Fmi2StatusRequest.parseFrom(bytes));
+					break;
+				case fmi2GetBooleanStatus:
+					reply = service.GetBooleanStatus(Fmi2StatusRequest.parseFrom(bytes));
+					break;
+				case fmi2GetStringStatus:
+					reply = service.GetStringStatus(Fmi2StatusRequest.parseFrom(bytes));
+					break;
+					
+					
 				default:
 
 					break;

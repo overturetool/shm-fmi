@@ -7,8 +7,11 @@ import org.intocps.java.fmi.service.IServiceProtocol;
 import org.intocps.java.fmi.service.ProtocolDriver;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.lausdahl.examples.Service.Fmi2BooleanStatusReply;
 import com.lausdahl.examples.Service.Fmi2DoStepRequest;
 import com.lausdahl.examples.Service.Fmi2Empty;
+import com.lausdahl.examples.Service.Fmi2IntegerStatusReply;
+import com.lausdahl.examples.Service.Fmi2RealStatusReply;
 import com.lausdahl.examples.Service.Fmi2StatusReply;
 import com.lausdahl.examples.Service.Fmi2StatusReply.Status;
 import com.lausdahl.examples.Service.Fmi2GetBooleanReply;
@@ -25,6 +28,8 @@ import com.lausdahl.examples.Service.Fmi2SetIntegerRequest;
 import com.lausdahl.examples.Service.Fmi2SetRealRequest;
 import com.lausdahl.examples.Service.Fmi2SetStringRequest;
 import com.lausdahl.examples.Service.Fmi2SetupExperimentRequest;
+import com.lausdahl.examples.Service.Fmi2StatusRequest;
+import com.lausdahl.examples.Service.Fmi2StringStatusReply;
 
 public class TestResponder implements IServiceProtocol{
 	
@@ -228,6 +233,36 @@ return ok();
 	@Override
 	public void error(InvalidProtocolBufferException e) {
 		e.printStackTrace();
+	}
+
+	@Override
+	public Fmi2StatusReply GetStatus(Fmi2StatusRequest request) {
+		return ok();
+	}
+
+	@Override
+	public Fmi2RealStatusReply GetRealStatus(Fmi2StatusRequest request) {
+		return Fmi2RealStatusReply.newBuilder().setValue(100.5).build();
+	}
+
+	@Override
+	public Fmi2IntegerStatusReply GetIntegerStatus(Fmi2StatusRequest request) {
+		return Fmi2IntegerStatusReply.newBuilder().setValue(100).build();
+	}
+
+	@Override
+	public Fmi2BooleanStatusReply GetBooleanStatus(Fmi2StatusRequest request) {
+		if(request.getStatus()==Fmi2StatusRequest.FmiStatusKind.fmi2Terminated)
+		return Fmi2BooleanStatusReply.newBuilder().setValue(true).build();
+		else return Fmi2BooleanStatusReply.newBuilder().setValue(false).build();
+			
+	}
+
+	@Override
+	public Fmi2StringStatusReply GetStringStatus(Fmi2StatusRequest request) {
+		if(request.getStatus()==Fmi2StatusRequest.FmiStatusKind.fmi2DoStepStatus)
+			return Fmi2StringStatusReply.newBuilder().setValue("waiting").build();
+			else return Fmi2StringStatusReply.newBuilder().setValue("nothing").build();
 	}
 
 }

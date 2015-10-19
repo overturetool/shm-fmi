@@ -41,6 +41,12 @@ public interface IServiceProtocol {
 	Fmi2StatusReply SetString(Fmi2SetStringRequest parseFrom);
 
 	Fmi2StatusReply SetupExperiment(Fmi2SetupExperimentRequest parseFrom);
+	
+	Fmi2StatusReply GetStatus(Fmi2StatusRequest request);
+	Fmi2RealStatusReply GetRealStatus(Fmi2StatusRequest request);
+	Fmi2IntegerStatusReply GetIntegerStatus(Fmi2StatusRequest request);
+	Fmi2BooleanStatusReply GetBooleanStatus(Fmi2StatusRequest request);
+	Fmi2StringStatusReply GetStringStatus(Fmi2StatusRequest request);
 
 	void error(InvalidProtocolBufferException e);
 
