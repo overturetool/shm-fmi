@@ -23,7 +23,7 @@ const char* FmiIpc::SIGNAL_AVALIABLE_NAME = "sigAvail";
 const char* FmiIpc::SIGNAL_NAME = "sig";
 #endif
 
-#define DEBUG
+//#define DEBUG
 
 #if defined( DEBUG )
  #define DEBUG_PRINTF(x) printf x
@@ -295,11 +295,11 @@ sb.st_size*/
 		printf("server_create: failed: %01d\n", __LINE__);
 		return;
 	}
-#elif   __linux
+//#elif   __linux
 //POSIX
-	sem_init(&m_pBuf->semSignal, 1, 0);
-	sem_init(&m_pBuf->semAvail, 1, 0);
-#elif __APPLE__
+//	sem_init(&m_pBuf->semSignal, 1, 0);
+//	sem_init(&m_pBuf->semAvail, 1, 0);
+#elif __APPLE__ || __linux
 
 	std::string* signalName = getMappedName(SIGNAL_NAME, name);
 	sem_unlink(signalName->c_str());
@@ -351,7 +351,7 @@ SharedFmiMessage* FmiIpc::Server::send(SharedFmiMessage* message,
 		{
 			return NULL;
 		}
-#elif __APPLE__
+#elif __APPLE__ || __linux
 //		printf("Server signaled avail\n");
 		sem_post(this->m_hAvail);
 
@@ -360,11 +360,11 @@ SharedFmiMessage* FmiIpc::Server::send(SharedFmiMessage* message,
 //		printf("Server waiting signal\n");
 		sem_wait(this->m_hSignal);
 //		printf("Server done waiting signal\n");
-#elif  __linux
+//#elif  __linux
 //POSIX
-	sem_post(&this->m_pBuf->semAvail);
-	DEBUG_PRINTF(("Server signaled\n"));
-	sem_wait(&this->m_pBuf->semSignal);
+//	sem_post(&this->m_pBuf->semAvail);
+//	DEBUG_PRINTF(("Server signaled\n"));
+//	sem_wait(&this->m_pBuf->semSignal);
 #endif
 
 
@@ -479,7 +479,7 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 				*success = false;
 				return;
 			}
-#elif __APPLE__
+#elif __APPLE__ || __linux__
 
 			std::string* signalName = getMappedName(SIGNAL_NAME, connectAddr);
 			m_hSignal =sem_open(signalName->c_str(), 0);
@@ -499,7 +499,7 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 			}
 			delete signalAvailName;
 
-#elif __linux
+//#elif __linux
 //real POSIX
 
 
@@ -552,13 +552,13 @@ bool FmiIpc::Client::waitAvailable(DWORD dwTimeout)
 #ifdef _WIN32
 	if (WaitForSingleObject(m_hAvail, dwTimeout) != WAIT_OBJECT_0)
 			return false;
-#elif __APPLE__
+#elif __APPLE__ || __linux__
 //	printf("Client waiting\n");
 	sem_wait(this->m_hAvail);
 //	printf("Client done waiting\n");
-#elif __linux
+//#elif __linux
 //POSIX
-	sem_wait(&this->m_pBuf->semAvail);
+//	sem_wait(&this->m_pBuf->semAvail);
 #endif
 
 
@@ -587,13 +587,13 @@ void FmiIpc::Client::sendReply(SharedFmiMessage* reply)
 
 #ifdef _WIN32
 	SetEvent(this->m_hSignal);
-#elif __APPLE__
+#elif __APPLE__ || __linux__
 
 	sem_post(this->m_hSignal);
 
-#elif __linux
+//#elif __linux
 //POSIX
-	sem_post(&this->m_pBuf->semSignal);
+//	sem_post(&this->m_pBuf->semSignal);
 #endif
 	DEBUG_PRINTF(("Client signaled\n"));
 }

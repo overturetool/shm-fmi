@@ -12,6 +12,7 @@
 #include <windows.h>
 #include <conio.h>
 #include <tchar.h>
+typedef HANDLE SIGNAL_HANDLE;
 #elif __APPLE__ ||  __linux
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,13 +36,14 @@ typedef bool BOOL;
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/stat.h>
+typedef sem_t* SIGNAL_HANDLE;
 #endif
 
-#ifdef __APPLE__
-typedef sem_t* SIGNAL_HANDLE;
-#else
-typedef HANDLE SIGNAL_HANDLE;
-#endif
+//#ifdef __APPLE__
+//typedef sem_t* SIGNAL_HANDLE;
+//#else
+//typedef HANDLE SIGNAL_HANDLE;
+//#endif
 
 
 #include <stdio.h>
@@ -79,7 +81,10 @@ public:
 	static void close(SIGNAL_HANDLE handle){
 		sem_close(handle);
 	}
-
+#elif __linux
+	static void close(SIGNAL_HANDLE handle){
+			sem_close(handle);
+		}
 #endif
 
 	static void unmap(void* ptr, std::string* name)
