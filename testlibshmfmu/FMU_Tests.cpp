@@ -37,6 +37,10 @@ extern "C"
 #include "FMU_TestsFixture.h"
 
 
+//
+// Define this REMOTE_TEST_DRIVER to use the remote java test driver
+//
+
 
 static FMU s_fmu;
 static bool s_libLoaded = false;
@@ -51,8 +55,11 @@ void remoteClientThread()
 	std::string port(GUID);
 
 	port += std::string(INSTANCE_NAME);
+
+#ifndef REMOTE_TEST_DRIVER
 	while (true)
 		remoteTestDriver("shmFmiTest");
+#endif
 }
 
 static FMU setup()
