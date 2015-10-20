@@ -113,15 +113,9 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 		const fmi2CallbackFunctions *functions, fmi2Boolean visible,
 		fmi2Boolean loggingOn)
 {
-	//printf("c++ fmi2Instantiate");
-
-	std::string port(fmuGUID); // = "TODO";//SSTR(getFreePort());
+	std::string port(fmuGUID);
 
 	port += instanceName;
-
-	//char buffer[10];
-	//snprintf(buffer, 10, "%u", getFreePort());
-//	std::string port(buffer);
 
 	std::string resourceLocationStr(fmuResourceLocation);
 
@@ -135,9 +129,6 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 	{
 		printf("FMU Debug skipping launch of external FMU\n");
 		port = "shmFmiTest";
-	} else
-	{
-		launcher->launch();
 	}
 
 	std::string url = port;
@@ -161,6 +152,11 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 	}
 
 	clients.push_back(container);
+
+	if (!config.m_skipLaunch)
+	{
+		launcher->launch();
+	}
 
 	client->fmi2Instantiate(instanceName, fmuGUID, fmuResourceLocation, "",
 			8900, visible, loggingOn);
@@ -471,7 +467,8 @@ extern "C" fmi2Status fmi2GetStatus(fmi2Component c, const fmi2StatusKind s,
 	{
 		ExternalClient::fmi2Status status;
 		ExternalClient::fmi2StatusKind kind = convertStatusKind(s);
-		fmi2Status s= convertStatus(fmu->m_client->fmi2GetStatus(kind,&status));
+		fmi2Status s = convertStatus(
+				fmu->m_client->fmi2GetStatus(kind, &status));
 		*value = convertStatus(status);
 		return s;
 	}
