@@ -23,6 +23,13 @@ const char* FmiIpc::SIGNAL_AVALIABLE_NAME = "sigAvail";
 const char* FmiIpc::SIGNAL_NAME = "sig";
 #endif
 
+#define DEBUG
+
+#if defined( DEBUG )
+ #define DEBUG_PRINTF(x) printf x
+#else
+  #define DEBUG_PRINTF(x)
+#endif
 
 
 FmiIpc::FmiIpc()
@@ -330,7 +337,7 @@ sb.st_size*/
 SharedFmiMessage* FmiIpc::Server::send(SharedFmiMessage* message,
 		DWORD dwTimeout)
 {
-//	printf("Server write msg\n");
+	DEBUG_PRINTF(("Server write msg\n"));
 	this->m_pBuf->message = *message;
 
 
@@ -338,6 +345,7 @@ SharedFmiMessage* FmiIpc::Server::send(SharedFmiMessage* message,
 
 #ifdef _WIN32
 	SetEvent(this->m_hAvail);
+	DEBUG_PRINTF(("Server signaled\n"));
 
 		if (WaitForSingleObject(this->m_hSignal, dwTimeout) != WAIT_OBJECT_0)
 		{
@@ -347,17 +355,20 @@ SharedFmiMessage* FmiIpc::Server::send(SharedFmiMessage* message,
 //		printf("Server signaled avail\n");
 		sem_post(this->m_hAvail);
 
+		DEBUG_PRINTF(("Server signaled\n"));
+
 //		printf("Server waiting signal\n");
 		sem_wait(this->m_hSignal);
 //		printf("Server done waiting signal\n");
 #elif  __linux
 //POSIX
 	sem_post(&this->m_pBuf->semAvail);
+	DEBUG_PRINTF(("Server signaled\n"));
 	sem_wait(&this->m_pBuf->semSignal);
 #endif
 
 
-//	printf("Server ret msg\n");
+	DEBUG_PRINTF(("Server ret msg\n"));
 	return &this->m_pBuf->message;
 }
 
@@ -491,6 +502,8 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 #elif __linux
 //real POSIX
 
+
+
 #endif
 
 
@@ -498,6 +511,7 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 
 
 	*success = true;
+	DEBUG_PRINTF(("Client connected to shared memory %s, status %d\n",this->m_name->c_str(),*success));
 }
 
 FmiIpc::Client::~Client()
@@ -558,7 +572,7 @@ SharedFmiMessage* FmiIpc::Client::getMessage(DWORD dwTimeout)
 
 	if (waitAvailable(dwTimeout))
 	{
-//		printf("Client ret msg\n");
+		DEBUG_PRINTF(("Client ret msg\n"));
 
 		return &this->m_pBuf->message;
 	}
@@ -566,7 +580,7 @@ SharedFmiMessage* FmiIpc::Client::getMessage(DWORD dwTimeout)
 }
 void FmiIpc::Client::sendReply(SharedFmiMessage* reply)
 {
-//	printf("Client write msg\n");
+	DEBUG_PRINTF(("Client write msg\n"));
 	//memcpy(&this->m_pBuf->message, reply, sizeof(SharedFmiMessage));
 	this->m_pBuf->message = *reply;
 
@@ -576,9 +590,10 @@ void FmiIpc::Client::sendReply(SharedFmiMessage* reply)
 #elif __APPLE__
 
 	sem_post(this->m_hSignal);
-//	printf("Client signaled\n");
+
 #elif __linux
 //POSIX
 	sem_post(&this->m_pBuf->semSignal);
 #endif
+	DEBUG_PRINTF(("Client signaled\n"));
 }
