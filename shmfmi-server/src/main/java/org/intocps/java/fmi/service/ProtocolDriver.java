@@ -52,6 +52,9 @@ public class ProtocolDriver implements Runnable {
 			byte type = typeArr[0];
 
 			Commands cmd = Commands.lookup(type);
+			
+			logger.debug("Recieved command: {}",cmd);
+			
 			if (cmd == null)
 				service.error("Unknown type");
 
@@ -140,14 +143,17 @@ public class ProtocolDriver implements Runnable {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				service.error(e);
+				logger.error("Decode error, returning FATAL message no matter what return type was expectede", e);
 				//This may be the wrong reply but better than nothing
 				reply=Fmi2StatusReply.newBuilder().setStatus(Fmi2StatusReply.Status.Fatal).build();
 			}
 
-			if (reply != null)
+			if (reply != null){
+				logger.debug("Sending message type {}",type);
 				this.mem.send(type, reply.toByteArray());
-			else {
+			}else {
 				service.error("deadlocking");
+				logger.error("deadlocked");
 			}
 		}
 
