@@ -20,7 +20,7 @@ def graph(filename,xMax):
 
 	converter = lambda x : 1 if x.strip() == "true" else 0
 
-	time , step , level,valve   = np.loadtxt(filename, delimiter=',', unpack=True, skiprows=1,converters={3:converter})
+	time , step , valve,level   = np.loadtxt(filename, delimiter=',', unpack=True, skiprows=1,converters={2:converter})
 	
 	fig = plt.figure()
 
