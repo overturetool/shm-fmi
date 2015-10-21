@@ -36,7 +36,7 @@ add_library(${PROJECT_NAME} SHARED fmu.cpp FmuContainer.cpp JavaLauncher.cpp Con
 target_link_libraries(${PROJECT_NAME} libshmfmi)
 target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
 
-find_library(PTHREAD_LIBRARY NAMES libpthread.a)
+find_library(PTHREAD_LIBRARY NAMES libpthread.a libpthread.dylib)
 target_link_libraries(${PROJECT_NAME} ${PTHREAD_LIBRARY})
 
 
