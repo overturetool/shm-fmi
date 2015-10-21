@@ -10,6 +10,7 @@
 	<groupId>org.intocps.java.fmi</groupId>
 	<artifactId>fmi-shm-server</artifactId>
 	<name>Java SHM-FMI server</name>
+	<version>0.0.1-SNAPSHOT</version>
 	<dependencies>
 
 		<dependency>
@@ -102,81 +103,7 @@
 
 
 
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.8</version>
-				<executions>
-					<execution>
-						<phase>generate-sources</phase>
-						<id>protoc</id>
-						<configuration>
-							<tasks>
-								<exec dir="${project.basedir}" executable="mkdir"
-											failonerror="true">
-									<arg value="-p" />
-									<arg value="target/generated-protoc/" />
-								</exec>
-								<exec dir="${project.basedir}" executable="protoc"
-											failonerror="true">
-
-									<arg value="--java_out=target/generated-protoc/" />
-									<arg value="--proto_path=../proto" />
-									<arg value="../proto/service.proto" />
-								</exec>
-								<exec dir="${project.basedir}" executable="mkdir"
-											failonerror="true">
-									<arg value="-p" />
-									<arg value="target/classes/lib/Windows-x86" />
-								</exec>
-									<exec dir="${project.basedir}" executable="mkdir"
-											failonerror="true">
-									<arg value="-p" />
-									<arg value="target/classes/lib/Mac-x86_64" />
-								</exec>
-								
-							</tasks>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-
-					<execution>
-						<id>javah</id>
-						<phase>process-classes</phase>
-						<configuration>
-							<tasks>
-								
-								<exec dir="${project.basedir}/src/main/native" executable="javah"
-											failonerror="true">
-
-
-									<arg value="-classpath"/>
-									<arg value="../../../target/classes" />
-									<arg value="org.intocps.java.fmi.shm.SharedMemory" />
-
-									<redirector outputproperty="redirector.out"
-                              errorproperty="redirector.err">
-                    <inputfilterchain>
-                      <replacestring from="before" to="after" />
-                    </inputfilterchain>
-                    <outputmapper type="merge" to="target/redirector-mac.out" />
-                    <errormapper type="merge" to="target/redirector-mac.err" />
-                  </redirector>
-									
-								</exec>
-								
-								
-								
-							</tasks>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-					
-				</executions>
-			</plugin>
+			
 
 			
 
@@ -237,8 +164,124 @@
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
+
+				<plugin>
+<groupId>org.apache.maven.plugins</groupId>
+<artifactId>maven-deploy-plugin</artifactId>
+<version>2.8.1</version>
+</plugin>
+
 			</plugins>
 		</pluginManagement>
 	</build>
+
+	<distributionManagement>
+    <repository>
+      <id>overture.au.dk</id>
+      <name>overture.au.dk-releases</name>
+      <url>http://overture.au.dk/artifactory/into-cps</url>
+    </repository>
+    <snapshotRepository>
+      <id>overture.au.dk</id>
+      <name>overture.au.dk-snapshots</name>
+      <url>http://overture.au.dk/artifactory/into-cps</url>
+    </snapshotRepository>
+	</distributionManagement>
+
+
+	<profiles>
+
+		<profile>
+			<id>protoc</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+								
+			</activation>
+
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.8</version>
+						<executions>
+							<execution>
+								<phase>generate-sources</phase>
+								<id>protoc</id>
+								<configuration>
+									<tasks>
+										<exec dir="${project.basedir}" executable="mkdir"
+													failonerror="true">
+											<arg value="-p" />
+											<arg value="target/generated-protoc/" />
+										</exec>
+										<exec dir="${project.basedir}" executable="protoc"
+													failonerror="true">
+
+											<arg value="--java_out=target/generated-protoc/" />
+											<arg value="--proto_path=../proto" />
+											<arg value="../proto/service.proto" />
+										</exec>
+										<exec dir="${project.basedir}" executable="mkdir"
+													failonerror="true">
+											<arg value="-p" />
+											<arg value="target/classes/lib/Windows-x86" />
+										</exec>
+										<exec dir="${project.basedir}" executable="mkdir"
+													failonerror="true">
+											<arg value="-p" />
+											<arg value="target/classes/lib/Mac-x86_64" />
+										</exec>
+										
+									</tasks>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+
+							<execution>
+								<id>javah</id>
+								<phase>process-classes</phase>
+								<configuration>
+									<tasks>
+										
+										<exec dir="${project.basedir}/src/main/native" executable="javah"
+													failonerror="true">
+
+
+											<arg value="-classpath"/>
+											<arg value="../../../target/classes" />
+											<arg value="org.intocps.java.fmi.shm.SharedMemory" />
+
+											<redirector outputproperty="redirector.out"
+																	errorproperty="redirector.err">
+												<inputfilterchain>
+													<replacestring from="before" to="after" />
+												</inputfilterchain>
+												<outputmapper type="merge" to="target/redirector-mac.out" />
+												<errormapper type="merge" to="target/redirector-mac.err" />
+											</redirector>
+											
+										</exec>
+										
+										
+										
+									</tasks>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+							
+						</executions>
+					</plugin>
+				</plugins>
+
+			</build>
+		</profile>
+	</profiles>
+
+	
+
 
 </project>

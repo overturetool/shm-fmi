@@ -9,6 +9,8 @@
 
 ConfigFile::ConfigFile(std::string configFile,std::string port)
 {
+	this->m_skipLaunch = true;
+
 	std::ifstream file(configFile);
 	int index = 0;
 
@@ -21,7 +23,7 @@ ConfigFile::ConfigFile(std::string configFile,std::string port)
 
 		if (index == 0)
 		{
-			this->m_skipLaunch = str.compare("true") == 0;
+			this->m_skipLaunch =!( str.compare("false") == 0);
 		} else if (this->m_skipLaunch && index == 1)
 		{
 			this->m_port = str;
@@ -47,7 +49,7 @@ ConfigFile::ConfigFile(std::string configFile,std::string port)
 			char *cp= this->m_args[i];
 			char c=cp[j];
 			if(c=='\r')
-				cp[j]=NULL;
+				cp[j]=0;
 		}
 
 

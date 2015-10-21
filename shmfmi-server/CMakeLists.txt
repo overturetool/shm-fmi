@@ -9,7 +9,7 @@ find_package(Protobuf REQUIRED)
 include_directories(${PROTOBUF_INCLUDE_DIRS})
 
 
-PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ../proto/service.proto)
+
 
 
 # protobuf outputs to current dir
@@ -27,42 +27,64 @@ else()
 endif()
 
 
-#set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-pthread")
+include_directories($ENV{JAVA_HOME}/include)
 
 if (WIN32)
-		#windows	
-		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libstdc++ -static-libgcc -Wl,-Bstatic -lstdc++  -Wl,-Bdynamic")
-
- set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--add-stdcall-alias")
-
-#message(FATAL_ERROR "JAVAHOME=$ENV{JAVA_HOME}")
-#include_directories(src/jni/java-win32/include src/jni/java-win32/include/win32)
-include_directories($ENV{JAVA_HOME}/include $ENV{JAVA_HOME}/include/win32)
-	endif() 
+	#windows	
+	#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+ 	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--add-stdcall-alias")
+	include_directories($ENV{JAVA_HOME}/include/win32)
+endif() 
 
 if (UNIX)
-#message(FATAL_ERROR "JAVAHOME=$ENV{JAVA_HOME}")
-include_directories($ENV{JAVA_HOME}/include)
-#      set(CMAKE_CXX_FLAGS ${CMAKE_CSS_FLAGS} "-fPIC")
 
-if(APPLE)
-include_directories($ENV{JAVA_HOME}/include/darwin)
-else()
-include_directories($ENV{JAVA_HOME}/include/linux)
+	if(APPLE)
+		include_directories($ENV{JAVA_HOME}/include/darwin)
+	else()
+		include_directories($ENV{JAVA_HOME}/include/linux)
+	endif()
 endif()
-
-endif()
-
-
-
 
 include_directories(${libshmfmi_SOURCE_DIR})
 add_library(sharedmemory SHARED src/main/native/sharedmemory.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 
 target_link_libraries(sharedmemory libshmfmi)
-target_link_libraries(sharedmemory ${PROTOBUF_LIBRARIES})
+
+if(APPLE)
+	target_link_libraries(sharedmemory /usr/local/lib/libprotobuf.a  ${PROTOBUF_LIBRARIES})
+else()
+	target_link_libraries(sharedmemory ${PROTOBUF_LIBRARIES})
+endif()
+
+
+
+foreach(LETTER ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
+	
+if(EXISTS "${LETTER}/libstdc++.a")
+#   message (STATUS "${LETTER}")
+	set(STDCPP_LIBRARY "${LETTER}/libstdc++.a")
+else()
+#  message (STATUS "${LETTER} ---- not these")
+endif()
+endforeach()
+
+message(STATUS "Static linking with libstdc++.a in ${STDCPP_LIBRARY}")
+target_link_libraries(sharedmemory ${STDCPP_LIBRARY})
 
 find_library(PTHREAD_LIBRARY NAMES libpthread.a)
 target_link_libraries(sharedmemory ${PTHREAD_LIBRARY})
 
+if (UNIX)
+	if(APPLE)
+
+	else()
+ 		target_link_libraries(sharedmemory rt)
+		target_link_libraries(sharedmemory dl)
+	endif()
+endif()
+
+if (WIN32)
+	#windows	
+	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+endif() 
 

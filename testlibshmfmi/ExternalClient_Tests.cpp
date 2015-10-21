@@ -17,13 +17,13 @@ void clientThread()
 {
 	bool success;
 	FmiIpc::Client client(MEM_KEY, &success);
-	if(!success)
+	if (!success)
 	{
-	//recurse until connected
-clientThread();
-return ;
+		//recurse until connected
+		clientThread();
+		return;
 	}
-SharedFmiMessage* msg = client.getMessage(0);
+	SharedFmiMessage* msg = client.getMessage(0);
 	printf("Client got message\n");
 	msg->cmd = fmi2DoStep;
 
@@ -87,7 +87,8 @@ TEST(ExternalClient, fmi2Instantiate)
 TEST(ExternalClient, fmi2EnterInitializationMode)
 {
 
-	ExternalClient client(MEM_KEY);std::thread t1(remoteClientThread);
+	ExternalClient client(MEM_KEY);
+	std::thread t1(remoteClientThread);
 	EXPECT_EQ(ExternalClient::fmi2OK, client.fmi2EnterInitializationMode());
 	t1.join();
 }
@@ -95,7 +96,8 @@ TEST(ExternalClient, fmi2EnterInitializationMode)
 TEST(ExternalClient, fmi2ExitInitializationMode)
 {
 
-	ExternalClient client(MEM_KEY);std::thread t1(remoteClientThread);
+	ExternalClient client(MEM_KEY);
+	std::thread t1(remoteClientThread);
 	EXPECT_EQ(ExternalClient::fmi2OK, client.fmi2ExitInitializationMode());
 	t1.join();
 }
@@ -103,7 +105,8 @@ TEST(ExternalClient, fmi2ExitInitializationMode)
 TEST(ExternalClient, fmi2SetupExperiment)
 {
 
-	ExternalClient client(MEM_KEY);std::thread t1(remoteClientThread);
+	ExternalClient client(MEM_KEY);
+	std::thread t1(remoteClientThread);
 
 	bool toleranceDefined = true;
 	double tolerance = 0.1;
@@ -120,7 +123,8 @@ TEST(ExternalClient, fmi2SetupExperiment)
 TEST(ExternalClient, fmi2Terminate)
 {
 
-	ExternalClient client(MEM_KEY);std::thread t1(remoteClientThread);
+	ExternalClient client(MEM_KEY);
+	std::thread t1(remoteClientThread);
 
 	EXPECT_EQ(ExternalClient::fmi2OK, client.fmi2Terminate());
 	t1.join();
@@ -129,7 +133,8 @@ TEST(ExternalClient, fmi2Terminate)
 TEST(ExternalClient, fmi2SetDebugLogging)
 {
 
-	ExternalClient client(MEM_KEY);std::thread t1(remoteClientThread);
+	ExternalClient client(MEM_KEY);
+	std::thread t1(remoteClientThread);
 
 	int loggingOn = true;
 	size_t nCategories = 3;
@@ -145,7 +150,7 @@ TEST(ExternalClient, SetGetReals)
 {
 
 	ExternalClient client(MEM_KEY);
-std::thread t1(remoteClientThread);
+	std::thread t1(remoteClientThread);
 	unsigned int vr[] =
 	{ 1, 2, 3 };
 	double vals[] =
@@ -170,7 +175,8 @@ std::thread t1(remoteClientThread);
 TEST(ExternalClient, SetGetBools)
 {
 
-	ExternalClient client(MEM_KEY);std::thread t1(remoteClientThread);
+	ExternalClient client(MEM_KEY);
+	std::thread t1(remoteClientThread);
 
 	unsigned int vr[] =
 	{ 1, 2, 3 };
@@ -195,7 +201,8 @@ TEST(ExternalClient, SetGetBools)
 TEST(ExternalClient, SetGetIntegers)
 {
 
-	ExternalClient client(MEM_KEY);std::thread t1(remoteClientThread);
+	ExternalClient client(MEM_KEY);
+	std::thread t1(remoteClientThread);
 
 	unsigned int vr[] =
 	{ 1, 2, 3 };
@@ -220,7 +227,8 @@ TEST(ExternalClient, SetGetIntegers)
 TEST(ExternalClient, SetGetStrings)
 {
 
-	ExternalClient client(MEM_KEY);std::thread t1(remoteClientThread);
+	ExternalClient client(MEM_KEY);
+	std::thread t1(remoteClientThread);
 
 	unsigned int vr[] =
 	{ 1, 2, 3 };
@@ -253,7 +261,8 @@ TEST(ExternalClient, SetGetStrings)
 TEST(ExternalClient, fmi2DoStep)
 {
 
-	ExternalClient client(MEM_KEY);std::thread t1(remoteClientThread);
+	ExternalClient client(MEM_KEY);
+	std::thread t1(remoteClientThread);
 
 	double currentCommunicationPoint = 0.0;
 	double communicationStepSize = 0.1;
@@ -262,6 +271,81 @@ TEST(ExternalClient, fmi2DoStep)
 	EXPECT_EQ(ExternalClient::fmi2OK,
 			client.fmi2DoStep(currentCommunicationPoint, communicationStepSize,
 					noSetFMUStatePriorToCurrentPoint));
+	t1.join();
+}
+
+TEST(ExternalClient, fmi2GetStatus)
+{
+
+	ExternalClient client(MEM_KEY);
+	std::thread t1(remoteClientThread);
+
+	ExternalClient::fmi2StatusKind s = ExternalClient::fmi2LastSuccessfulTime;
+	ExternalClient::fmi2Status value;
+
+	EXPECT_EQ(ExternalClient::fmi2OK, client.fmi2GetStatus(s, &value));
+	EXPECT_EQ(ExternalClient::fmi2OK, value);
+
+	t1.join();
+}
+
+TEST(ExternalClient, fmi2GetRealStatus)
+{
+
+	ExternalClient client(MEM_KEY);
+	std::thread t1(remoteClientThread);
+
+	ExternalClient::fmi2StatusKind s = ExternalClient::fmi2LastSuccessfulTime;
+	double value;
+
+	EXPECT_EQ(ExternalClient::fmi2OK, client.fmi2GetRealStatus(s, &value));
+	EXPECT_EQ(100.5, value);
+
+	t1.join();
+}
+
+TEST(ExternalClient, fmi2GetIntegerStatus)
+{
+
+	ExternalClient client(MEM_KEY);
+	std::thread t1(remoteClientThread);
+
+	ExternalClient::fmi2StatusKind s = ExternalClient::fmi2LastSuccessfulTime;
+	int value;
+
+	EXPECT_EQ(ExternalClient::fmi2OK, client.fmi2GetIntegerStatus(s, &value));
+	EXPECT_EQ(100, value);
+
+	t1.join();
+}
+
+TEST(ExternalClient, fmi2GetBooleanStatus)
+{
+
+	ExternalClient client(MEM_KEY);
+	std::thread t1(remoteClientThread);
+
+	ExternalClient::fmi2StatusKind s = ExternalClient::fmi2Terminated;
+	int value;
+
+	EXPECT_EQ(ExternalClient::fmi2OK, client.fmi2GetBooleanStatus(s, &value));
+	EXPECT_EQ(true, value);
+
+	t1.join();
+}
+
+TEST(ExternalClient, fmi2GetStringStatus)
+{
+
+	ExternalClient client(MEM_KEY);
+	std::thread t1(remoteClientThread);
+
+	ExternalClient::fmi2StatusKind s = ExternalClient::fmi2DoStepStatus;
+	const char* value;
+
+	EXPECT_EQ(ExternalClient::fmi2OK, client.fmi2GetStringStatus(s, &value));
+	ASSERT_STREQ("waiting", value);
+
 	t1.join();
 }
 

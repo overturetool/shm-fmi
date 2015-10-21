@@ -37,6 +37,10 @@ extern "C"
 #include "FMU_TestsFixture.h"
 
 
+//
+// Define this REMOTE_TEST_DRIVER to use the remote java test driver
+//
+
 
 static FMU s_fmu;
 static bool s_libLoaded = false;
@@ -51,8 +55,11 @@ void remoteClientThread()
 	std::string port(GUID);
 
 	port += std::string(INSTANCE_NAME);
+
+#ifndef REMOTE_TEST_DRIVER
 	while (true)
 		remoteTestDriver("shmFmiTest");
+#endif
 }
 
 static FMU setup()
@@ -251,13 +258,13 @@ TEST(FMU, setRealInputDerivatives)
 {
 	FMU fmu = setup();
 	fmi2Component comp = initializing(fmu);
-	printf("before setRealInputDerivatives\n");
+	//printf("before setRealInputDerivatives\n");
 	const fmi2ValueReference vr[1] =
 	{ stringId };
 	fmi2Status status = fmu.setRealInputDerivatives(comp, vr, 1, new int[1]
 	{ 1 }, new double[1]
 	{ 1.1 });
-	printf("after setRealInputDerivatives\n");
+//	printf("after setRealInputDerivatives\n");
 //not FW'ed to receiver
 	EXPECT_EQ(fmi2Error, status);
 }
@@ -429,3 +436,78 @@ TEST(FMU, getMaxStepsize)
 		EXPECT_EQ(100, size);
 	}
 }
+
+
+//get status
+TEST(FMU, getStatus)
+{
+	FMU fmu = setup();
+	fmi2Component comp = initialized(fmu);
+
+	fmi2StatusKind kind = fmi2LastSuccessfulTime;
+	fmi2Status value ;
+
+	fmi2Status status = fmu.getStatus(comp,kind,&value);
+
+	EXPECT_EQ(fmi2OK, status);
+	EXPECT_EQ(fmi2OK, value);
+}
+
+TEST(FMU, fmi2GetRealStatus)
+{
+	FMU fmu = setup();
+	fmi2Component comp = initialized(fmu);
+
+	fmi2StatusKind kind = fmi2LastSuccessfulTime;
+	fmi2Real value ;
+
+	fmi2Status status = fmu.getRealStatus(comp,kind,&value);
+
+	EXPECT_EQ(fmi2OK, status);
+	EXPECT_EQ(100.5, value);
+}
+
+TEST(FMU, fmi2GetIntegerStatus)
+{
+	FMU fmu = setup();
+	fmi2Component comp = initialized(fmu);
+
+	fmi2StatusKind kind = fmi2LastSuccessfulTime;
+	fmi2Integer value ;
+
+	fmi2Status status = fmu.getIntegerStatus(comp,kind,&value);
+
+	EXPECT_EQ(fmi2OK, status);
+	EXPECT_EQ(100, value);
+}
+
+TEST(FMU, fmi2GetBooleanStatus)
+{
+	FMU fmu = setup();
+	fmi2Component comp = initialized(fmu);
+
+	fmi2StatusKind kind = fmi2Terminated;
+	fmi2Boolean value ;
+
+	fmi2Status status = fmu.getBooleanStatus(comp,kind,&value);
+
+	EXPECT_EQ(fmi2OK, status);
+	EXPECT_EQ(true, value);
+}
+
+
+TEST(FMU, fmi2GetStringStatus)
+{
+	FMU fmu = setup();
+	fmi2Component comp = initialized(fmu);
+
+	fmi2StatusKind kind = fmi2DoStepStatus;
+	fmi2String value ;
+
+	fmi2Status status = fmu.getStringStatus(comp,kind,&value);
+
+	EXPECT_EQ(fmi2OK, status);
+	ASSERT_STREQ("waiting", value);
+}
+
+

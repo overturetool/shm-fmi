@@ -28,7 +28,7 @@
 #include <windows.h>
 
 #elif __APPLE__ ||  __linux
-//??
+#include <cstring>
 #endif
 
 class JavaLauncher {

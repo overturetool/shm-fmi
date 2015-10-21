@@ -47,3 +47,7 @@ builds/
 testlibshmfmi/external_client_unittests
 testlibshmfmu/core
 testlibshmfmu/external_client_unittests
+
+
+**/#Vagrantfile#
+**/.vagrant/

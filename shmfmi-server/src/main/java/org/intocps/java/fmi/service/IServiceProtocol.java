@@ -2,59 +2,51 @@ package org.intocps.java.fmi.service;
 
 import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.lausdahl.examples.Service.DoStepRequest;
-import com.lausdahl.examples.Service.Empty;
-import com.lausdahl.examples.Service.Fmi2StatusReply;
-import com.lausdahl.examples.Service.GetBooleanReply;
-import com.lausdahl.examples.Service.GetIntegerReply;
-import com.lausdahl.examples.Service.GetMaxStepSizeReply;
-import com.lausdahl.examples.Service.GetRealReply;
-import com.lausdahl.examples.Service.GetRequest;
-import com.lausdahl.examples.Service.InstantiateRequest;
-import com.lausdahl.examples.Service.SetBooleanRequest;
-import com.lausdahl.examples.Service.SetDebugLoggingRequest;
-import com.lausdahl.examples.Service.SetIntegerRequest;
-import com.lausdahl.examples.Service.SetRealRequest;
-import com.lausdahl.examples.Service.SetStringRequest;
-import com.lausdahl.examples.Service.SetupExperimentRequest;
+import com.lausdahl.examples.Service.*;
 
 public interface IServiceProtocol {
 
 	void error(String string);
 
-	Fmi2StatusReply DoStep(DoStepRequest parseFrom);
+	Fmi2StatusReply DoStep(Fmi2DoStepRequest parseFrom);
 
-	Fmi2StatusReply Terminate(Empty parseFrom);
+	Fmi2StatusReply Terminate(Fmi2Empty parseFrom);
 
-	Fmi2StatusReply EnterInitializationMode(Empty parseFrom);
+	Fmi2StatusReply EnterInitializationMode(Fmi2Empty parseFrom);
 
-	Fmi2StatusReply ExitInitializationMode(Empty parseFrom);
+	Fmi2StatusReply ExitInitializationMode(Fmi2Empty parseFrom);
 
-	GetBooleanReply GetBoolean(GetRequest parseFrom);
+	Fmi2GetBooleanReply GetBoolean(Fmi2GetRequest parseFrom);
 
-	GetIntegerReply GetInteger(GetRequest parseFrom);
+	Fmi2GetIntegerReply GetInteger(Fmi2GetRequest parseFrom);
 
-	GetMaxStepSizeReply GetMaxStepSize(Empty parseFrom);
+	Fmi2GetMaxStepSizeReply GetMaxStepSize(Fmi2Empty parseFrom);
 
-	GetRealReply GetReal(GetRequest parseFrom);
+	Fmi2GetRealReply GetReal(Fmi2GetRequest parseFrom);
 
-	GeneratedMessage GetString(GetRequest parseFrom);
+	GeneratedMessage GetString(Fmi2GetRequest parseFrom);
 
-	Fmi2StatusReply Instantiate(InstantiateRequest parseFrom);
+	Fmi2StatusReply Instantiate(Fmi2InstantiateRequest parseFrom);
 
-	Fmi2StatusReply Reset(Empty parseFrom);
+	Fmi2StatusReply Reset(Fmi2Empty parseFrom);
 
-	Fmi2StatusReply SetBoolean(SetBooleanRequest parseFrom);
+	Fmi2StatusReply SetBoolean(Fmi2SetBooleanRequest parseFrom);
 
-	Fmi2StatusReply SetDebugLogging(SetDebugLoggingRequest parseFrom);
+	Fmi2StatusReply SetDebugLogging(Fmi2SetDebugLoggingRequest parseFrom);
 
-	Fmi2StatusReply SetInteger(SetIntegerRequest parseFrom);
+	Fmi2StatusReply SetInteger(Fmi2SetIntegerRequest parseFrom);
 
-	Fmi2StatusReply SetReal(SetRealRequest parseFrom);
+	Fmi2StatusReply SetReal(Fmi2SetRealRequest parseFrom);
 
-	Fmi2StatusReply SetString(SetStringRequest parseFrom);
+	Fmi2StatusReply SetString(Fmi2SetStringRequest parseFrom);
 
-	Fmi2StatusReply SetupExperiment(SetupExperimentRequest parseFrom);
+	Fmi2StatusReply SetupExperiment(Fmi2SetupExperimentRequest parseFrom);
+	
+	Fmi2StatusReply GetStatus(Fmi2StatusRequest request);
+	Fmi2RealStatusReply GetRealStatus(Fmi2StatusRequest request);
+	Fmi2IntegerStatusReply GetIntegerStatus(Fmi2StatusRequest request);
+	Fmi2BooleanStatusReply GetBooleanStatus(Fmi2StatusRequest request);
+	Fmi2StringStatusReply GetStringStatus(Fmi2StatusRequest request);
 
 	void error(InvalidProtocolBufferException e);
 

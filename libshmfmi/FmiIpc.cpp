@@ -23,6 +23,13 @@ const char* FmiIpc::SIGNAL_AVALIABLE_NAME = "sigAvail";
 const char* FmiIpc::SIGNAL_NAME = "sig";
 #endif
 
+//#define DEBUG
+
+#if defined( DEBUG )
+ #define DEBUG_PRINTF(x) printf x
+#else
+  #define DEBUG_PRINTF(x)
+#endif
 
 
 FmiIpc::FmiIpc()
@@ -45,8 +52,11 @@ std::string* getMappedName(const char* baseName, const char* name)
 
 	if(nameOfMapping->length()>=29)//31 is max incl NULL
 	{
+	
+		std::string hash= std::to_string(	std::hash<std::string>()(*nameOfMapping));
 		*nameOfMapping="/";
-	*nameOfMapping+=std::to_string(	std::hash<std::string>()(*nameOfMapping));
+				*nameOfMapping+=hash;
+		printf("New Apple shm key is: %s\n",nameOfMapping->c_str());
 	}
 
 #endif
@@ -83,7 +93,7 @@ void FmiIpc::Server::close()
 	if (m_hSignal)
 	{
 		SIGNAL_HANDLE handle = m_hSignal;
-		m_hSignal = NULL;
+		m_hSignal = 0;
 		FmiIpc::close(handle);
 	}
 
@@ -91,7 +101,7 @@ void FmiIpc::Server::close()
 	if (m_hAvail)
 	{
 		SIGNAL_HANDLE handle = m_hAvail;
-		m_hAvail = NULL;
+		m_hAvail = 0;
 		FmiIpc::close(handle);
 	}
 
@@ -125,7 +135,7 @@ void FmiIpc::Server::create(const char* name)
 {
 
 	std::string* nameOfMapping = getMappedName(SHARED_MEM_BASE_NAME, name);
-	printf("Starting server with key: %s\n", nameOfMapping->c_str());
+	//printf("Starting server with key: %s\n", nameOfMapping->c_str());
 	// Create the file mapping
 
 #ifdef _WIN32
@@ -288,11 +298,11 @@ sb.st_size*/
 		printf("server_create: failed: %01d\n", __LINE__);
 		return;
 	}
-#elif   __linux
+//#elif   __linux
 //POSIX
-	sem_init(&m_pBuf->semSignal, 1, 0);
-	sem_init(&m_pBuf->semAvail, 1, 0);
-#elif __APPLE__
+//	sem_init(&m_pBuf->semSignal, 1, 0);
+//	sem_init(&m_pBuf->semAvail, 1, 0);
+#elif __APPLE__ || __linux
 
 	std::string* signalName = getMappedName(SIGNAL_NAME, name);
 	sem_unlink(signalName->c_str());
@@ -330,7 +340,7 @@ sb.st_size*/
 SharedFmiMessage* FmiIpc::Server::send(SharedFmiMessage* message,
 		DWORD dwTimeout)
 {
-//	printf("Server write msg\n");
+	DEBUG_PRINTF(("Server write msg\n"));
 	this->m_pBuf->message = *message;
 
 
@@ -338,26 +348,30 @@ SharedFmiMessage* FmiIpc::Server::send(SharedFmiMessage* message,
 
 #ifdef _WIN32
 	SetEvent(this->m_hAvail);
+	DEBUG_PRINTF(("Server signaled\n"));
 
 		if (WaitForSingleObject(this->m_hSignal, dwTimeout) != WAIT_OBJECT_0)
 		{
 			return NULL;
 		}
-#elif __APPLE__
+#elif __APPLE__ || __linux
 //		printf("Server signaled avail\n");
 		sem_post(this->m_hAvail);
+
+		DEBUG_PRINTF(("Server signaled\n"));
 
 //		printf("Server waiting signal\n");
 		sem_wait(this->m_hSignal);
 //		printf("Server done waiting signal\n");
-#elif  __linux
+//#elif  __linux
 //POSIX
-	sem_post(&this->m_pBuf->semAvail);
-	sem_wait(&this->m_pBuf->semSignal);
+//	sem_post(&this->m_pBuf->semAvail);
+//	DEBUG_PRINTF(("Server signaled\n"));
+//	sem_wait(&this->m_pBuf->semSignal);
 #endif
 
 
-//	printf("Server ret msg\n");
+	DEBUG_PRINTF(("Server ret msg\n"));
 	return &this->m_pBuf->message;
 }
 
@@ -368,6 +382,7 @@ FmiIpc::Client::Client()
 	m_hSignal = 0;
 	m_hAvail = 0;
 	m_pBuf = NULL;
+	m_name=NULL;
 }
 
 FmiIpc::Client::Client(const char* connectAddr, bool* success)
@@ -378,13 +393,13 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 	m_hAvail = 0;
 	m_pBuf = NULL;
 
-	printf("Client key %s\n", connectAddr);
+	//printf("Client key %s\n", connectAddr);
 
 
 
 	std::string* nameOfMapping = getMappedName(SHARED_MEM_BASE_NAME,
 			connectAddr);
-	printf("Starting client with key: %s\n", nameOfMapping->c_str());
+	//printf("Starting client with key: %s\n", nameOfMapping->c_str());
 	// Open the shared file
 
 #ifdef _WIN32
@@ -407,8 +422,7 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 	{
 #endif
 
-		printf("Starting client with key: %s - faild\n",
-				nameOfMapping->c_str());
+	//	printf("Starting client with key: %s - faild\n",				nameOfMapping->c_str());
 		*success = false;
 		return;
 	}
@@ -468,7 +482,7 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 				*success = false;
 				return;
 			}
-#elif __APPLE__
+#elif __APPLE__ || __linux__
 
 			std::string* signalName = getMappedName(SIGNAL_NAME, connectAddr);
 			m_hSignal =sem_open(signalName->c_str(), 0);
@@ -488,8 +502,10 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 			}
 			delete signalAvailName;
 
-#elif __linux
+//#elif __linux
 //real POSIX
+
+
 
 #endif
 
@@ -498,6 +514,7 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 
 
 	*success = true;
+	DEBUG_PRINTF(("Client connected to shared memory %s, status %d\n",this->m_name->c_str(),*success));
 }
 
 FmiIpc::Client::~Client()
@@ -538,13 +555,13 @@ bool FmiIpc::Client::waitAvailable(DWORD dwTimeout)
 #ifdef _WIN32
 	if (WaitForSingleObject(m_hAvail, dwTimeout) != WAIT_OBJECT_0)
 			return false;
-#elif __APPLE__
+#elif __APPLE__ || __linux__
 //	printf("Client waiting\n");
 	sem_wait(this->m_hAvail);
 //	printf("Client done waiting\n");
-#elif __linux
+//#elif __linux
 //POSIX
-	sem_wait(&this->m_pBuf->semAvail);
+//	sem_wait(&this->m_pBuf->semAvail);
 #endif
 
 
@@ -558,7 +575,7 @@ SharedFmiMessage* FmiIpc::Client::getMessage(DWORD dwTimeout)
 
 	if (waitAvailable(dwTimeout))
 	{
-//		printf("Client ret msg\n");
+		DEBUG_PRINTF(("Client ret msg\n"));
 
 		return &this->m_pBuf->message;
 	}
@@ -566,19 +583,20 @@ SharedFmiMessage* FmiIpc::Client::getMessage(DWORD dwTimeout)
 }
 void FmiIpc::Client::sendReply(SharedFmiMessage* reply)
 {
-//	printf("Client write msg\n");
+	DEBUG_PRINTF(("Client write msg\n"));
 	//memcpy(&this->m_pBuf->message, reply, sizeof(SharedFmiMessage));
 	this->m_pBuf->message = *reply;
 
 
 #ifdef _WIN32
 	SetEvent(this->m_hSignal);
-#elif __APPLE__
+#elif __APPLE__ || __linux__
 
 	sem_post(this->m_hSignal);
-//	printf("Client signaled\n");
-#elif __linux
+
+//#elif __linux
 //POSIX
-	sem_post(&this->m_pBuf->semSignal);
+//	sem_post(&this->m_pBuf->semSignal);
 #endif
+	DEBUG_PRINTF(("Client signaled\n"));
 }
