@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.8.5)
-project (testlibshmfmu CXX)
+project (testlibshmfmu C CXX)
 
 include(CheckCXXCompilerFlag)
 
@@ -38,7 +38,7 @@ endif()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
 #set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -pthread")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ -Wl,-Bstatic -lprotobuf -lstdc++ -lpthread  -Wl,-Bdynamic")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ -Wl,-Bstatic -lprotobuf -lstdc++ -lpthread  -Wl,-Bdynamic")
 
 #get path to the FMU in libshmfmu
 # We need to configure the FMU location to be used in the test
@@ -46,7 +46,7 @@ get_property(libshmfmu_lib_location TARGET libshmfmu PROPERTY LOCATION)
 #message (STATUS "libshmfmu_lib_location == ${libshmfmu_lib_location}")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DFMI_COSIMULATION")
-set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -DFMI_COSIMULATION")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DFMI_COSIMULATION")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DFMULIB=\\\"${libshmfmu_lib_location}\\\"")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DFMULIB=\\\"${libshmfmu_lib_location}\\\"")
@@ -66,9 +66,23 @@ include_directories(${gtest_SOURCE_DIR}/include)
 
 target_link_libraries(${PROJECT_NAME} libshmfmi)
 
-target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
+
+if(APPLE)
+	target_link_libraries(${PROJECT_NAME} /usr/local/lib/libprotobuf.a  ${PROTOBUF_LIBRARIES})
+else()
+	target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
+endif()
+
+
+
+if(APPLE)
+
+elseif(UNIX)
+
 target_link_libraries(${PROJECT_NAME} rt)
 target_link_libraries(${PROJECT_NAME} dl)
+endif()
+
 #target_link_libraries(${PROJECT_NAME} pthread)
 
 add_test(AllTestsIn-testlibshmfmu ${PROJECT_NAME})

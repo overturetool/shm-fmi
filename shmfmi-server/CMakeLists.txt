@@ -49,7 +49,14 @@ include_directories(${libshmfmi_SOURCE_DIR})
 add_library(sharedmemory SHARED src/main/native/sharedmemory.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 
 target_link_libraries(sharedmemory libshmfmi)
-target_link_libraries(sharedmemory ${PROTOBUF_LIBRARIES})
+
+if(APPLE)
+	target_link_libraries(sharedmemory /usr/local/lib/libprotobuf.a  ${PROTOBUF_LIBRARIES})
+else()
+	target_link_libraries(sharedmemory ${PROTOBUF_LIBRARIES})
+endif()
+
+
 
 foreach(LETTER ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
 	

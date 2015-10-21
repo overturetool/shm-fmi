@@ -34,7 +34,13 @@ add_library(${PROJECT_NAME} SHARED fmu.cpp FmuContainer.cpp JavaLauncher.cpp Con
 
 
 target_link_libraries(${PROJECT_NAME} libshmfmi)
-target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
+
+if(APPLE)
+	target_link_libraries(${PROJECT_NAME} /usr/local/lib/libprotobuf.a  ${PROTOBUF_LIBRARIES})
+else()
+	target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
+endif()
+
 
 
 #target_link_libraries(${PROJECT_NAME} "/usr/lib/gcc/i686-w64-mingw32/4.8/libstdc++.a")
@@ -54,7 +60,7 @@ message(STATUS "Static linking with libstdc++.a in ${STDCPP_LIBRARY}")
 target_link_libraries(${PROJECT_NAME} ${STDCPP_LIBRARY})
 
 
-find_library(PTHREAD_LIBRARY NAMES libpthread.a)
+find_library(PTHREAD_LIBRARY NAMES libpthread.a libpthread.dylib)
 target_link_libraries(${PROJECT_NAME} ${PTHREAD_LIBRARY})
 
 

@@ -53,8 +53,16 @@ include_directories(${gtest_SOURCE_DIR}/include)
 target_link_libraries(${PROJECT_NAME} libshmfmi)
 
 target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
+
+if(APPLE)
+
+elseif(UNIX)
+
 target_link_libraries(${PROJECT_NAME} rt)
-target_link_libraries(${PROJECT_NAME} dl)
+target_link_libraries(${PROJECT_NAME} dl) 
+
+endif()
+
 #target_link_libraries(${PROJECT_NAME} pthread)
 
 add_test(AllTestsIn-testlibshmfmi ${PROJECT_NAME})
