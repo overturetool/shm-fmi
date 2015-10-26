@@ -15,12 +15,6 @@ PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ../proto/service.proto)
 # protobuf outputs to current dir
 set(CMAKE_INCLUDE_CURRENT_DIR on)
 
-#if (LINUX)
-#      set(CMAKE_CXX_FLAGS ${CMAKE_CSS_FLAGS} "-fPIC")
-#endif()
-#set_target_properties(${PROJECT_NAME}
-#                      PROPERTIES POSITION_INDEPENDENT_CODE ON)
-
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 if(COMPILER_SUPPORTS_CXX11)
@@ -34,20 +28,10 @@ endif()
 
 set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-pthread")
 
-
-#add_library(${PROJECT_NAME}-cc ${PROTO_SRCS})
-
 add_library(${PROJECT_NAME} FmiIpc.cpp ${PROTO_SRCS} ${PROTO_HDRS} ExternalClient.cpp)
-#add_library(${PROJECT_NAME}-shared SHARED FmiIpc.cpp ExternalClient.cpp ${PROTO_SRCS})
-#${PROTO_SRCS} ${PROTO_HDRS}
-#target_link_libraries(${PROJECT_NAME}-shared ${PROTOBUF_LIBRARIES})
-#target_link_libraries(${PROJECT_NAME}-shared ${PROJECT_NAME}-cc)
 
 set_target_properties(${PROJECT_NAME}
                       PROPERTIES POSITION_INDEPENDENT_CODE ON)
-
-#set_target_properties(${PROJECT_NAME}-shared
-#                      PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 
 # Expose A's public includes (including the ones of A's dependencies
@@ -57,22 +41,14 @@ set(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_
 
 
 
-# set the protobuf lib
-if(APPLE)
-set(PROTOBUF_LIBRARIES /usr/local/lib/libprotobuf.a)
-else()
-#	target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
-endif()																	 
-
-
 # extra libs
 set(ADDITIONAL_LIBS "")
 if (UNIX)
 	if(APPLE)
-
+		# set the protobuf lib
+		set(PROTOBUF_LIBRARIES /usr/local/lib/libprotobuf.a)
 	else()
  		set(ADDITIONAL_LIBS rt dl)
-#		target_link_libraries(${PROJECT_NAME} dl)
 	endif()
 endif()
 

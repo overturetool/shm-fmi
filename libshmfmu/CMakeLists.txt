@@ -5,14 +5,6 @@ include(CheckCXXCompilerFlag)
 
 set(CMAKE_VERBOSE_MAKEFILE on)
 
-#find_package(Protobuf REQUIRED)
-#include_directories(${PROTOBUF_INCLUDE_DIRS})
-
-
-# protobuf outputs to current dir
-set(CMAKE_INCLUDE_CURRENT_DIR on)
-
-
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 if(COMPILER_SUPPORTS_CXX11)
@@ -27,8 +19,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DFMI_COSIMULATION")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DFMI_COSIMULATION")
 
 include_directories(includes/fmi)
-
-message(STATUS "includes are ${libshmfmi_INCLUDE_DIRS}")
 include_directories(${libshmfmi_INCLUDE_DIRS})
 
 
@@ -36,19 +26,8 @@ add_library(${PROJECT_NAME} SHARED fmu.cpp FmuContainer.cpp JavaLauncher.cpp Con
 
 
 target_link_libraries(${PROJECT_NAME} libshmfmi)
-
 target_link_libraries(${PROJECT_NAME} ${libshmfmi_LIBS})
 
-#if(APPLE)
-#	target_link_libraries(${PROJECT_NAME} /usr/local/lib/libprotobuf.a  ${PROTOBUF_LIBRARIES})
-#else()
-#	target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
-#endif()
-
-
-
-#target_link_libraries(${PROJECT_NAME} "/usr/lib/gcc/i686-w64-mingw32/4.8/libstdc++.a")
-#find_library(STDCPP_LIBRARY NAMES libstdc++.a PATHS ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
 
 foreach(LETTER ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
 	
@@ -70,28 +49,10 @@ target_link_libraries(${PROJECT_NAME} ${PTHREAD_LIBRARY})
 
 # I need this: -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic
 
-
-#if (UNIX)
-#	if(APPLE)
-#
-#	else()
-# 		target_link_libraries(${PROJECT_NAME} rt)
-#		target_link_libraries(${PROJECT_NAME} dl)
-#	endif()
-#endif()
-
-
 if (WIN32)
 	#windows	
 	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
 endif() 
-
-
-##
-## TODO: The only thing missing now is to add this at -lstdc++ the end of the g++ link command but before -pthread and inside the -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic
-## 
-## When this is done the dll produced can run on windows (when windows has mingw, I havent tested on a clean version of Windows yet)
-##
 
 set_target_properties(${PROJECT_NAME}
                       PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -103,5 +64,3 @@ set_target_properties(${PROJECT_NAME}
 set(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/include ${libshmfmi_INCLUDE_DIRS} CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
 
 set(${PROJECT_NAME}_LIBS ${libshmfmi_LIBS} CACHE INTERNAL "${PROJECT_NAME}: Libraries" FORCE)
-
-																	 
