@@ -1,4 +1,19 @@
 
+#notes
+
+##mac
+
+```
+protoc -I ../proto/ --cpp_out=. ../proto/service.proto 
+mkdir -p builds/mac/shm
+cd builds/mac/shm
+JAVA_HOME=`/usr/libexec/java_home -v 1.7` cmake ../../../
+
+
+
+```
+
+
 # Environment
 
 ```shell
