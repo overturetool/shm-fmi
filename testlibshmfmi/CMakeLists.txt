@@ -7,8 +7,8 @@ include(CheckCXXCompilerFlag)
 set(CMAKE_VERBOSE_MAKEFILE on)
 
 
-find_package(Protobuf REQUIRED)
-include_directories(${PROTOBUF_INCLUDE_DIRS})
+#find_package(Protobuf REQUIRED)
+#include_directories(${PROTOBUF_INCLUDE_DIRS})
 
 #PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ../proto/service.proto)
 
@@ -47,21 +47,21 @@ file(GLOB CPP_FILES *.cpp)
 #include_directories(${libshmfmi_INCLUDE_DIRS})
 
 add_executable(${PROJECT_NAME} ${CPP_FILES})
-include_directories(${libshmfmi_SOURCE_DIR})
+include_directories(${libshmfmi_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} gtest_main)
 include_directories(${gtest_SOURCE_DIR}/include)
 target_link_libraries(${PROJECT_NAME} libshmfmi)
 
-target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${libshmfmi_LIBS})
 
-if(APPLE)
-
-elseif(UNIX)
-
-target_link_libraries(${PROJECT_NAME} rt)
-target_link_libraries(${PROJECT_NAME} dl) 
-
-endif()
+#if(APPLE)
+#
+#elseif(UNIX)
+#
+#target_link_libraries(${PROJECT_NAME} rt)
+#target_link_libraries(${PROJECT_NAME} dl) 
+#
+#endif()
 
 #target_link_libraries(${PROJECT_NAME} pthread)
 

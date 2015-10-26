@@ -52,5 +52,29 @@ set_target_properties(${PROJECT_NAME}
 
 # Expose A's public includes (including the ones of A's dependencies
 # transitively) to other subprojects through cache variable.
-set(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/include
+set(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR} ${PROTOBUF_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR} 
                                      CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
+
+
+
+# set the protobuf lib
+if(APPLE)
+set(PROTOBUF_LIBRARIES /usr/local/lib/libprotobuf.a)
+else()
+#	target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
+endif()																	 
+
+
+# extra libs
+set(ADDITIONAL_LIBS "")
+if (UNIX)
+	if(APPLE)
+
+	else()
+ 		set(ADDITIONAL_LIBS rt dl)
+#		target_link_libraries(${PROJECT_NAME} dl)
+	endif()
+endif()
+
+																	 
+set(${PROJECT_NAME}_LIBS ${PROTOBUF_LIBRARIES} ${ADDITIONAL_LIBS} CACHE INTERNAL "${PROJECT_NAME}: Libraries" FORCE)

@@ -6,7 +6,7 @@ include(CheckCXXCompilerFlag)
 set(CMAKE_VERBOSE_MAKEFILE on)
 
 
-find_package(Protobuf REQUIRED)
+#find_package(Protobuf REQUIRED)
 
 
 enable_testing()
@@ -59,7 +59,7 @@ include_directories(include/fmi)
 include_directories(include)
 
 add_executable(${PROJECT_NAME} ${CPP_FILES} ${C_FILES})
-include_directories(${libshmfmi_SOURCE_DIR})
+include_directories(${libshmfmi_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} gtest_main)
 include_directories(${gtest_SOURCE_DIR}/include)
 
@@ -67,21 +67,20 @@ include_directories(${gtest_SOURCE_DIR}/include)
 target_link_libraries(${PROJECT_NAME} libshmfmi)
 
 
-if(APPLE)
-	target_link_libraries(${PROJECT_NAME} /usr/local/lib/libprotobuf.a  ${PROTOBUF_LIBRARIES})
-else()
-	target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
-endif()
+#if(APPLE)
+#	target_link_libraries(${PROJECT_NAME} /usr/local/lib/libprotobuf.a  ${PROTOBUF_LIBRARIES})
+#else()
+#	target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
+#endif()
+target_link_libraries(${PROJECT_NAME} ${libshmfmi_LIBS})
 
-
-
-if(APPLE)
-
-elseif(UNIX)
-
-target_link_libraries(${PROJECT_NAME} rt)
-target_link_libraries(${PROJECT_NAME} dl)
-endif()
+#if(APPLE)
+#
+#elseif(UNIX)
+#
+#target_link_libraries(${PROJECT_NAME} rt)
+#target_link_libraries(${PROJECT_NAME} dl)
+#endif()
 
 #target_link_libraries(${PROJECT_NAME} pthread)
 
