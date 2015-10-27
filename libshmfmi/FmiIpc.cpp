@@ -52,8 +52,11 @@ std::string* getMappedName(const char* baseName, const char* name)
 
 	if(nameOfMapping->length()>=29)//31 is max incl NULL
 	{
+	
+		std::string hash= std::to_string(	std::hash<std::string>()(*nameOfMapping));
 		*nameOfMapping="/";
-	*nameOfMapping+=std::to_string(	std::hash<std::string>()(*nameOfMapping));
+				*nameOfMapping+=hash;
+		printf("New Apple shm key is: %s\n",nameOfMapping->c_str());
 	}
 
 #endif

@@ -5,17 +5,6 @@ include(CheckCXXCompilerFlag)
 
 set(CMAKE_VERBOSE_MAKEFILE on)
 
-find_package(Protobuf REQUIRED)
-include_directories(${PROTOBUF_INCLUDE_DIRS})
-
-
-
-
-
-# protobuf outputs to current dir
-set(CMAKE_INCLUDE_CURRENT_DIR on)
-
-
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 if(COMPILER_SUPPORTS_CXX11)
@@ -49,7 +38,8 @@ include_directories(${libshmfmi_SOURCE_DIR})
 add_library(sharedmemory SHARED src/main/native/sharedmemory.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 
 target_link_libraries(sharedmemory libshmfmi)
-target_link_libraries(sharedmemory ${PROTOBUF_LIBRARIES})
+target_link_libraries(sharedmemory ${libshmfmi_LIBS})
+
 
 foreach(LETTER ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
 	
@@ -67,14 +57,6 @@ target_link_libraries(sharedmemory ${STDCPP_LIBRARY})
 find_library(PTHREAD_LIBRARY NAMES libpthread.a)
 target_link_libraries(sharedmemory ${PTHREAD_LIBRARY})
 
-if (UNIX)
-	if(APPLE)
-
-	else()
- 		target_link_libraries(sharedmemory rt)
-		target_link_libraries(sharedmemory dl)
-	endif()
-endif()
 
 if (WIN32)
 	#windows	
