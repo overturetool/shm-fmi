@@ -48,6 +48,7 @@ if (UNIX)
 		# set the protobuf lib
 		set(PROTOBUF_LIBRARIES /usr/local/lib/libprotobuf.a)
 	else()
+		set(PROTOBUF_LIBRARIES /usr/local/lib/libprotobuf.a ${PROTOBUF_LIBRARIES})
  		set(ADDITIONAL_LIBS rt dl)
 	endif()
 endif()
