@@ -26,7 +26,7 @@ Vagrant.configure(2) do |config|
 			cd protobuf
 			git checkout 5d4a856
 			./autogen.sh
-			./configure --enable-static
+			./configure --disable-shared --enable-static
 			make
 			make install
 			ldconfig /usr/local/lib
