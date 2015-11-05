@@ -39,7 +39,7 @@ if [ ! -f /usr/local/lib/libprotobuf.a ] || [ ! -f /usr/local/bin/protoc ]; then
 
 mkdir -p $repo_root/builds/linux64/protobuf
 cd $repo_root/builds/linux64/protobuf
-$repo_root/third_party/protobuf/configure --enable-static
+CXXFLAGS=-fPIC $repo_root/third_party/protobuf/configure
 make
 pwd
 echo -e "\033[32m echo Please install using `make install && ldconfig /usr/local/lib`"
@@ -64,21 +64,30 @@ echo "Javahome is now: ${J_HOME}"
 echo "4-th were $4"
 WIN32_BUILD_DIR=$repo_root/builds/$ARCH
 
-PROTOBUF_BUILD_DIR=$WIN32_BUILD_DIR/protobuf/
+#PROTOBUF_BUILD_DIR=$WIN32_BUILD_DIR/protobuf/
 
 
+#mkdir -p $PROTOBUF_BUILD_DIR
+#mkdir -p $WIN32_BUILD_DIR/protobuf-${ARCH}
+# Create protbuf build dir
+#PROTOBUF_BUILD_DIR=$WIN32_BUILD_DIR/protobuf-${ARCH}
+PROTOBUF_BUILD_DIR=~/.protobuf/protobuf-${ARCH}
 mkdir -p $PROTOBUF_BUILD_DIR
-mkdir -p $WIN32_BUILD_DIR/protobuf-${ARCH}
+# convert to full path
+PROTOBUF_WIN32=`cd "$PROTOBUF_BUILD_DIR"; pwd`
 
-PROTOBUF_WIN32=`cd "$WIN32_BUILD_DIR/protobuf-$ARCH"; pwd`
+
 
 cd $PROTOBUF_BUILD_DIR
 
-if [ ! -f $PROTOBUF_WIN32/lib/libprotobuf.a ]; then
+if [ ! -f $PROTOBUF_BUILD_DIR/lib/libprotobuf.a ]; then
 	echo "protobuf not installed"
 
+cd $repo_root/third_party/protobuf/
+make distclean
+cd $PROTOBUF_BUILD_DIR
 
-$repo_root/third_party/protobuf/configure --host=$COMPILER --build=i686-pc-linux-gnu --with-protoc=protoc --disable-shared --prefix=$PROTOBUF_WIN32
+$repo_root/third_party/protobuf/configure --host=$COMPILER --build=i686-pc-linux-gnu --with-protoc=protoc --disable-shared --prefix=$PROTOBUF_BUILD_DIR
 make
 make install
 fi
@@ -89,7 +98,7 @@ cd $WIN32_BUILD_DIR/shm
 
 pwd
 
-JAVA_HOME=$J_HOME cmake -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN -DPROTOBUF_INCLUDE_DIR=$PROTOBUF_WIN32/include -DPROTOBUF_LIBRARY=$PROTOBUF_WIN32/lib/libprotobuf.a ../../../
+JAVA_HOME=$J_HOME cmake -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN -DPROTOBUF_INCLUDE_DIR=$PROTOBUF_BUILD_DIR/include -DPROTOBUF_LIBRARY=$PROTOBUF_BUILD_DIR/lib/libprotobuf.a ../../../
 
 cd $repo_root
 pwd
