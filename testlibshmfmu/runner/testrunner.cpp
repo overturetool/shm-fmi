@@ -38,7 +38,7 @@
 
 int main (int argc, char *argv[]) {
 
-	char* name ="shmFmiTest";
+	const char* name ="shmFmiTest";
 
 	if(argc>1)
 		name = argv[1];
