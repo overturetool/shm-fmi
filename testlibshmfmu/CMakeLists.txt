@@ -64,7 +64,15 @@ target_link_libraries(${PROJECT_NAME} gtest_main)
 
 #target_link_libraries(${PROJECT_NAME} ${libshmfmi_LIBS})
 #target_link_libraries(${PROJECT_NAME} ${libshmfmi_LIBS_filtered})
-target_link_libraries(${PROJECT_NAME} rt dl)
+if (UNIX)
+	if(APPLE)
+		# set the protobuf lib
+		
+	else()
+		target_link_libraries(${PROJECT_NAME} rt dl)
+	endif()
+endif()
+
 
 add_test(AllTestsIn-testlibshmfmu ${PROJECT_NAME})
 
