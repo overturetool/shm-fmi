@@ -61,6 +61,8 @@ TEST(FMUDualLoadTest, doubleLoad)
 	outValue=values[0];
 	EXPECT_EQ(inValue, outValue);
 
+	fmu1.freeInstance(compf1i1);
+	fmu2.freeInstance(compf2i1);
 //	fmi2Component comp = instantiated();
 //
 //	fmu.freeInstance(comp);
