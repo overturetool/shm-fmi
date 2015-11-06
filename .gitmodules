@@ -2,6 +2,7 @@
 	path = third_party/googletest
 	url = https://github.com/google/googletest.git
 	depth = 1
+	ignore = dirty
 [submodule "third_party/cmake-toolchains"]
 	path = third_party/cmake-toolchains
 	url = https://github.com/zyga/cmake-toolchains.git

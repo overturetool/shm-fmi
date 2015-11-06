@@ -51,3 +51,21 @@ testlibshmfmu/external_client_unittests
 
 **/#Vagrantfile#
 **/.vagrant/
+
+
+
+# CMake
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+
+
+# output / generated files
+testlibshmfmu/config.txt
+testlibshmfmu/testlibshmfmu
+testlibshmfmu/testlibshmfmu-driver
+testlibshmfmi/testlibshmfmi
