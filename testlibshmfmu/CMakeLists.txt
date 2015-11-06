@@ -39,7 +39,7 @@ include_directories(include)
 include_directories(${libshmfmi_INCLUDE_DIRS})
 include_directories(${gtest_SOURCE_DIR}/include)
 
-add_executable(${PROJECT_NAME} FMU_Tests.cpp LibraryLoad_Tests.cpp ${C_FILES})
+add_executable(${PROJECT_NAME} FMU_Tests.cpp LibraryLoad_Tests.cpp FMU_DualLoad_Tests.cpp ${C_FILES})
 
 target_link_libraries(${PROJECT_NAME} gtest_main)
 #target_link_libraries(${PROJECT_NAME} libshmfmi)
