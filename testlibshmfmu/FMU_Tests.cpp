@@ -3,7 +3,7 @@
 #include <string>
 #include <iostream>
 
-#include "RemoteTestDriver.h"
+//#include "RemoteTestDriver.h"
 #include <thread>
 #include <chrono>
 
@@ -40,95 +40,97 @@ extern "C"
 //
 // Define this REMOTE_TEST_DRIVER to use the remote java test driver
 //
+ FMU FMUTest::s_fmu;
+ bool FMUTest::s_libLoaded = false;
+ fmi2Component FMUTest::gcomp = NULL;
 
+//static FMU s_fmu;
+//static bool s_libLoaded = false;
 
-static FMU s_fmu;
-static bool s_libLoaded = false;
+//static std::thread* t1 = NULL;
+//
+//void remoteClientThread()
+//{
+//	std::this_thread::sleep_for(std::chrono::milliseconds
+//(100));
+//	printf("Starting service test responder thread\n");
+//	std::string port(GUID);
+//
+//	port += std::string(INSTANCE_NAME);
+//
+//#ifndef REMOTE_TEST_DRIVER
+////	while (true)
+//	//	remoteTestDriver("shmFmiTest");
+//#endif
+//}
 
-static std::thread* t1 = NULL;
-
-void remoteClientThread()
-{
-	std::this_thread::sleep_for(std::chrono::milliseconds
-(100));
-	printf("Starting service test responder thread\n");
-	std::string port(GUID);
-
-	port += std::string(INSTANCE_NAME);
-
-#ifndef REMOTE_TEST_DRIVER
-	while (true)
-		remoteTestDriver("shmFmiTest");
-#endif
-}
-
-static FMU setup()
-{
-	if (s_libLoaded)
-		return s_fmu;
-
-	FMU fmu;
-	HMODULE h;
-
-	EXPECT_EQ(true, loadDll(FMULIB, &fmu, &h));
-
-	s_fmu = fmu;
-	s_libLoaded = true;
-
-	if (t1 == NULL)
-		{
-			t1 = new std::thread(remoteClientThread);
-			t1->detach();
-		}
-
-	return fmu;
-}
-
-fmi2Component gcomp = NULL;
-
-static fmi2Component instantiated(FMU fmu)
-{
-	if (gcomp == NULL)
-		gcomp = fmu.instantiate(INSTANCE_NAME, fmi2CoSimulation, GUID, ".",
-		NULL, true, true);
-
-	return gcomp;
-}
-
-static fmi2Component setuped(FMU fmu)
-{
-	fmi2Component comp = instantiated(fmu);
-
-	fmi2Status status = fmu.setupExperiment(comp, toleranceDefined, tolerance,
-	startTime, stopTimeDefined, stopTime);
-
-	EXPECT_EQ(fmi2OK, status);
-	return comp;
-}
-
-static fmi2Component initializing(FMU fmu)
-{
-	fmi2Component comp = setuped(fmu);
-
-	fmi2Status status = fmu.enterInitializationMode(comp);
-
-	EXPECT_EQ(fmi2OK, status);
-	return comp;
-}
-
-static fmi2Component initialized(FMU fmu)
-{
-	fmi2Component comp = setuped(fmu);
-
-	fmi2Status status = fmu.enterInitializationMode(comp);
-
-	EXPECT_EQ(fmi2OK, status);
-
-	status = fmu.exitInitializationMode(comp);
-
-	EXPECT_EQ(fmi2OK, status);
-	return comp;
-}
+//static FMU setup()
+//{
+//	if (s_libLoaded)
+//		return s_fmu;
+//
+//	FMU fmu;
+//	HMODULE h;
+//
+//	EXPECT_EQ(true, loadDll(FMULIB, &fmu, &h));
+//
+//	s_fmu = fmu;
+//	s_libLoaded = true;
+//
+////	if (t1 == NULL)
+////		{
+////			t1 = new std::thread(remoteClientThread);
+////			t1->detach();
+////		}
+//
+//	return fmu;
+//}
+//
+//fmi2Component gcomp = NULL;
+//
+//static fmi2Component instantiated(FMU fmu)
+//{
+//	if (gcomp == NULL)
+//		gcomp = fmu.instantiate(INSTANCE_NAME, fmi2CoSimulation, GUID, ".",
+//		NULL, true, true);
+//
+//	return gcomp;
+//}
+//
+//static fmi2Component setuped(FMU fmu)
+//{
+//	fmi2Component comp = instantiated(fmu);
+//
+//	fmi2Status status = fmu.setupExperiment(comp, toleranceDefined, tolerance,
+//	startTime, stopTimeDefined, stopTime);
+//
+//	EXPECT_EQ(fmi2OK, status);
+//	return comp;
+//}
+//
+//static fmi2Component initializing(FMU fmu)
+//{
+//	fmi2Component comp = setuped(fmu);
+//
+//	fmi2Status status = fmu.enterInitializationMode(comp);
+//
+//	EXPECT_EQ(fmi2OK, status);
+//	return comp;
+//}
+//
+//static fmi2Component initialized(FMU fmu)
+//{
+//	fmi2Component comp = setuped(fmu);
+//
+//	fmi2Status status = fmu.enterInitializationMode(comp);
+//
+//	EXPECT_EQ(fmi2OK, status);
+//
+//	status = fmu.exitInitializationMode(comp);
+//
+//	EXPECT_EQ(fmi2OK, status);
+//	return comp;
+//}
 
 /*******************************************
  *
@@ -136,24 +138,21 @@ static fmi2Component initialized(FMU fmu)
  *
  *******************************************/
 
-TEST(FMU, getTypesPlatform)
+TEST_F(FMUTest, getTypesPlatform)
 {
-	FMU fmu = setup();
 	fmu.getTypesPlatform();
 }
 
-TEST(FMU, getVersion)
+TEST_F(FMUTest, getVersion)
 {
-	FMU fmu = setup();
 	EXPECT_STREQ("2.0", fmu.getVersion());
 }
 
-TEST(FMU, instantiate)
+TEST_F(FMUTest, instantiate)
 {
-	FMU fmu = setup();
 //fmu.instantiate("A", fmi2CoSimulation, "{348783748923}", ".", NULL, true,
 //	true);
-	instantiated(fmu);
+	instantiated();
 }
 
 /*******************************************
@@ -161,10 +160,9 @@ TEST(FMU, instantiate)
  * instantiated
  *
  *******************************************/
-TEST(FMU, setDebugLogging)
+TEST_F(FMUTest, setDebugLogging)
 {
-	FMU fmu = setup();
-	fmi2Component comp = instantiated(fmu);
+	fmi2Component comp = instantiated();
 
 	const char* categories[] =
 	{ "all", "debug" };
@@ -173,18 +171,16 @@ TEST(FMU, setDebugLogging)
 	EXPECT_EQ(fmi2OK, status);
 }
 
-TEST(FMU, freeInstance)
-{
-	FMU fmu = setup();
-	fmi2Component comp = instantiated(fmu);
+//TEST_F(FMUTest, freeInstance)
+//{
+//	fmi2Component comp = instantiated();
+//
+//	//fmu.freeInstance(comp);
+//}
 
-	//fmu.freeInstance(comp);
-}
-
-TEST(FMU, setupExperiment)
+TEST_F(FMUTest, setupExperiment)
 {
-	FMU fmu = setup();
-	fmi2Component comp = instantiated(fmu);
+	fmi2Component comp = instantiated();
 
 	fmi2Status status = fmu.setupExperiment(comp, toleranceDefined, tolerance,
 	startTime, stopTimeDefined, stopTime);
@@ -192,10 +188,9 @@ TEST(FMU, setupExperiment)
 	EXPECT_EQ(fmi2OK, status);
 }
 
-TEST(FMU, reset)
+TEST_F(FMUTest, reset)
 {
-	FMU fmu = setup();
-	fmi2Component comp = instantiated(fmu);
+	fmi2Component comp = instantiated();
 
 	fmi2Status status = fmu.reset(comp);
 
@@ -208,20 +203,18 @@ TEST(FMU, reset)
  *
  *******************************************/
 
-TEST(FMU, enterInitializationMode)
+TEST_F(FMUTest, enterInitializationMode)
 {
-	FMU fmu = setup();
-	fmi2Component comp = setuped(fmu);
+	fmi2Component comp = setuped();
 
 	fmi2Status status = fmu.enterInitializationMode(comp);
 
 	EXPECT_EQ(fmi2OK, status);
 }
 
-TEST(FMU, setReal)
+TEST_F(FMUTest, setReal)
 {
-	FMU fmu = setup();
-	fmi2Component comp = initializing(fmu);
+	fmi2Component comp = initializing();
 	const fmi2ValueReference vr[1] =
 	{ realId };
 	fmi2Status status = fmu.setReal(comp, vr, 1, new double[1]
@@ -230,10 +223,9 @@ TEST(FMU, setReal)
 	EXPECT_EQ(fmi2OK, status);
 }
 
-TEST(FMU, setInteger)
+TEST_F(FMUTest, setInteger)
 {
-	FMU fmu = setup();
-	fmi2Component comp = initializing(fmu);
+	fmi2Component comp = initializing();
 	const fmi2ValueReference vr[1] =
 	{ intId };
 	fmi2Status status = fmu.setInteger(comp, vr, 1, new int[1]
@@ -242,10 +234,9 @@ TEST(FMU, setInteger)
 	EXPECT_EQ(fmi2OK, status);
 }
 
-TEST(FMU, setString)
+TEST_F(FMUTest, setString)
 {
-	FMU fmu = setup();
-	fmi2Component comp = initializing(fmu);
+	fmi2Component comp = initializing();
 	const fmi2ValueReference vr[1] =
 	{ stringId };
 	fmi2Status status = fmu.setString(comp, vr, 1, new fmi2String[1]
@@ -254,10 +245,9 @@ TEST(FMU, setString)
 	EXPECT_EQ(fmi2OK, status);
 }
 
-TEST(FMU, setRealInputDerivatives)
+TEST_F(FMUTest, setRealInputDerivatives)
 {
-	FMU fmu = setup();
-	fmi2Component comp = initializing(fmu);
+	fmi2Component comp = initializing();
 	//printf("before setRealInputDerivatives\n");
 	const fmi2ValueReference vr[1] =
 	{ stringId };
@@ -271,10 +261,9 @@ TEST(FMU, setRealInputDerivatives)
 
 // State stuff
 
-TEST(FMU, getsetFMUstate)
+TEST_F(FMUTest, getsetFMUstate)
 {
-	FMU fmu = setup();
-	fmi2Component comp = initializing(fmu);
+	fmi2Component comp = initializing();
 	fmi2FMUstate* state;
 	fmi2Status status = fmu.getFMUstate(comp, state);
 
@@ -297,20 +286,18 @@ TEST(FMU, getsetFMUstate)
  *
  *******************************************/
 
-TEST(FMU, exitInitializationMode)
+TEST_F(FMUTest, exitInitializationMode)
 {
-	FMU fmu = setup();
-	fmi2Component comp = initializing(fmu);
+	fmi2Component comp = initializing();
 
 	fmi2Status status = fmu.exitInitializationMode(comp);
 
 	EXPECT_EQ(fmi2OK, status);
 }
 
-TEST(FMU, getReal)
+TEST_F(FMUTest, getReal)
 {
-	FMU fmu = setup();
-	fmi2Component comp = initializing(fmu);
+	fmi2Component comp = initializing();
 
 	const fmi2ValueReference vr[1] =
 	{ realIdGet };
@@ -323,10 +310,9 @@ TEST(FMU, getReal)
 	EXPECT_EQ(9.9, values[0]);
 }
 
-TEST(FMU, getBoolean)
+TEST_F(FMUTest, getBoolean)
 {
-	FMU fmu = setup();
-	fmi2Component comp = initializing(fmu);
+	fmi2Component comp = initializing();
 
 	const fmi2ValueReference vr[1] =
 	{ boolIdGet };
@@ -339,10 +325,9 @@ TEST(FMU, getBoolean)
 	EXPECT_EQ(true, values[0]);
 }
 
-TEST(FMU, getInteger)
+TEST_F(FMUTest, getInteger)
 {
-	FMU fmu = setup();
-	fmi2Component comp = initializing(fmu);
+	fmi2Component comp = initializing();
 
 	const fmi2ValueReference vr[1] =
 	{ intIdGet };
@@ -355,10 +340,9 @@ TEST(FMU, getInteger)
 	EXPECT_EQ(1, values[0]);
 }
 
-TEST(FMU, getString)
+TEST_F(FMUTest, getString)
 {
-	FMU fmu = setup();
-	fmi2Component comp = initializing(fmu);
+	fmi2Component comp = initializing();
 
 	const fmi2ValueReference vr[1] =
 	{ stringIdGet };
@@ -372,10 +356,9 @@ TEST(FMU, getString)
 	EXPECT_STREQ("undefined", values[0]);
 }
 
-TEST(FMU, getDirectionalDerivative)
+TEST_F(FMUTest, getDirectionalDerivative)
 {
-	FMU fmu = setup();
-	fmi2Component comp = initializing(fmu);
+	fmi2Component comp = initializing();
 	const fmi2ValueReference vr[1] =
 	{ stringId };
 
@@ -399,20 +382,18 @@ TEST(FMU, getDirectionalDerivative)
  *
  *******************************************/
 
-TEST(FMU, terminate)
+TEST_F(FMUTest, terminate)
 {
-	FMU fmu = setup();
-	fmi2Component comp = initialized(fmu);
+	fmi2Component comp = initialized();
 
 	fmi2Status status = fmu.terminate(comp);
 
 	EXPECT_EQ(fmi2OK, status);
 }
 
-TEST(FMU, doStep)
+TEST_F(FMUTest, doStep)
 {
-	FMU fmu = setup();
-	fmi2Component comp = initialized(fmu);
+	fmi2Component comp = initialized();
 
 	fmi2Status status = fmu.doStep(comp, 0.0, 1.0, false);
 
@@ -423,10 +404,9 @@ TEST(FMU, doStep)
 
 //INTO specific
 
-TEST(FMU, getMaxStepsize)
+TEST_F(FMUTest, getMaxStepsize)
 {
-	FMU fmu = setup();
-	fmi2Component comp = initialized(fmu);
+	fmi2Component comp = initialized();
 
 	if (fmu.getMaxStepsize != NULL)
 	{
@@ -439,10 +419,9 @@ TEST(FMU, getMaxStepsize)
 
 
 //get status
-TEST(FMU, getStatus)
+TEST_F(FMUTest, getStatus)
 {
-	FMU fmu = setup();
-	fmi2Component comp = initialized(fmu);
+	fmi2Component comp = initialized();
 
 	fmi2StatusKind kind = fmi2LastSuccessfulTime;
 	fmi2Status value ;
@@ -453,10 +432,9 @@ TEST(FMU, getStatus)
 	EXPECT_EQ(fmi2OK, value);
 }
 
-TEST(FMU, fmi2GetRealStatus)
+TEST_F(FMUTest, fmi2GetRealStatus)
 {
-	FMU fmu = setup();
-	fmi2Component comp = initialized(fmu);
+	fmi2Component comp = initialized();
 
 	fmi2StatusKind kind = fmi2LastSuccessfulTime;
 	fmi2Real value ;
@@ -467,10 +445,9 @@ TEST(FMU, fmi2GetRealStatus)
 	EXPECT_EQ(100.5, value);
 }
 
-TEST(FMU, fmi2GetIntegerStatus)
+TEST_F(FMUTest, fmi2GetIntegerStatus)
 {
-	FMU fmu = setup();
-	fmi2Component comp = initialized(fmu);
+	fmi2Component comp = initialized();
 
 	fmi2StatusKind kind = fmi2LastSuccessfulTime;
 	fmi2Integer value ;
@@ -481,10 +458,9 @@ TEST(FMU, fmi2GetIntegerStatus)
 	EXPECT_EQ(100, value);
 }
 
-TEST(FMU, fmi2GetBooleanStatus)
+TEST_F(FMUTest, fmi2GetBooleanStatus)
 {
-	FMU fmu = setup();
-	fmi2Component comp = initialized(fmu);
+	fmi2Component comp = initialized();
 
 	fmi2StatusKind kind = fmi2Terminated;
 	fmi2Boolean value ;
@@ -496,10 +472,9 @@ TEST(FMU, fmi2GetBooleanStatus)
 }
 
 
-TEST(FMU, fmi2GetStringStatus)
+TEST_F(FMUTest, fmi2GetStringStatus)
 {
-	FMU fmu = setup();
-	fmi2Component comp = initialized(fmu);
+	fmi2Component comp = initialized();
 
 	fmi2StatusKind kind = fmi2DoStepStatus;
 	fmi2String value ;
@@ -510,4 +485,9 @@ TEST(FMU, fmi2GetStringStatus)
 	ASSERT_STREQ("waiting", value);
 }
 
+TEST_F(FMUTest, freeInstance)
+{
+	fmi2Component comp = instantiated();
 
+	fmu.freeInstance(comp);
+}

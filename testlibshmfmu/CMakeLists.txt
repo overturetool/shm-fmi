@@ -39,10 +39,41 @@ include_directories(include)
 include_directories(${libshmfmi_INCLUDE_DIRS})
 include_directories(${gtest_SOURCE_DIR}/include)
 
-add_executable(${PROJECT_NAME} ${CPP_FILES} ${C_FILES})
+add_executable(${PROJECT_NAME} FMU_Tests.cpp LibraryLoad_Tests.cpp ${C_FILES})
 
 target_link_libraries(${PROJECT_NAME} gtest_main)
-target_link_libraries(${PROJECT_NAME} libshmfmi)
-target_link_libraries(${PROJECT_NAME} ${libshmfmi_LIBS})
+#target_link_libraries(${PROJECT_NAME} libshmfmi)
+
+
+#set(libshmfmi_LIBS_filtered "${PROTOBUF_LIBRARIES} -lrt -ldl")
+#set(libshmfmi_LIBS_filtered "${libshmfmi_LIBS}")
+#message(STATUS "libshmfmi's are: ${libshmfmi_LIBS}")
+#foreach(LETTER ${libshmfmi_LIBS})
+	
+#if(${LETTER} MATCHES "libprotobuf.a")
+#   message (STATUS "Found the static lib for protobuf${LETTER}")
+	#set(STDCPP_LIBRARY "${LETTER}/libstdc++.a")
+#set(libshmfmi_LIBS_filtered "${libshmfmi_LIBS_filtered} ")
+#else()
+#  message (STATUS "${LETTER} ---- not these")
+#set(libshmfmi_LIBS_filtered "${libshmfmi_LIBS_filtered};${LETTER}")
+#endif()
+#endforeach()
+#message(STATUS "libshmfmi's altered to: ${libshmfmi_LIBS_filtered}")
+
+
+#target_link_libraries(${PROJECT_NAME} ${libshmfmi_LIBS})
+#target_link_libraries(${PROJECT_NAME} ${libshmfmi_LIBS_filtered})
+target_link_libraries(${PROJECT_NAME} rt dl)
 
 add_test(AllTestsIn-testlibshmfmu ${PROJECT_NAME})
+
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTEST_RUNNER_DRIVER_PATH=\\\"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-driver\\\"")
+add_executable(${PROJECT_NAME}-driver runner/testrunner.cpp RemoteTestDriver.cpp)
+
+
+
+target_link_libraries(${PROJECT_NAME}-driver libshmfmi)
+target_link_libraries(${PROJECT_NAME}-driver ${libshmfmi_LIBS})
+

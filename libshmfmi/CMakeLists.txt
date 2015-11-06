@@ -26,7 +26,8 @@ else()
 endif()
 
 
-set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-pthread")
+#set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-pthread")
+#set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-pthread")
 
 add_library(${PROJECT_NAME} FmiIpc.cpp ${PROTO_SRCS} ${PROTO_HDRS} ExternalClient.cpp)
 
@@ -48,7 +49,10 @@ if (UNIX)
 		# set the protobuf lib
 		set(PROTOBUF_LIBRARIES /usr/local/lib/libprotobuf.a)
 	else()
-		set(PROTOBUF_LIBRARIES /usr/local/lib/libprotobuf.a ${PROTOBUF_LIBRARIES})
+		#set(PROTOBUF_LIBRARIES -Wl,--whole-archive /usr/local/lib/libprotobuf.a /home/parallels/shm-fmi/third_party/zlib/libz.a -Wl,--no-whole-archive -lpthread)
+		set(PROTOBUF_LIBRARIES /usr/local/lib/libprotobuf.a -lpthread)
+#set(PROTOBUF_LIBRARIES ${PROTOBUF_LIBRARIES})
+		#set(CMAKE_INSTALL_RPATH "$ORIGIN/")
  		set(ADDITIONAL_LIBS rt dl)
 	endif()
 endif()
