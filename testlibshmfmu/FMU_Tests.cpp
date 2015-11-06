@@ -37,14 +37,6 @@ extern "C"
 #include "FMU_TestsFixture.h"
 
 
-//
-// Define this REMOTE_TEST_DRIVER to use the remote java test driver
-//
- FMU FMUTest::s_fmu;
- bool FMUTest::s_libLoaded = false;
- fmi2Component FMUTest::gcomp = NULL;
-
-
 /*******************************************
  *
  * start/end
@@ -397,10 +389,11 @@ TEST_F(FMUTest, fmi2GetStringStatus)
 }
 
 
-// This test is the last since it unloads the global test fmu
 TEST_F(FMUTest, freeInstance)
 {
 	fmi2Component comp = instantiated();
 
 	fmu.freeInstance(comp);
+	//we must tell teardown to skip freeinstance
+	FMUTest::comp = NULL;
 }

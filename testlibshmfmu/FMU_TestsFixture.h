@@ -22,6 +22,7 @@ class FMUTest: public ::testing::Test
 public:
 	FMUTest()
 	{
+		comp = NULL;
 	}
 
 	void SetUp()
@@ -31,6 +32,10 @@ public:
 
 	void TearDown()
 	{
+		if (fmu.dllHandle != NULL && comp != NULL)
+		{
+			fmu.freeInstance(comp);
+		}
 	}
 
 	~FMUTest()
@@ -38,18 +43,12 @@ public:
 		// cleanup any pending stuff, but no exceptions allowed
 	}
 
-	static FMU s_fmu;
-	static bool s_libLoaded;
-
 	FMU fmu;
-	static fmi2Component gcomp;
+	fmi2Component comp;
 
 private:
 	FMU setup()
 	{
-		if (FMUTest::s_libLoaded)
-			return FMUTest::s_fmu;
-
 		HMODULE h;
 
 		//write config
@@ -66,9 +65,6 @@ private:
 
 		EXPECT_EQ(true, loadDll(FMULIB, &fmu, &h));
 
-		FMUTest::s_fmu = fmu;
-		FMUTest::s_libLoaded = true;
-
 		return fmu;
 	}
 
@@ -76,20 +72,16 @@ public:
 
 	fmi2Component instantiated()
 	{
-		if (FMUTest::gcomp == NULL)
-		{
+		char * cwd = getcwd(NULL, 0);
 
-			char * cwd = getcwd(NULL, 0);
+		if (cwd == NULL)
+			perror("unable to obtaining cur directory\n");
 
-			if (cwd == NULL)
-				perror("unable to obtaining cur directory\n");
+		comp = fmu.instantiate(INSTANCE_NAME, fmi2CoSimulation, GUID, cwd, NULL,
+				true, true);
+		delete cwd;
 
-			FMUTest::gcomp = fmu.instantiate(INSTANCE_NAME, fmi2CoSimulation,
-					GUID, cwd, NULL, true, true);
-			delete cwd;
-		}
-
-		return FMUTest::gcomp;
+		return comp;
 	}
 
 	fmi2Component setuped()
