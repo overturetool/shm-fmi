@@ -99,7 +99,7 @@ int JavaLauncher::launch() {
 	int kk = cmd.length();
 		char * buf = new char[cmd.length()];
 		memcpy(buf,cmd.c_str(),cmd.length());
-		buf[kk-1]=NULL;
+		buf[kk-1]=0;
 
 	printf("Launching process: '%s' with arguments: '%s' in folder '%s'\n",m_args[0],buf,m_workingDir);
 
