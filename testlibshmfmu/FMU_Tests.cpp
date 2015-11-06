@@ -44,93 +44,6 @@ extern "C"
  bool FMUTest::s_libLoaded = false;
  fmi2Component FMUTest::gcomp = NULL;
 
-//static FMU s_fmu;
-//static bool s_libLoaded = false;
-
-//static std::thread* t1 = NULL;
-//
-//void remoteClientThread()
-//{
-//	std::this_thread::sleep_for(std::chrono::milliseconds
-//(100));
-//	printf("Starting service test responder thread\n");
-//	std::string port(GUID);
-//
-//	port += std::string(INSTANCE_NAME);
-//
-//#ifndef REMOTE_TEST_DRIVER
-////	while (true)
-//	//	remoteTestDriver("shmFmiTest");
-//#endif
-//}
-
-//static FMU setup()
-//{
-//	if (s_libLoaded)
-//		return s_fmu;
-//
-//	FMU fmu;
-//	HMODULE h;
-//
-//	EXPECT_EQ(true, loadDll(FMULIB, &fmu, &h));
-//
-//	s_fmu = fmu;
-//	s_libLoaded = true;
-//
-////	if (t1 == NULL)
-////		{
-////			t1 = new std::thread(remoteClientThread);
-////			t1->detach();
-////		}
-//
-//	return fmu;
-//}
-//
-//fmi2Component gcomp = NULL;
-//
-//static fmi2Component instantiated(FMU fmu)
-//{
-//	if (gcomp == NULL)
-//		gcomp = fmu.instantiate(INSTANCE_NAME, fmi2CoSimulation, GUID, ".",
-//		NULL, true, true);
-//
-//	return gcomp;
-//}
-//
-//static fmi2Component setuped(FMU fmu)
-//{
-//	fmi2Component comp = instantiated(fmu);
-//
-//	fmi2Status status = fmu.setupExperiment(comp, toleranceDefined, tolerance,
-//	startTime, stopTimeDefined, stopTime);
-//
-//	EXPECT_EQ(fmi2OK, status);
-//	return comp;
-//}
-//
-//static fmi2Component initializing(FMU fmu)
-//{
-//	fmi2Component comp = setuped(fmu);
-//
-//	fmi2Status status = fmu.enterInitializationMode(comp);
-//
-//	EXPECT_EQ(fmi2OK, status);
-//	return comp;
-//}
-//
-//static fmi2Component initialized(FMU fmu)
-//{
-//	fmi2Component comp = setuped(fmu);
-//
-//	fmi2Status status = fmu.enterInitializationMode(comp);
-//
-//	EXPECT_EQ(fmi2OK, status);
-//
-//	status = fmu.exitInitializationMode(comp);
-//
-//	EXPECT_EQ(fmi2OK, status);
-//	return comp;
-//}
 
 /*******************************************
  *
@@ -150,8 +63,6 @@ TEST_F(FMUTest, getVersion)
 
 TEST_F(FMUTest, instantiate)
 {
-//fmu.instantiate("A", fmi2CoSimulation, "{348783748923}", ".", NULL, true,
-//	true);
 	instantiated();
 }
 
@@ -485,6 +396,8 @@ TEST_F(FMUTest, fmi2GetStringStatus)
 	ASSERT_STREQ("waiting", value);
 }
 
+
+// This test is the last since it unloads the global test fmu
 TEST_F(FMUTest, freeInstance)
 {
 	fmi2Component comp = instantiated();

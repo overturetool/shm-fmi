@@ -22,55 +22,21 @@ class FMUTest: public ::testing::Test
 public:
 	FMUTest()
 	{
-		// initialization code here
-//		pid = 0;
 	}
 
 	void SetUp()
 	{
-		// code here will execute just before the test ensues
-		//   printf("Ready for forking\n");
-//	   pid = fork();
-//	   	if (pid == 0)
-//	   	{
-//	   		std::this_thread::sleep_for(std::chrono::milliseconds
-//	   		(1000));
-//	   		printf("test driver forked\n");
-//	   		execl("./testlibshmfmu-driver","./testlibshmfmu-driver", (char*) 0);
-//	   	 fputs(dlerror(),stderr);
-//	   	//        fprintf(stderr,dlerror());
-//	   	        fflush(stderr);
-//	   		exit(0);
-//	   	} else if(pid==-1)
-//	   	{
-//	   		// Parent process will return a non-zero value from fork()
-//	   		printf("server_create: failed to fork: %01d %s\n", __LINE__,strerror( errno ));
-//
-//
-//	   	}else{
-//
-//	   	}
-
 		fmu = setup();
 	}
 
 	void TearDown()
 	{
-		// code here will be called just after the test completes
-		// ok to through exceptions from here if need be
-
-//	   if(pid!=0)
-//		   kill(pid, SIGKILL);
-		//fmu.freeInstance(FMUTest::gcomp);
 	}
 
 	~FMUTest()
 	{
 		// cleanup any pending stuff, but no exceptions allowed
 	}
-
-//   int pid;
-	// put in any custom data members that you need
 
 	static FMU s_fmu;
 	static bool s_libLoaded;
@@ -102,12 +68,6 @@ private:
 
 		FMUTest::s_fmu = fmu;
 		FMUTest::s_libLoaded = true;
-
-		//	if (t1 == NULL)
-		//		{
-		//			t1 = new std::thread(remoteClientThread);
-		//			t1->detach();
-		//		}
 
 		return fmu;
 	}
