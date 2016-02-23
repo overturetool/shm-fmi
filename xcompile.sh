@@ -12,7 +12,7 @@ function compileDarwin64
 		rm -rf $B
 		mkdir -p $B
 
-		cmake  -B$B -H$1 -DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/osx-gcc.cmake` -DOSXCROSS_ROOT=$OSXCROSS_ROOT
+		JAVA_HOME=$B/third_party/jvm/darwin64 cmake  -B$B -H$1 -DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/osx-gcc.cmake` -DOSXCROSS_ROOT=$OSXCROSS_ROOT
 
 		make -C $B -j$threads
 
@@ -27,7 +27,7 @@ function compileWin32
 		rm -rf $B
 		mkdir -p $B
 
-		JAVA_HOME=shmfmi-server/src/jni/java-win32 cmake  -B$B -H$1 -DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/cmake-toolchains/Toolchain-Ubuntu-mingw32.cmake`
+		JAVA_HOME=$B/third_party/jvm/win32 cmake  -B$B -H$1 -DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/cmake-toolchains/Toolchain-Ubuntu-mingw32.cmake`
 
 		make -C $B -j$threads
 
@@ -42,7 +42,7 @@ function compileWin64
 		rm -rf $B
 		mkdir -p $B
 
-		JAVA_HOME=shmfmi-server/src/jni/java-win64 cmake  -B$B -H$1 -DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/cmake-toolchains/Toolchain-Ubuntu-mingw64.cmake`
+		JAVA_HOME=$B/third_party/jvm/win64 cmake  -B$B -H$1 -DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/cmake-toolchains/Toolchain-Ubuntu-mingw64.cmake`
 
 		make -C $B -j$threads
 
@@ -55,7 +55,7 @@ function compileLinux64
 		rm -rf $B
 		mkdir -p $B
 
-		cmake  -B$B -H$1
+		JAVA_HOME=$B/third_party/jvm/linux64 cmake  -B$B -H$1
 
 		make -C $B -j$threads
 }
@@ -68,7 +68,7 @@ function compileLinux32
 		rm -rf $B
 		mkdir -p $B
 
-		cmake -B$B -H$1 -DLINK_FLAGS="-m32" -DCFLAGS="-m32"
+		JAVA_HOME=$B/third_party/jvm/linux64 cmake -B$B -H$1 -DLINK_FLAGS="-m32" -DCFLAGS="-m32"
 
 		make -C $B -j$threads
 }
