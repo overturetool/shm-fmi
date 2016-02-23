@@ -6,3 +6,6 @@
 [submodule "third_party/cmake-toolchains"]
 	path = third_party/cmake-toolchains
 	url = https://github.com/zyga/cmake-toolchains.git
+[submodule "toolchains/cmake-toolchains"]
+	path = toolchains/cmake-toolchains
+	url = https://github.com/zyga/cmake-toolchains.git
