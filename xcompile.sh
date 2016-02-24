@@ -115,7 +115,13 @@ function compileLinux32
 		make -C $B -j$threads
 }
 
+function generateJava
+{
+		OUT=shmfmi-server/target/generated-protoc/
+		mkdir -p $OUT
+		protoc --java_out=$OUT --proto_path=proto proto/service.proto
 
+}
 
 
 function xcompile
@@ -134,3 +140,4 @@ function xcompile
 
 xcompile .
 
+generateJava
