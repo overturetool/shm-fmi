@@ -105,13 +105,12 @@ function compileLinux32
 		rm -rf $B
 		mkdir -p $B
 
-		JAVA_HOME=../third_party/jvm/linux64 cmake \
-						 -B$B \
-						 -H$1 \
-						 -DLINK_FLAGS="-m32" \
-						 -DCFLAGS="-m32" \
-						 -DPROTOBUF_INCLUDE_DIRS=$SHM_DEPENDENCIES_ROOT/linux32/usr/protobuf/include/ \
-             -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/linux32/usr/protobuf/lib/libprotobuf.a
+		CC="gcc -m32" CXX="g++ -m32" JAVA_HOME=../third_party/jvm/linux64 cmake \
+			-B$B \
+			-H$1 \
+			-DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/linux32-gcc.cmake` \
+			-DPROTOBUF_INCLUDE_DIRS=$SHM_DEPENDENCIES_ROOT/linux32/usr/protobuf/include/ \
+      -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/linux32/usr/protobuf/lib/libprotobuf.a
 
 		make -C $B -j$threads
 }
