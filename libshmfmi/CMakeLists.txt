@@ -8,7 +8,6 @@ set(CMAKE_VERBOSE_MAKEFILE on)
 find_package(Protobuf REQUIRED)
 include_directories(${PROTOBUF_INCLUDE_DIRS})
 
-
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ../proto/service.proto)
 
 
@@ -25,9 +24,6 @@ else()
         message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-
-#set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-pthread")
-#set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-pthread")
 
 add_library(${PROJECT_NAME} FmiIpc.cpp ${PROTO_SRCS} ${PROTO_HDRS} ExternalClient.cpp)
 
@@ -47,15 +43,9 @@ set(ADDITIONAL_LIBS "")
 if (UNIX)
 	if(APPLE)
 		# set the protobuf lib
-		set(PROTOBUF_LIBRARIES /usr/lib/libprotobuf.a)
 	else()
-		#set(PROTOBUF_LIBRARIES -Wl,--whole-archive /usr/local/lib/libprotobuf.a /home/parallels/shm-fmi/third_party/zlib/libz.a -Wl,--no-whole-archive -lpthread)
-		set(PROTOBUF_LIBRARIES /usr/lib/libprotobuf.a -lpthread)
-#set(PROTOBUF_LIBRARIES ${PROTOBUF_LIBRARIES})
-		#set(CMAKE_INSTALL_RPATH "$ORIGIN/")
  		set(ADDITIONAL_LIBS rt dl)
 	endif()
 endif()
 
-																	 
 set(${PROJECT_NAME}_LIBS ${PROTOBUF_LIBRARIES} ${ADDITIONAL_LIBS} CACHE INTERNAL "${PROJECT_NAME}: Libraries" FORCE)
