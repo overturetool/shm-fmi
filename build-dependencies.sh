@@ -95,7 +95,7 @@ else
 			LF_FLAGS=-m32
 		fi
 
-		./configure --build=i686-pc-linux-gnu --with-protoc=protoc --disable-shared --prefix=$PROTOBUF_INSTALL  "CCFLAGS=$CC_FLAGS" "CXXFLAGS=$CXX_FLAGS" "LDFLAGS=$LD_FLAGS"
+		./configure --build=i686-pc-linux-gnu --with-protoc=protoc --disable-shared --prefix=$PROTOBUF_INSTALL  "CCFLAGS=$CC_FLAGS -fPIC" "CXXFLAGS=$CXX_FLAGS -fPIC" "LDFLAGS=$LD_FLAGS"
 	fi
 
 fi
