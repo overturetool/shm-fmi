@@ -132,7 +132,7 @@ function createGitInfo
 
 		git remote -v > $INFO
 		git show-ref HEAD >> $INFO
-		git rev-parse --verify HEAD >> $INFO
+		git rev-parse HEAD >> $INFO
 
 }
 
