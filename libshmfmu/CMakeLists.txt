@@ -61,6 +61,6 @@ set_target_properties(${PROJECT_NAME}
 
 # Expose A's public includes (including the ones of A's dependencies
 # transitively) to other subprojects through cache variable.
-set(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/include ${libshmfmi_INCLUDE_DIRS} CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
+set(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/include ${libshmfmi_INCLUDE_DIRS} CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
 
 set(${PROJECT_NAME}_LIBS ${libshmfmi_LIBS} CACHE INTERNAL "${PROJECT_NAME}: Libraries" FORCE)
