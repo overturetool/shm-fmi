@@ -123,6 +123,18 @@ function generateJava
 
 }
 
+function createGitInfo
+{
+		echo Storing git info in 'git-info.txt'
+
+		INFO=git-info.txt
+		rm -f $INFO
+
+		git remote -v > $INFO
+		git show-ref HEAD >> $INFO
+		git rev-parse --verify HEAD >> $INFO
+
+}
 
 function xcompile
 {
@@ -136,7 +148,7 @@ function xcompile
 }
 
 
-
+createGitInfo
 
 xcompile .
 
