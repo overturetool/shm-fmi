@@ -41,7 +41,7 @@ ConfigFile::ConfigFile(std::string configFile,std::string port)
 	{
 		//printf("Copying line: %s\n",arguments.at(i).c_str());
 
-		this->m_args[i] = new char[arguments.at(i).size()];
+		this->m_args[i] = new char[arguments.at(i).size()+1];
 		strcpy(this->m_args[i], arguments.at(i).c_str() );
 
 		for(int j=0; j < arguments.at(i).length();j++)
