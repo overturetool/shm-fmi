@@ -27,6 +27,7 @@ add_subdirectory(shmfmi-server)
 add_subdirectory(third_party/googletest/googletest)
 add_subdirectory(testlibshmfmi) # C is a shared library (depends on B and external XXX)
 add_subdirectory(testlibshmfmu)
+add_subdirectory(testfmu-integration)
 #add_subdirectory(third_party/googletest/googletest)
 
 

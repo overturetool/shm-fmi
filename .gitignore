@@ -65,13 +65,18 @@ CTestTestfile.cmake
 
 
 # output / generated files
-testlibshmfmu/config.txt
+testfmu-integration/config.txt
 testlibshmfmu/testlibshmfmu
 testlibshmfmu/testlibshmfmu-driver
 testlibshmfmi/testlibshmfmi
-
+testfmu-integration/testfmu-integration
+testfmu-integration/testfmu-integration-driver
 
 #testing
 
 **/Testing
 git-info.txt
+
+#code blocks
+*.cbp
+*.layout
