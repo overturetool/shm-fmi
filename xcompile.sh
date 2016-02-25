@@ -130,9 +130,11 @@ function createGitInfo
 		INFO=git-info.txt
 		rm -f $INFO
 
+		set +e
 		git remote -v > $INFO
-		git show-ref HEAD >> $INFO
+		git show-ref >> $INFO
 		git rev-parse HEAD >> $INFO
+		set -e
 
 }
 
