@@ -27,50 +27,50 @@ JavaLauncher::~JavaLauncher() {
 //Returns the last Win32 error, in string format. Returns an empty string if there is no error.
 std::string GetLastErrorAsString()
 {
-    //Get the error message, if any.
-    DWORD errorMessageID = ::GetLastError();
-    if(errorMessageID == 0)
-        return std::string(); //No error message has been recorded
+	//Get the error message, if any.
+	DWORD errorMessageID = ::GetLastError();
+	if(errorMessageID == 0)
+	return std::string();//No error message has been recorded
 
-    LPSTR messageBuffer = nullptr;
-    size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                                 NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+	LPSTR messageBuffer = nullptr;
+	size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
 
-    std::string message(messageBuffer, size);
+	std::string message(messageBuffer, size);
 
-    //Free the buffer.
-    LocalFree(messageBuffer);
+	//Free the buffer.
+	LocalFree(messageBuffer);
 
-    return message;
+	return message;
 }
 
 // Create a string with last error message
 std::string GetLastErrorStdStr()
 {
-  DWORD error = GetLastError();
-  if (error)
-  {
-    LPVOID lpMsgBuf;
-    DWORD bufLen = FormatMessage(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER |
-        FORMAT_MESSAGE_FROM_SYSTEM |
-        FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL,
-        error,
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        (LPTSTR) &lpMsgBuf,
-        0, NULL );
-    if (bufLen)
-    {
-      LPCSTR lpMsgStr = (LPCSTR)lpMsgBuf;
-      std::string result(lpMsgStr, lpMsgStr+bufLen);
+	DWORD error = GetLastError();
+	if (error)
+	{
+		LPVOID lpMsgBuf;
+		DWORD bufLen = FormatMessage(
+				FORMAT_MESSAGE_ALLOCATE_BUFFER |
+				FORMAT_MESSAGE_FROM_SYSTEM |
+				FORMAT_MESSAGE_IGNORE_INSERTS,
+				NULL,
+				error,
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+				(LPTSTR) &lpMsgBuf,
+				0, NULL );
+		if (bufLen)
+		{
+			LPCSTR lpMsgStr = (LPCSTR)lpMsgBuf;
+			std::string result(lpMsgStr, lpMsgStr+bufLen);
 
-      LocalFree(lpMsgBuf);
+			LocalFree(lpMsgBuf);
 
-      return result;
-    }
-  }
-  return std::string();
+			return result;
+		}
+	}
+	return std::string();
 }
 #endif
 
@@ -90,31 +90,31 @@ int JavaLauncher::launch() {
 	while (m_args[i] != NULL) {
 
 		//if (i > 0) {
-			cmd += m_args[i];
-			cmd += " ";
-	//	}
+		cmd += m_args[i];
+		cmd += " ";
+		//	}
 		i++;
 	}
 
 	int kk = cmd.length();
-		char * buf = new char[cmd.length()];
-		memcpy(buf,cmd.c_str(),cmd.length());
-		buf[kk-1]=0;
+	char * buf = new char[cmd.length()];
+	memcpy(buf,cmd.c_str(),cmd.length());
+	buf[kk-1]=0;
 
 	printf("Launching process: '%s' with arguments: '%s' in folder '%s'\n",m_args[0],buf,m_workingDir);
 
 	// Start the child process.
 	if (!CreateProcess(NULL,//m_args[0],   // No module name (use command line)
-			buf,        // Command line
-			NULL,           // Process handle not inheritable
-			NULL,           // Thread handle not inheritable
-			FALSE,          // Set handle inheritance to FALSE
-			0,              // No creation flags
-			NULL,           // Use parent's environment block
-			m_workingDir,           // Use parent's starting directory
-			&si,            // Pointer to STARTUPINFO structure
-			&pi)           // Pointer to PROCESS_INFORMATION structure
-			) {
+					buf,// Command line
+					NULL,// Process handle not inheritable
+					NULL,// Thread handle not inheritable
+					FALSE,// Set handle inheritance to FALSE
+					0,// No creation flags
+					NULL,// Use parent's environment block
+					m_workingDir,// Use parent's starting directory
+					&si,// Pointer to STARTUPINFO structure
+					&pi)// Pointer to PROCESS_INFORMATION structure
+	) {
 		//printf("CreateProcess failed (%d).\n", GetLastError());
 		printf("---CresteProcess failed %s\n",GetLastErrorStdStr().c_str());
 		delete buf;
@@ -129,8 +129,7 @@ int JavaLauncher::launch() {
 
 	int status;
 	pid = fork();
-	if (pid == 0)
-	{
+	if (pid == 0) {
 		printf("Fork application %s\n", m_args[0]);
 		// Child process will return 0 from fork()
 
@@ -142,36 +141,39 @@ int JavaLauncher::launch() {
 		 printf("%s ",m_args[i]);
 		 }
 		 printf("\n");*/
-		if(m_workingDir!=NULL)
-		{
-		if(chdir(m_workingDir)==0){
-			printf("Changed dir to: %s\n",m_workingDir);
-		}else{
-			printf("server_create: failed to fork and change dir: %01d %s\n", __LINE__,strerror( errno ));
-		}
+		if (m_workingDir != NULL) {
+			if (chdir(m_workingDir) == 0) {
+				printf("Changed dir to: %s\n", m_workingDir);
+			} else {
+				printf(
+						"server_create: failed to fork and change dir: %01d %s\n",
+						__LINE__, strerror( errno));
+			}
 
 		}
 		int i = 0;
 		while (m_args[i] != NULL) {
 
-				//if (i > 0) {
-					printf("%s\n", m_args[i]);
-				i++;
-			}
+			//if (i > 0) {
+			printf("%s\n", m_args[i]);
+			i++;
+		}
 
 		status = execvp(m_args[0], m_args);
-		printf("server_create: failed to fork and execvp: %01d %s\n", __LINE__,strerror( errno ));
+		int errn = errno;
+		printf("server_create: failed to fork and execvp: %01d %s\n", __LINE__,
+				strerror(errn));
 //		printf("program %s, arg 1: %s\n",m_args[0],m_args[1]);
 		printf("Execvp status: %d\n", status);
-		printf("Execvp error: %d", errno);
-		exit(0);
-	} else if(pid==-1)
-	{
+		printf("Execvp error: %d", errn);
+		exit(errn);
+	} else if (pid == -1) {
 		// Parent process will return a non-zero value from fork()
-		printf("server_create: failed to fork: %01d %s\n", __LINE__,strerror( errno ));
+		printf("server_create: failed to fork: %01d %s\n", __LINE__,
+				strerror( errno));
 
 		m_launched = false;
-	}else{
+	} else {
 		m_launched = true;
 	}
 
