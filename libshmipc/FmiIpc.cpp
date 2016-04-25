@@ -526,26 +526,33 @@ FmiIpc::Client::~Client()
 {
 	// Close the event
 	if (m_hSignal)
+	{
 		FmiIpc::close(m_hSignal);
+	}
 
 	// Close the event
 	if (m_hAvail)
+	{
 		FmiIpc::close(m_hAvail);
+	}
 
 	// Unmap the memory
 	//UnmapViewOfFile(m_pBuf);
 	if (m_pBuf)
+	{
 		FmiIpc::unmap(m_pBuf, m_name);
+	}
 
 	// Close the file handle
 	if (m_hMapFile)
+	{
 #ifdef _WIN32
 		FmiIpc::close(m_hMapFile);
 #elif __APPLE__ ||  __linux
 //POSIX
 //		shm_unlink(m_name->c_str());
 #endif
-
+	}
 	if (m_name != NULL)
 		delete m_name;
 }
