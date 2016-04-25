@@ -135,7 +135,7 @@ void FmiIpc::Server::create(const char* name)
 {
 
 	std::string* nameOfMapping = getMappedName(SHARED_MEM_BASE_NAME, name);
-	//printf("Starting server with key: %s\n", nameOfMapping->c_str());
+	printf("Starting server with key: %s\n", nameOfMapping->c_str());
 	// Create the file mapping
 
 #ifdef _WIN32
@@ -393,13 +393,13 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 	m_hAvail = 0;
 	m_pBuf = NULL;
 
-	//printf("Client key %s\n", connectAddr);
+	printf("Client key %s\n", connectAddr);
 
 
 
 	std::string* nameOfMapping = getMappedName(SHARED_MEM_BASE_NAME,
 			connectAddr);
-	//printf("Starting client with key: %s\n", nameOfMapping->c_str());
+	printf("Starting client with key: %s\n", nameOfMapping->c_str());
 	// Open the shared file
 
 #ifdef _WIN32
