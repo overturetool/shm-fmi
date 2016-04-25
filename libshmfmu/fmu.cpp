@@ -142,6 +142,8 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 		return NULL;
 	}
 
+	printf("FMU Server client create, hosting SHM with raw key: %s\n", url);
+
 	FmuContainer *container = new FmuContainer(client, instanceName, functions,
 			launcher);
 
