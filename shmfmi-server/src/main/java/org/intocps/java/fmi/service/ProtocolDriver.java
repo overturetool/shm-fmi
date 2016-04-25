@@ -19,15 +19,25 @@ public class ProtocolDriver implements Runnable {
 
 		this.mem = new SharedMemory();
 		
+		int retries = 10;
+		boolean connected = false;
+		
 		System.out.println("Starting shared memory with key: "+id);
 		logger.debug("Starting shared memory with key: {}",id);
-		while (!this.mem.setId(id)) {
+		while (!(connected=this.mem.setId(id)) && retries>=0) {
 			try {
-				Thread.sleep(100);
+				Thread.sleep(500);
+				retries--;
 			} catch (InterruptedException e) {
 				// don't care
 			}
 		}
+		
+		if(!connected)
+		{
+			throw new RuntimeException("Unable to connect");
+		}
+		
 		this.service = service;
 
 		thread = new Thread(this);
