@@ -115,6 +115,8 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 {
 	std::string port(fmuGUID);
 
+	setbuf(stdout, NULL);//fixme remove
+
 	port += instanceName;
 
 	std::string resourceLocationStr(fmuResourceLocation);
@@ -132,7 +134,7 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 	}
 
 	std::string url = port;
-	std::cout << "--Launching with shared memory key: '" << url << "'" << std::endl;
+	std::cout << "---Launching with shared memory key: '" << url << "'" << std::endl;
 
 	ExternalClient *client = new ExternalClient(url);
 
