@@ -20,7 +20,7 @@ else()
         message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-set(CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS} "-pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 add_executable(${PROJECT_NAME} FmiIpc.cpp ipcmain.cpp)
 
@@ -28,8 +28,6 @@ add_executable(${PROJECT_NAME} FmiIpc.cpp ipcmain.cpp)
 # transitively) to other subprojects through cache variable.
 set(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR} CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
 
-find_library(PTHREAD_LIBRARY NAMES libpthread.a libpthread.dylib)
-target_link_libraries(${PROJECT_NAME} ${PTHREAD_LIBRARY})
 
 # extra libs
 set(ADDITIONAL_LIBS "")
