@@ -132,7 +132,7 @@ void FmiIpc::Server::create(const char* name)
 {
 
 	std::string* nameOfMapping = getMappedName(SHARED_MEM_BASE_NAME, name);
-	printf("Starting server with key: %s\n", nameOfMapping->c_str());
+	printf("Starting IPC server with key: %s\n", nameOfMapping->c_str());
 	// Create the file mapping
 
 #ifdef _WIN32
@@ -324,7 +324,7 @@ void FmiIpc::Server::create(const char* name)
 
 	if (m_pBuf == NULL)
 	{
-		printf("Error in server ctr, buf NULL\n");
+		printf("Error in IPC server ctr, buf NULL\n");
 	}
 
 	//m_pBuf->message.cmd = fmi2Reset;
@@ -332,12 +332,12 @@ void FmiIpc::Server::create(const char* name)
 
 SharedFmiMessage* FmiIpc::Server::send(SharedFmiMessage* message, DWORD dwTimeout)
 {
-	DEBUG_PRINTF(("Server write msg\n"));
+	DEBUG_PRINTF(("IPC Server write msg\n"));
 	this->m_pBuf->message = *message;
 
 #ifdef _WIN32
 	SetEvent(this->m_hAvail);
-	DEBUG_PRINTF(("Server signaled\n"));
+	DEBUG_PRINTF(("IPC Server signaled\n"));
 
 	if (WaitForSingleObject(this->m_hSignal, dwTimeout) != WAIT_OBJECT_0)
 	{
@@ -347,7 +347,7 @@ SharedFmiMessage* FmiIpc::Server::send(SharedFmiMessage* message, DWORD dwTimeou
 //		printf("Server signaled avail\n");
 	sem_post(this->m_hAvail);
 
-	DEBUG_PRINTF(("Server signaled\n"));
+	DEBUG_PRINTF(("IPC Server signaled\n"));
 
 //		printf("Server waiting signal\n");
 	sem_wait(this->m_hSignal);
@@ -359,7 +359,7 @@ SharedFmiMessage* FmiIpc::Server::send(SharedFmiMessage* message, DWORD dwTimeou
 //	sem_wait(&this->m_pBuf->semSignal);
 #endif
 
-	DEBUG_PRINTF(("Server ret msg\n"));
+	DEBUG_PRINTF(("IPC Server ret msg\n"));
 	return &this->m_pBuf->message;
 }
 
@@ -381,10 +381,10 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 	m_hAvail = 0;
 	m_pBuf = NULL;
 
-	printf("Client key %s\n", connectAddr);
+	printf("IPC Client key %s\n", connectAddr);
 
 	std::string* nameOfMapping = getMappedName(SHARED_MEM_BASE_NAME, connectAddr);
-	printf("Starting client with key: %s\n", nameOfMapping->c_str());
+	printf("Starting IPC client with key: %s\n", nameOfMapping->c_str());
 	// Open the shared file
 
 #ifdef _WIN32
@@ -519,7 +519,7 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 #endif
 
 	*success = true;
-	DEBUG_PRINTF(("Client connected to shared memory %s, status %d\n",this->m_name->c_str(),*success));
+	DEBUG_PRINTF(("IPC Client connected to shared memory %s, status %d\n",this->m_name->c_str(),*success));
 }
 
 FmiIpc::Client::~Client()
@@ -583,7 +583,7 @@ SharedFmiMessage* FmiIpc::Client::getMessage(DWORD dwTimeout)
 
 	if (waitAvailable(dwTimeout))
 	{
-		DEBUG_PRINTF(("Client ret msg\n"));
+		DEBUG_PRINTF(("IPC Client ret msg\n"));
 
 		return &this->m_pBuf->message;
 	}
@@ -591,7 +591,7 @@ SharedFmiMessage* FmiIpc::Client::getMessage(DWORD dwTimeout)
 }
 void FmiIpc::Client::sendReply(SharedFmiMessage* reply)
 {
-	DEBUG_PRINTF(("Client write msg\n"));
+	DEBUG_PRINTF(("IPC Client write msg\n"));
 	//memcpy(&this->m_pBuf->message, reply, sizeof(SharedFmiMessage));
 	this->m_pBuf->message = *reply;
 
@@ -605,5 +605,5 @@ void FmiIpc::Client::sendReply(SharedFmiMessage* reply)
 //POSIX
 //	sem_post(&this->m_pBuf->semSignal);
 #endif
-	DEBUG_PRINTF(("Client signaled\n"));
+	DEBUG_PRINTF(("IPC Client signaled\n"));
 }
