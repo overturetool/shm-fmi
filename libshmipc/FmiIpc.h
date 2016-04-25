@@ -97,9 +97,9 @@ public:
 		  if (r != 0)
 		    printf("munmap");
 
-		  r = shm_unlink(name->c_str());
-		  if (r != 0)
-			  printf("shm_unlink");
+//		  r = shm_unlink(name->c_str());
+//		  if (r != 0)
+//			  printf("shm_unlink");
 	#endif
 		}
 

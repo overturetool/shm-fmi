@@ -1,14 +1,9 @@
 cmake_minimum_required (VERSION 2.8.5)
-project (libshmfmi C CXX)
+project (libshmipc C CXX)
 
 include(CheckCXXCompilerFlag)
 
 set(CMAKE_VERBOSE_MAKEFILE on)
-
-find_package(Protobuf REQUIRED)
-include_directories(${PROTOBUF_INCLUDE_DIRS})
-
-PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ../proto/service.proto)
 
 
 
@@ -25,18 +20,18 @@ else()
         message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-include_directories(${libshmipc_INCLUDE_DIRS})
 
-add_library(${PROJECT_NAME} ../libshmipc/FmiIpc.cpp ${PROTO_SRCS} ${PROTO_HDRS} ExternalClient.cpp)
+#add_library(${PROJECT_NAME} FmiIpc.cpp)
 
-set_target_properties(${PROJECT_NAME}
-                      PROPERTIES POSITION_INDEPENDENT_CODE ON)
+add_executable(${PROJECT_NAME} FmiIpc.cpp ipcmain.cpp)
+
+#set_target_properties(${PROJECT_NAME}
+#                      PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 
 # Expose A's public includes (including the ones of A's dependencies
 # transitively) to other subprojects through cache variable.
-set(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR} ${PROTOBUF_INCLUDE_DIRS} ${libshmipc_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR} 
-                                     CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
+set(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR} CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
 
 
 

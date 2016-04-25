@@ -34,7 +34,7 @@ if (UNIX)
 	endif()
 endif()
 
-include_directories(${libshmfmi_SOURCE_DIR})
+include_directories(${libshmfmi_INCLUDE_DIRS})
 add_library(sharedmemory SHARED src/main/native/sharedmemory.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 
 target_link_libraries(sharedmemory libshmfmi)

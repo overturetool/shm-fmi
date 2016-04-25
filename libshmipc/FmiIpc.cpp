@@ -26,21 +26,18 @@ const char* FmiIpc::SIGNAL_NAME = "sig";
 //#define DEBUG
 
 #if defined( DEBUG )
- #define DEBUG_PRINTF(x) printf x
+#define DEBUG_PRINTF(x) printf x
 #else
-  #define DEBUG_PRINTF(x)
+#define DEBUG_PRINTF(x)
 #endif
-
 
 FmiIpc::FmiIpc()
 {
-	// TODO Auto-generated constructor stub
 
 }
 
 FmiIpc::~FmiIpc()
 {
-	// TODO Auto-generated destructor stub
 }
 
 std::string* getMappedName(const char* baseName, const char* name)
@@ -50,13 +47,13 @@ std::string* getMappedName(const char* baseName, const char* name)
 
 #ifdef __APPLE__
 
-	if(nameOfMapping->length()>=29)//31 is max incl NULL
+	if (nameOfMapping->length() >= 29) //31 is max incl NULL
 	{
-	
-		std::string hash= std::to_string(	std::hash<std::string>()(*nameOfMapping));
-		*nameOfMapping="/";
-				*nameOfMapping+=hash;
-		printf("New Apple shm key is: %s\n",nameOfMapping->c_str());
+
+		std::string hash = std::to_string(std::hash<std::string>()(*nameOfMapping));
+		*nameOfMapping = "/";
+		*nameOfMapping += hash;
+		printf("New Apple shm key is: %s\n", nameOfMapping->c_str());
 	}
 
 #endif
@@ -118,13 +115,13 @@ void FmiIpc::Server::close()
 	if (m_hMapFile)
 	{
 		HANDLE handle = m_hMapFile;
-		m_hMapFile =(HANDLE) NULL;
+		m_hMapFile = (HANDLE) NULL;
 
 #ifdef _WIN32
 		FmiIpc::close(m_hMapFile);
 #elif __APPLE__ ||  __linux
 //POSIX
-	shm_unlink(m_name->c_str());
+		shm_unlink(m_name->c_str());
 #endif
 
 	}
@@ -145,7 +142,7 @@ void FmiIpc::Server::create(const char* name)
 #elif __APPLE__ 
 //POSIX
 	shm_unlink(nameOfMapping->c_str());
-	m_hMapFile = shm_open(nameOfMapping->c_str(), O_CREAT|O_RDWR,	ALLPERMS);
+	m_hMapFile = shm_open(nameOfMapping->c_str(), O_CREAT | O_RDWR, ALLPERMS);
 
 #elif  __linux
 	m_hMapFile = shm_open(nameOfMapping->c_str(), O_CREAT | O_TRUNC | O_RDWR,
@@ -163,34 +160,32 @@ void FmiIpc::Server::create(const char* name)
 	{
 #endif
 
-		switch(errno)
-				{
-				case EACCES:
-					break;
+		switch (errno)
+		{
+		case EACCES:
+			break;
 
-				case EEXIST:
-							break;
-				case EINTR://The shm_open() operation was interrupted by a signal.
-							break;
-				case EINVAL://The shm_open() operation is not supported.
-							break;
-				case EMFILE:
-							break;
-				case ENAMETOOLONG:
-							break;
-				case ENFILE:
-							break;
-				case ENOENT:
-							break;
-				case ENOSPC:
-							break;
-				default:
-					break;
-				}
+		case EEXIST:
+			break;
+		case EINTR: //The shm_open() operation was interrupted by a signal.
+			break;
+		case EINVAL: //The shm_open() operation is not supported.
+			break;
+		case EMFILE:
+			break;
+		case ENAMETOOLONG:
+			break;
+		case ENFILE:
+			break;
+		case ENOENT:
+			break;
+		case ENOSPC:
+			break;
+		default:
+			break;
+		}
 
-		printf("server_create: failed: %01d %s\n", __LINE__,strerror( errno ));
-
-
+		printf("server_create: failed: %01d %s\n", __LINE__, strerror( errno));
 
 		return;
 	}
@@ -212,65 +207,63 @@ void FmiIpc::Server::create(const char* name)
 	if (ftruncate(m_hMapFile, sizeof(SharedFmiMem)) != 0)
 	{
 
-		switch(errno)
-						{
-						case EBADF:
-							break;
+		switch (errno)
+		{
+		case EBADF:
+			break;
 
-						case EFBIG:
-									break;
-						case EINVAL:
-									break;
-						case EROFS:
-									break;
-						case EINTR:
-									break;
-						case EIO:
-									break;
-						default:
-							break;
-						}
+		case EFBIG:
+			break;
+		case EINVAL:
+			break;
+		case EROFS:
+			break;
+		case EINTR:
+			break;
+		case EIO:
+			break;
+		default:
+			break;
+		}
 
-
-		printf("server_create: failed: unable to truncate. %s\n",strerror( errno ));
+		printf("server_create: failed: unable to truncate. %s\n", strerror( errno));
 		return;
 	}
 
-/*	struct stat sb;
-	if (fstat(m_hMapFile, &sb)) {
-	perror("fstat");
-	exit(1);
-	}
+	/*	struct stat sb;
+	 if (fstat(m_hMapFile, &sb)) {
+	 perror("fstat");
+	 exit(1);
+	 }
 
-	int ds = sizeof(SharedFmiMem);
-sb.st_size*/
+	 int ds = sizeof(SharedFmiMem);
+	 sb.st_size*/
 
-
-	void *ptr = mmap(NULL, sizeof(SharedFmiMem), PROT_READ | PROT_WRITE,MAP_SHARED, m_hMapFile, 0);
+	void *ptr = mmap(NULL, sizeof(SharedFmiMem), PROT_READ | PROT_WRITE, MAP_SHARED, m_hMapFile, 0);
 	if (ptr == MAP_FAILED)
 	{
 
-		switch(errno)
-							{
-							case EACCES:
-								break;
+		switch (errno)
+		{
+		case EACCES:
+			break;
 
-							case EBADF:
-										break;
-							case EINVAL:
-										break;
-							case ENODEV:
-										break;
-							case ENOMEM:
-										break;
-							case ENXIO:
-										break;
-							case EOVERFLOW:
-										break;
-							default:
-								break;
-							}
-		printf("server_create: failed: mmap: %s\n",strerror( errno ));
+		case EBADF:
+			break;
+		case EINVAL:
+			break;
+		case ENODEV:
+			break;
+		case ENOMEM:
+			break;
+		case ENXIO:
+			break;
+		case EOVERFLOW:
+			break;
+		default:
+			break;
+		}
+		printf("server_create: failed: mmap: %s\n", strerror( errno));
 		return;
 	}
 
@@ -306,62 +299,58 @@ sb.st_size*/
 
 	std::string* signalName = getMappedName(SIGNAL_NAME, name);
 	sem_unlink(signalName->c_str());
-	m_hSignal= sem_open(signalName->c_str(), O_CREAT , ALLPERMS, 0);
+	m_hSignal = sem_open(signalName->c_str(), O_CREAT, ALLPERMS, 0);
 
-	if (m_hSignal == (sem_t *)SEM_FAILED) {
-		printf("server_create: failed: sem_open signal: %s\n",strerror( errno ));
+	if (m_hSignal == (sem_t *) SEM_FAILED)
+	{
+		printf("server_create: failed: sem_open signal: %s\n", strerror( errno));
 
 	}
 	delete signalName;
 
-
-
 	std::string* signalAvailName = getMappedName(SIGNAL_AVALIABLE_NAME, name);
 	sem_unlink(signalAvailName->c_str());
-		m_hAvail = sem_open(signalAvailName->c_str(), O_CREAT , ALLPERMS, 0);
+	m_hAvail = sem_open(signalAvailName->c_str(), O_CREAT, ALLPERMS, 0);
 
-		if (m_hAvail == (sem_t *)SEM_FAILED) {
-				printf("server_create: failed: sem_open signal: %s\n",strerror( errno ));
+	if (m_hAvail == (sem_t *) SEM_FAILED)
+	{
+		printf("server_create: failed: sem_open signal: %s\n", strerror( errno));
 
-			}
+	}
 
-		delete signalAvailName;
+	delete signalAvailName;
 
 #endif
 
-		if(m_pBuf==NULL)
-		{
-			printf("Error in server ctr, buf NULL\n");
-		}
+	if (m_pBuf == NULL)
+	{
+		printf("Error in server ctr, buf NULL\n");
+	}
 
 	//m_pBuf->message.cmd = fmi2Reset;
 }
 
-SharedFmiMessage* FmiIpc::Server::send(SharedFmiMessage* message,
-		DWORD dwTimeout)
+SharedFmiMessage* FmiIpc::Server::send(SharedFmiMessage* message, DWORD dwTimeout)
 {
 	DEBUG_PRINTF(("Server write msg\n"));
 	this->m_pBuf->message = *message;
-
-
-
 
 #ifdef _WIN32
 	SetEvent(this->m_hAvail);
 	DEBUG_PRINTF(("Server signaled\n"));
 
-		if (WaitForSingleObject(this->m_hSignal, dwTimeout) != WAIT_OBJECT_0)
-		{
-			return NULL;
-		}
+	if (WaitForSingleObject(this->m_hSignal, dwTimeout) != WAIT_OBJECT_0)
+	{
+		return NULL;
+	}
 #elif __APPLE__ || __linux
 //		printf("Server signaled avail\n");
-		sem_post(this->m_hAvail);
+	sem_post(this->m_hAvail);
 
-		DEBUG_PRINTF(("Server signaled\n"));
+	DEBUG_PRINTF(("Server signaled\n"));
 
 //		printf("Server waiting signal\n");
-		sem_wait(this->m_hSignal);
+	sem_wait(this->m_hSignal);
 //		printf("Server done waiting signal\n");
 //#elif  __linux
 //POSIX
@@ -369,7 +358,6 @@ SharedFmiMessage* FmiIpc::Server::send(SharedFmiMessage* message,
 //	DEBUG_PRINTF(("Server signaled\n"));
 //	sem_wait(&this->m_pBuf->semSignal);
 #endif
-
 
 	DEBUG_PRINTF(("Server ret msg\n"));
 	return &this->m_pBuf->message;
@@ -382,7 +370,7 @@ FmiIpc::Client::Client()
 	m_hSignal = 0;
 	m_hAvail = 0;
 	m_pBuf = NULL;
-	m_name=NULL;
+	m_name = NULL;
 }
 
 FmiIpc::Client::Client(const char* connectAddr, bool* success)
@@ -395,10 +383,7 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 
 	printf("Client key %s\n", connectAddr);
 
-
-
-	std::string* nameOfMapping = getMappedName(SHARED_MEM_BASE_NAME,
-			connectAddr);
+	std::string* nameOfMapping = getMappedName(SHARED_MEM_BASE_NAME, connectAddr);
 	printf("Starting client with key: %s\n", nameOfMapping->c_str());
 	// Open the shared file
 
@@ -422,7 +407,33 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 	{
 #endif
 
-	//	printf("Starting client with key: %s - faild\n",				nameOfMapping->c_str());
+		//	printf("Starting client with key: %s - faild\n",				nameOfMapping->c_str());
+
+		switch (errno)
+		{
+		case EACCES:
+			break;
+
+		case EEXIST:
+			break;
+		case EINTR:	//The shm_open() operation was interrupted by a signal.
+			break;
+		case EINVAL:	//The shm_open() operation is not supported.
+			break;
+		case EMFILE:
+			break;
+		case ENAMETOOLONG:
+			break;
+		case ENFILE:
+			break;
+		case ENOENT:
+			break;
+		case ENOSPC:
+			break;
+		default:
+			break;
+		}
+
 		*success = false;
 		return;
 	}
@@ -459,59 +470,53 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 		return;
 	}
 
-
 #ifdef _WIN32
 	std::string* signalName = getMappedName(SIGNAL_NAME, connectAddr);
 
-			// Create the events
-			m_hSignal = CreateEventA(NULL, FALSE, FALSE, signalName->c_str());
-			delete signalName;
+	// Create the events
+	m_hSignal = CreateEventA(NULL, FALSE, FALSE, signalName->c_str());
+	delete signalName;
 
-			if (m_hSignal == NULL || m_hSignal == INVALID_HANDLE_VALUE)
-			{
-				*success = false;
-				return;
-			}
+	if (m_hSignal == NULL || m_hSignal == INVALID_HANDLE_VALUE)
+	{
+		*success = false;
+		return;
+	}
 
-			std::string* signalAvailName = getMappedName(SIGNAL_AVALIABLE_NAME,
-					connectAddr);
-			m_hAvail = CreateEventA(NULL, FALSE, FALSE, signalAvailName->c_str());
-			delete signalAvailName;
-			if (m_hAvail == NULL || m_hSignal == INVALID_HANDLE_VALUE)
-			{
-				*success = false;
-				return;
-			}
+	std::string* signalAvailName = getMappedName(SIGNAL_AVALIABLE_NAME,
+			connectAddr);
+	m_hAvail = CreateEventA(NULL, FALSE, FALSE, signalAvailName->c_str());
+	delete signalAvailName;
+	if (m_hAvail == NULL || m_hSignal == INVALID_HANDLE_VALUE)
+	{
+		*success = false;
+		return;
+	}
 #elif __APPLE__ || __linux__
 
-			std::string* signalName = getMappedName(SIGNAL_NAME, connectAddr);
-			m_hSignal =sem_open(signalName->c_str(), 0);
+	std::string* signalName = getMappedName(SIGNAL_NAME, connectAddr);
+	m_hSignal = sem_open(signalName->c_str(), 0);
 
-			if (m_hSignal == (sem_t *)SEM_FAILED) {
-					printf("client_create: failed: sem_open signal: %s\n",strerror( errno ));
-					*success = false;
-			}
-			delete signalName;
+	if (m_hSignal == (sem_t *) SEM_FAILED)
+	{
+		printf("client_create: failed: sem_open signal: %s\n", strerror( errno));
+		*success = false;
+	}
+	delete signalName;
 
-
-			std::string* signalAvailName = getMappedName(SIGNAL_AVALIABLE_NAME,	connectAddr);
-			m_hAvail =sem_open(signalAvailName->c_str(), 0);
-			if (m_hAvail == (sem_t *)SEM_FAILED) {
-					printf("client_create: failed: sem_open signal: %s\n",strerror( errno ));
-					*success = false;
-			}
-			delete signalAvailName;
+	std::string* signalAvailName = getMappedName(SIGNAL_AVALIABLE_NAME, connectAddr);
+	m_hAvail = sem_open(signalAvailName->c_str(), 0);
+	if (m_hAvail == (sem_t *) SEM_FAILED)
+	{
+		printf("client_create: failed: sem_open signal: %s\n", strerror( errno));
+		*success = false;
+	}
+	delete signalAvailName;
 
 //#elif __linux
 //real POSIX
 
-
-
 #endif
-
-
-
-
 
 	*success = true;
 	DEBUG_PRINTF(("Client connected to shared memory %s, status %d\n",this->m_name->c_str(),*success));
@@ -520,28 +525,26 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 FmiIpc::Client::~Client()
 {
 	// Close the event
-	if(m_hSignal)
-	FmiIpc::close(m_hSignal);
-
+	if (m_hSignal)
+		FmiIpc::close(m_hSignal);
 
 	// Close the event
-	if(m_hAvail)
-	FmiIpc::close(m_hAvail);
+	if (m_hAvail)
+		FmiIpc::close(m_hAvail);
 
 	// Unmap the memory
 	//UnmapViewOfFile(m_pBuf);
-	if(m_pBuf)
-	FmiIpc::unmap(m_pBuf, m_name);
+	if (m_pBuf)
+		FmiIpc::unmap(m_pBuf, m_name);
 
 	// Close the file handle
-	if(m_hMapFile)
+	if (m_hMapFile)
 #ifdef _WIN32
 		FmiIpc::close(m_hMapFile);
 #elif __APPLE__ ||  __linux
 //POSIX
-	shm_unlink(m_name->c_str());
+//		shm_unlink(m_name->c_str());
 #endif
-
 
 	if (m_name != NULL)
 		delete m_name;
@@ -551,10 +554,9 @@ bool FmiIpc::Client::waitAvailable(DWORD dwTimeout)
 {
 	// Wait on the available event
 
-
 #ifdef _WIN32
 	if (WaitForSingleObject(m_hAvail, dwTimeout) != WAIT_OBJECT_0)
-			return false;
+	return false;
 #elif __APPLE__ || __linux__
 //	printf("Client waiting\n");
 	sem_wait(this->m_hAvail);
@@ -563,7 +565,6 @@ bool FmiIpc::Client::waitAvailable(DWORD dwTimeout)
 //POSIX
 //	sem_wait(&this->m_pBuf->semAvail);
 #endif
-
 
 	// Success
 	return true;
@@ -586,7 +587,6 @@ void FmiIpc::Client::sendReply(SharedFmiMessage* reply)
 	DEBUG_PRINTF(("Client write msg\n"));
 	//memcpy(&this->m_pBuf->message, reply, sizeof(SharedFmiMessage));
 	this->m_pBuf->message = *reply;
-
 
 #ifdef _WIN32
 	SetEvent(this->m_hSignal);
