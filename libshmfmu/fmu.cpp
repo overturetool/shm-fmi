@@ -132,7 +132,7 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 	}
 
 	std::string url = port;
-	std::cout << "--Launching with shared memory key: " << url << std::endl;
+	std::cout << "--Launching with shared memory key: '" << url << "'" << std::endl;
 
 	ExternalClient *client = new ExternalClient(url);
 
@@ -143,6 +143,8 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 	}
 
 	printf("FMU Server client create, hosting SHM with raw key: %s\n", url.c_str());
+
+	fflush(stdout);//FIXME remove
 
 	FmuContainer *container = new FmuContainer(client, instanceName, functions,
 			launcher);
