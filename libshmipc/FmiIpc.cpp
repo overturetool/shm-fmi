@@ -61,16 +61,16 @@ std::string* getMappedName(const char* baseName, const char* name)
 	return nameOfMapping;
 }
 
-FmiIpc::Server::Server(const char* connectionName)
+FmiIpc::Server::Server()
 {
 	// Set default params
 	m_hMapFile = 0;
 	m_hSignal = 0;
 	m_hAvail = 0;
 	m_pBuf = NULL;
-
+	m_name = NULL;
 	// create the server
-	create(connectionName);
+//	create(connectionName);
 }
 
 FmiIpc::Server::~Server()
@@ -128,9 +128,9 @@ void FmiIpc::Server::close()
 }
 ;
 
-void FmiIpc::Server::create(const char* name)
+bool FmiIpc::Server::create(const char* name)
 {
-
+bool ok = true;
 	std::string* nameOfMapping = getMappedName(SHARED_MEM_BASE_NAME, name);
 	printf("Starting IPC server with key: %s\n", nameOfMapping->c_str());
 	// Create the file mapping
@@ -187,7 +187,7 @@ void FmiIpc::Server::create(const char* name)
 
 		printf("server_create: failed: %01d %s\n", __LINE__, strerror( errno));
 
-		return;
+		return false;
 	}
 	// Map to the file
 #ifdef _WIN32
@@ -197,7 +197,7 @@ void FmiIpc::Server::create(const char* name)
 	if (m_pBuf == NULL)
 	{
 		printf("server_create: failed: %01d\n", __LINE__);
-		return;
+		return false;
 	}
 	// Clear the buffer
 	ZeroMemory(m_pBuf, sizeof(SharedFmiMem));
@@ -227,7 +227,7 @@ void FmiIpc::Server::create(const char* name)
 		}
 
 		printf("server_create: failed: unable to truncate. %s\n", strerror( errno));
-		return;
+		return false;
 	}
 
 	/*	struct stat sb;
@@ -264,7 +264,7 @@ void FmiIpc::Server::create(const char* name)
 			break;
 		}
 		printf("server_create: failed: mmap: %s\n", strerror( errno));
-		return;
+		return false;
 	}
 
 	m_pBuf = (SharedFmiMem*) ptr;
@@ -279,7 +279,7 @@ void FmiIpc::Server::create(const char* name)
 	if (m_hSignal == NULL || m_hSignal == INVALID_HANDLE_VALUE)
 	{
 		printf("server_create: failed: %01d\n", __LINE__);
-		return;
+		return false;
 	}
 
 	std::string* signalAvailName = getMappedName(SIGNAL_AVALIABLE_NAME, name);
@@ -289,7 +289,7 @@ void FmiIpc::Server::create(const char* name)
 	if (m_hAvail == NULL || m_hSignal == INVALID_HANDLE_VALUE)
 	{
 		printf("server_create: failed: %01d\n", __LINE__);
-		return;
+		return false;
 	}
 //#elif   __linux
 //POSIX
@@ -304,6 +304,7 @@ void FmiIpc::Server::create(const char* name)
 	if (m_hSignal == (sem_t *) SEM_FAILED)
 	{
 		printf("server_create: failed: sem_open signal: %s\n", strerror( errno));
+		ok = false;
 
 	}
 	delete signalName;
@@ -315,6 +316,7 @@ void FmiIpc::Server::create(const char* name)
 	if (m_hAvail == (sem_t *) SEM_FAILED)
 	{
 		printf("server_create: failed: sem_open signal: %s\n", strerror( errno));
+		ok = false;
 
 	}
 
@@ -325,9 +327,12 @@ void FmiIpc::Server::create(const char* name)
 	if (m_pBuf == NULL)
 	{
 		printf("Error in IPC server ctr, buf NULL\n");
+		ok = false;
 	}
 
 	//m_pBuf->message.cmd = fmi2Reset;
+
+	return ok;
 }
 
 SharedFmiMessage* FmiIpc::Server::send(SharedFmiMessage* message, DWORD dwTimeout)

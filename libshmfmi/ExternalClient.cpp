@@ -9,13 +9,20 @@
 
 ExternalClient::ExternalClient(std::string url)
 {
-	this->server = new FmiIpc::Server(url.c_str());
+	this->m_url = new std::string(url);
+	this->server = new FmiIpc::Server();
 }
 
 ExternalClient::~ExternalClient()
 {
-	// TODO Auto-generated destructor stub
+	delete this->m_url;
+	delete this->server;
+}
 
+
+bool ExternalClient::initialize()
+{
+	return this->server->create(this->m_url->c_str());
 }
 
 google::protobuf::Message* ExternalClient::send(

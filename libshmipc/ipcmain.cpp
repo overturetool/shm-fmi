@@ -22,7 +22,8 @@ int main(int argc, char *argv[])
 	{
 		printf("Server mode selected\n");
 
-		FmiIpc::Server* server = new FmiIpc::Server(key);
+		FmiIpc::Server* server = new FmiIpc::Server();
+		server->create(key);
 		SharedFmiMessage message;
 
 		message.cmd = fmi2Command::fmi2DoStep;

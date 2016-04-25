@@ -136,6 +136,12 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 
 	ExternalClient *client = new ExternalClient(url);
 
+	if(!client->initialize())
+	{
+		printf("FMU Debug FATAL: cannot create and initialize IPC server for FMU\n");
+		return NULL;
+	}
+
 	FmuContainer *container = new FmuContainer(client, instanceName, functions,
 			launcher);
 

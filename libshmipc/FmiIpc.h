@@ -106,7 +106,7 @@ public:
 	class Server {
 	public:
 		// Construct / Destruct
-		Server(const char* name ="server");
+		Server();//const char* name ="server");
 		~Server();
 
 	private:
@@ -118,7 +118,7 @@ public:
 		SharedFmiMem *m_pBuf;		// Buffer that points to the shared memory
 	public:
 		// Create and destroy functions
-		void create(const char* name);
+		bool create(const char* name="server");
 		void close(void);
 
 		// TCHAR szName[];

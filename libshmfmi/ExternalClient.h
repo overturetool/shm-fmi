@@ -54,6 +54,8 @@ public:
 	ExternalClient(std::string url);
 	virtual ~ExternalClient();
 
+	bool initialize();
+
 	bool fmi2Instantiate(fmi2String instanceName, fmi2String fmuGUID,
 			fmi2String fmuResourceLocation, const char* callbackAddress,
 			int callbackPort, fmi2Boolean visible, fmi2Boolean loggingOn);
@@ -101,7 +103,7 @@ public:
 	fmi2Status fmi2GetMaxStepsize(fmi2Real* size);
 
 private:
-	//std::unique_ptr<Fmu::Stub> stub_;
+	std::string* m_url;
 	FmiIpc::Server* server;
 	ExternalClient::fmi2Status getStatus(Fmi2StatusReply*);
 
