@@ -37,7 +37,7 @@ if (UNIX)
 	if(APPLE)
 		# set the protobuf lib
 	else()
- 		set(ADDITIONAL_LIBS rt dl)
+ 		set(ADDITIONAL_LIBS rt)
 	endif()
 endif()
 
