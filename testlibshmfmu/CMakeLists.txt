@@ -16,6 +16,9 @@ else()
         message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
+
+add_definitions(-DSOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
+
 set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-pthread")
 
 file(GLOB CPP_FILES *.cpp)
