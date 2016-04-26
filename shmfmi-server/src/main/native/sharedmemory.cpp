@@ -21,7 +21,10 @@ JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setId(
 	client = new FmiIpc::Client(idString,&success);
 
 	if(!success)
+	{
+		delete client;
 		client =NULL;
+	}
 
 	env->ReleaseStringUTFChars(id, idString);
 
