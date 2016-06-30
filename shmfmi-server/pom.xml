@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-				 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -10,7 +9,7 @@
 	<groupId>org.intocps.java.fmi</groupId>
 	<artifactId>fmi-shm-server</artifactId>
 	<name>Java SHM-FMI server</name>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2</version>
 	<dependencies>
 
 		<dependency>
@@ -132,7 +131,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore />
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -177,7 +176,7 @@
     <url>git@gitlab.au.dk:into-cps/shm-fmi.git</url>
     <connection>scm:git:git://gitlab.au.dk:into-cps/shm-fmi.git</connection>
     <developerConnection>scm:git:git@gitlab.au.dk:into-cps/shm-fmi.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>Release/0.0.2</tag>
   </scm>
 
 
@@ -199,25 +198,21 @@
 								<id>protoc</id>
 								<configuration>
 									<tasks>
-										<exec dir="${project.basedir}" executable="mkdir"
-													failonerror="true">
+										<exec dir="${project.basedir}" executable="mkdir" failonerror="true">
 											<arg value="-p" />
 											<arg value="target/generated-protoc/" />
 										</exec>
-										<exec dir="${project.basedir}" executable="protoc"
-													failonerror="true">
+										<exec dir="${project.basedir}" executable="protoc" failonerror="true">
 
 											<arg value="--java_out=target/generated-protoc/" />
 											<arg value="--proto_path=../proto" />
 											<arg value="../proto/service.proto" />
 										</exec>
-										<exec dir="${project.basedir}" executable="mkdir"
-													failonerror="true">
+										<exec dir="${project.basedir}" executable="mkdir" failonerror="true">
 											<arg value="-p" />
 											<arg value="target/classes/lib/Windows-x86" />
 										</exec>
-										<exec dir="${project.basedir}" executable="mkdir"
-													failonerror="true">
+										<exec dir="${project.basedir}" executable="mkdir" failonerror="true">
 											<arg value="-p" />
 											<arg value="target/classes/lib/Mac-x86_64" />
 										</exec>
@@ -235,15 +230,13 @@
 								<configuration>
 									<tasks>
 										
-										<exec dir="${project.basedir}/src/main/native" executable="javah"
-													failonerror="true">
+										<exec dir="${project.basedir}/src/main/native" executable="javah" failonerror="true">
 
-											<arg value="-classpath"/>
+											<arg value="-classpath" />
 											<arg value="../../../target/classes" />
 											<arg value="org.intocps.java.fmi.shm.SharedMemory" />
 
-											<redirector outputproperty="redirector.out"
-																	errorproperty="redirector.err">
+											<redirector outputproperty="redirector.out" errorproperty="redirector.err">
 												<inputfilterchain>
 													<replacestring from="before" to="after" />
 												</inputfilterchain>
