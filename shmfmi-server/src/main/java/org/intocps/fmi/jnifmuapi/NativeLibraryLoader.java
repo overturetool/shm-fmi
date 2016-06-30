@@ -109,7 +109,7 @@ public class NativeLibraryLoader
 	/**
 	 * Adds the specified path to the java library path
 	 *
-	 * @param pathToAdd
+	 * @param dirPathToAdd
 	 *            the path to add
 	 * @throws Exception
 	 */
