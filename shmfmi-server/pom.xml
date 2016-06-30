@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-				 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -10,7 +9,7 @@
 	<groupId>org.intocps.java.fmi</groupId>
 	<artifactId>fmi-shm-server</artifactId>
 	<name>Java SHM-FMI server</name>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2</version>
 	<dependencies>
 
 		<dependency>
@@ -19,17 +18,12 @@
 			<version>3.0.0-beta-1</version>
 		</dependency>
 
-
-
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
-
-
-
 
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -52,15 +46,8 @@
 		</dependency>
 	</dependencies>
 
-
 	<build>
-
-
-
-
-
 		<plugins>
-
 
 			<!-- Configure the compiler for all Overture Projects -->
 			<plugin>
@@ -72,8 +59,6 @@
 					<target>1.7</target>
 				</configuration>
 			</plugin>
-
-
 
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -99,16 +84,6 @@
 				</executions>
 			</plugin>
 
-
-
-
-
-			
-
-			
-
-
-
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
@@ -129,7 +104,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 
 		</plugins>
 		<pluginManagement>
@@ -157,7 +131,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore />
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -166,10 +140,19 @@
 				</plugin>
 
 				<plugin>
-<groupId>org.apache.maven.plugins</groupId>
-<artifactId>maven-deploy-plugin</artifactId>
-<version>2.8.1</version>
-</plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>2.8.1</version>
+				</plugin>
+
+				<plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>2.5.3</version>
+          <configuration>
+            <tagNameFormat>Release/@{project.version}</tagNameFormat>
+          </configuration>
+        </plugin>
 
 			</plugins>
 		</pluginManagement>
@@ -189,13 +172,19 @@
 	</distributionManagement>
 
 
-	<profiles>
+	<scm>
+    <url>git@gitlab.au.dk:into-cps/shm-fmi.git</url>
+    <connection>scm:git:git://gitlab.au.dk:into-cps/shm-fmi.git</connection>
+    <developerConnection>scm:git:git@gitlab.au.dk:into-cps/shm-fmi.git</developerConnection>
+    <tag>Release/0.0.2</tag>
+  </scm>
 
+
+	<profiles>
 		<profile>
 			<id>protoc</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
-								
 			</activation>
 
 			<build>
@@ -209,25 +198,21 @@
 								<id>protoc</id>
 								<configuration>
 									<tasks>
-										<exec dir="${project.basedir}" executable="mkdir"
-													failonerror="true">
+										<exec dir="${project.basedir}" executable="mkdir" failonerror="true">
 											<arg value="-p" />
 											<arg value="target/generated-protoc/" />
 										</exec>
-										<exec dir="${project.basedir}" executable="protoc"
-													failonerror="true">
+										<exec dir="${project.basedir}" executable="protoc" failonerror="true">
 
 											<arg value="--java_out=target/generated-protoc/" />
 											<arg value="--proto_path=../proto" />
 											<arg value="../proto/service.proto" />
 										</exec>
-										<exec dir="${project.basedir}" executable="mkdir"
-													failonerror="true">
+										<exec dir="${project.basedir}" executable="mkdir" failonerror="true">
 											<arg value="-p" />
 											<arg value="target/classes/lib/Windows-x86" />
 										</exec>
-										<exec dir="${project.basedir}" executable="mkdir"
-													failonerror="true">
+										<exec dir="${project.basedir}" executable="mkdir" failonerror="true">
 											<arg value="-p" />
 											<arg value="target/classes/lib/Mac-x86_64" />
 										</exec>
@@ -245,43 +230,30 @@
 								<configuration>
 									<tasks>
 										
-										<exec dir="${project.basedir}/src/main/native" executable="javah"
-													failonerror="true">
+										<exec dir="${project.basedir}/src/main/native" executable="javah" failonerror="true">
 
-
-											<arg value="-classpath"/>
+											<arg value="-classpath" />
 											<arg value="../../../target/classes" />
 											<arg value="org.intocps.java.fmi.shm.SharedMemory" />
 
-											<redirector outputproperty="redirector.out"
-																	errorproperty="redirector.err">
+											<redirector outputproperty="redirector.out" errorproperty="redirector.err">
 												<inputfilterchain>
 													<replacestring from="before" to="after" />
 												</inputfilterchain>
 												<outputmapper type="merge" to="target/redirector-mac.out" />
 												<errormapper type="merge" to="target/redirector-mac.err" />
 											</redirector>
-											
 										</exec>
-										
-										
-										
 									</tasks>
 								</configuration>
 								<goals>
 									<goal>run</goal>
 								</goals>
 							</execution>
-							
 						</executions>
 					</plugin>
 				</plugins>
-
 			</build>
 		</profile>
 	</profiles>
-
-	
-
-
 </project>
