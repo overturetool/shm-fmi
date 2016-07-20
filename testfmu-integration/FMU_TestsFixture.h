@@ -72,12 +72,19 @@ public:
 
 	fmi2Component instantiated()
 	{
+
+char str[200];
+
 		char * cwd = getcwd(NULL, 0);
+
+strcpy (str,"file:");
+strcat (str,cwd);
 
 		if (cwd == NULL)
 			perror("unable to obtaining cur directory\n");
 
-		comp = fmu.instantiate(INSTANCE_NAME, fmi2CoSimulation, GUID, cwd, NULL,
+printf("make cwd into uri: %s\n",str);
+		comp = fmu.instantiate(INSTANCE_NAME, fmi2CoSimulation, GUID, str, NULL,
 				true, true);
 		delete cwd;
 

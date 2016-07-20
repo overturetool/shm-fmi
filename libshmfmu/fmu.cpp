@@ -119,7 +119,10 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 
 	port += instanceName;
 
+
 	std::string resourceLocationStr(fmuResourceLocation);
+	resourceLocationStr = resourceLocationStr.substr(5);
+	std::cout << "---Launching Tool Wrapper memory key: '" << port << "'" << " and resource location "<< resourceLocationStr << std::endl;
 
 	std::string configFile = resourceLocationStr + std::string("/config.txt");
 	ConfigFile config(configFile, port);

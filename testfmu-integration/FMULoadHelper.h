@@ -61,13 +61,19 @@ public:
 
 	fmi2Component instantiate(const char* name)
 	{
-		char * cwd = getcwd(NULL, 0);
+
+char str[200];
+
+    char * cwd = getcwd(NULL, 0);
+
+strcpy (str,"file:");
+strcat (str,cwd);
 
 		if (cwd == NULL)
 		perror("unable to obtaining cur directory\n");
 
 		fmi2Component comp = fmu.instantiate(name, fmi2CoSimulation,
-				GUID, cwd, NULL, true, true);
+				GUID, str, NULL, true, true);
 		delete cwd;
 
 		return comp;

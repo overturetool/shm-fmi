@@ -53,7 +53,7 @@ std::string* getMappedName(const char* baseName, const char* name)
 		std::string hash = std::to_string(std::hash<std::string>()(*nameOfMapping));
 		*nameOfMapping = "/";
 		*nameOfMapping += hash;
-		printf("New Apple shm key is: %s\n", nameOfMapping->c_str());
+		printf("New Apple shm key is: %s from %s\n", nameOfMapping->c_str(),baseName);
 	}
 
 #endif

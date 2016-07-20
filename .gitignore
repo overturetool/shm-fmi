@@ -80,3 +80,4 @@ git-info.txt
 #code blocks
 *.cbp
 *.layout
+shmfmi-server/repository
