@@ -121,7 +121,14 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 
 
 	std::string resourceLocationStr(fmuResourceLocation);
+
+#ifdef _WIN32
+	resourceLocationStr = resourceLocationStr.substr(6);
+#elif __APPLE__ ||  __linux
 	resourceLocationStr = resourceLocationStr.substr(5);
+#endif
+
+
 	std::cout << "---Launching Tool Wrapper memory key: '" << port << "'" << " and resource location "<< resourceLocationStr << std::endl;
 
 	std::string configFile = resourceLocationStr + std::string("/config.txt");
