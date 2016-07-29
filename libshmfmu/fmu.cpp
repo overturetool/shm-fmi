@@ -105,6 +105,7 @@ static void notimplemented(fmi2Component c, fmi2String message)
 	}
 }
 
+#define LOG(functions,comp,name,status,category, message,args...) if(functions!=NULL){	if(functions->logger!=NULL)	{functions->logger((void*)comp , name, status, category, message, args);}}
 // ---------------------------------------------------------------------------
 // FMI functions
 // ---------------------------------------------------------------------------
@@ -113,38 +114,57 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 		const fmi2CallbackFunctions *functions, fmi2Boolean visible,
 		fmi2Boolean loggingOn)
 {
-	std::string port(fmuGUID);
+//	if(functions!=NULL)
+//	{
+//		if(functions->logger!=NULL)
+//		{
+//			functions->logger((void*)clients.size() , instanceName, fmi2OK, "logFmiCall", "Called instantiate with instance %s and guid %s", instanceName,fmuGUID);
+//		}
+//	}
+
+	LOG(functions,(void*)clients.size() , instanceName, fmi2OK, "logFmiCall", "FMU: Called instantiate with instance %s and guid %s", instanceName,fmuGUID);
+
+	std::string shared_memory_key(fmuGUID);
+	shared_memory_key.append(instanceName);
 
 	setbuf(stdout, NULL);//fixme remove
 
-	port += instanceName;
-
 	std::string resourceLocationStr(fmuResourceLocation);
 
+#ifdef _WIN32
+	resourceLocationStr = resourceLocationStr.substr(6);
+#elif __APPLE__ ||  __linux
+	resourceLocationStr = resourceLocationStr.substr(5);
+#endif
+
+	LOG(functions,(void*)clients.size() , instanceName, fmi2OK, "logFmiCall", "FMU: Launching Tool Wrapper memory key: '%s'  and resource location %s", shared_memory_key.c_str(),resourceLocationStr.c_str());
+
+
 	std::string configFile = resourceLocationStr + std::string("/config.txt");
-	ConfigFile config(configFile, port);
+	ConfigFile config(configFile, shared_memory_key);
 
 	JavaLauncher *launcher = new JavaLauncher(resourceLocationStr.c_str(),
 			config.m_args);
 
 	if (config.m_skipLaunch)
 	{
-		printf("FMU Debug skipping launch of external FMU\n");
-		port = "shmFmiTest";
+		printf("FMU: FMU Debug skipping launch of external FMU\n");
+		shared_memory_key = "shmFmiTest";
 	}
 
-	std::string url = port;
-	std::cout << "---Launching with shared memory key: '" << url << "'" << std::endl;
 
-	ExternalClient *client = new ExternalClient(url);
+	LOG(functions,(void*)clients.size() , instanceName, fmi2OK, "logFmiCall", "FMU: Launching with shared memory key: '%s'", shared_memory_key.c_str());
+
+	ExternalClient *client = new ExternalClient(shared_memory_key);
 
 	if(!client->initialize())
 	{
-		printf("FMU Debug FATAL: cannot create and initialize IPC server for FMU\n");
+		printf("FMU: FMU Debug FATAL: cannot create and initialize IPC server for FMU\n");
 		return NULL;
 	}
 
-	printf("FMU Server client create, hosting SHM with raw key: %s\n", url.c_str());
+	LOG(functions,(void*)clients.size() , instanceName, fmi2OK, "logFmiCall", "FMU: FMU Server client create, hosting SHM with raw key: %s", shared_memory_key.c_str());
+
 
 	fflush(stdout);//FIXME remove
 
