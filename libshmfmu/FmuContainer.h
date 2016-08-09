@@ -8,7 +8,7 @@
 #ifndef FMUCONTAINER_H_
 #define FMUCONTAINER_H_
 
-#include "ExternalClient.h"
+#include "FmuProxy.h"
 #include "fmi2Functions.h"
 #include "JavaLauncher.h"
 
@@ -16,12 +16,12 @@
 class FmuContainer
 {
 public:
-	FmuContainer(ExternalClient *client, const char* name, const fmi2CallbackFunctions *functions,JavaLauncher* launcher);
+	FmuContainer(FmuProxy *proxy, const char* name, const fmi2CallbackFunctions *functions,JavaLauncher* launcher);
 	virtual ~FmuContainer();
 
 public:
 	const fmi2CallbackFunctions *m_functions;
-	ExternalClient* m_client;
+	FmuProxy* m_proxy;
 	const char* m_name;
 	JavaLauncher *m_javaLauncher;
 };

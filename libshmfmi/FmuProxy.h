@@ -1,5 +1,5 @@
 /*
- * ExternalClient.h
+ * FmuProxy.h
  *
  *  Created on: Aug 20, 2015
  *      Author: parallels
@@ -26,7 +26,7 @@ using service::Fmi2GetRealReply;
 using service::Fmi2StatusReply;
 using namespace service;
 
-class ExternalClient
+class FmuProxy
 {
 	typedef void* fmi2Component;
 	typedef const char* fmi2String;
@@ -50,9 +50,9 @@ public:
 		fmi2Terminated
 	} fmi2StatusKind;
 
-	//ExternalClient(std::shared_ptr<ChannelInterface> channel);
-	ExternalClient(std::string url);
-	virtual ~ExternalClient();
+	//FmuProxy(std::shared_ptr<ChannelInterface> channel);
+	FmuProxy(std::string url);
+	virtual ~FmuProxy();
 
 	bool initialize();
 
@@ -105,11 +105,11 @@ public:
 private:
 	std::string* m_url;
 	FmiIpc::Server* server;
-	ExternalClient::fmi2Status getStatus(Fmi2StatusReply*);
+	FmuProxy::fmi2Status getStatus(Fmi2StatusReply*);
 
 	google::protobuf::Message* send(sharedfmimemory::fmi2Command type,
 			google::protobuf::Message* msg);
-	ExternalClient::fmi2Status sendRetStatus(sharedfmimemory::fmi2Command type,
+	FmuProxy::fmi2Status sendRetStatus(sharedfmimemory::fmi2Command type,
 			google::protobuf::Message* msg);
 
 	Fmi2StatusRequest createGetStatusRequest(const fmi2StatusKind s);

@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "ExternalClient.h"
+#include "FmuProxy.h"
 #include <string>
 #include <iostream>
 #include <thread>
@@ -8,9 +8,9 @@
 
 
 
-#include "ExternalClientTest.h"
+#include "FmuProxyTest.h"
 
-/*TEST_F(ExternalClientTest, system)
+/*TEST_F(FmuProxyTest, system)
  {
  std::eexec("java -cp .:/home/parallels/Downloads/grpc-fmi/java/bin/:/home/parallels/Downloads/grpc-fmi/java/lib/netty-all-4.1.0.Beta5.jar:/home/parallels/Downloads/grpc-fmi/java/lib/grpc-all-0.8.0.jar:/home/parallels/Downloads/grpc-fmi/java/lib/guava-18.0.jar:/home/parallels/Downloads/grpc-fmi/java/lib/hpack-0.10.1.jar:/home/parallels/Downloads/grpc-fmi/java/lib/protobuf-java-3.0.0-alpha-3.1.jar rpc.Server");
  }*/
@@ -68,7 +68,7 @@ void remoteClientThreadResume()
 	remoteTestDriver(MEM_KEY);
 }
 
-TEST_F(ExternalClientTest, fmi2Instantiate)
+TEST_F(FmuProxyTest, fmi2Instantiate)
 {
 	std::string instanceName = "my instance";
 	std::string fmuGUID = "dcnkjvnrevirehvljkfnvf";
@@ -84,19 +84,19 @@ TEST_F(ExternalClientTest, fmi2Instantiate)
 					visible, loggingOn));
 }
 
-TEST_F(ExternalClientTest, fmi2EnterInitializationMode)
+TEST_F(FmuProxyTest, fmi2EnterInitializationMode)
 {
 
-	EXPECT_EQ(ExternalClient::fmi2OK, m_client->fmi2EnterInitializationMode());
+	EXPECT_EQ(FmuProxy::fmi2OK, m_client->fmi2EnterInitializationMode());
 }
 
-TEST_F(ExternalClientTest, fmi2ExitInitializationMode)
+TEST_F(FmuProxyTest, fmi2ExitInitializationMode)
 {
 
-	EXPECT_EQ(ExternalClient::fmi2OK, m_client->fmi2ExitInitializationMode());
+	EXPECT_EQ(FmuProxy::fmi2OK, m_client->fmi2ExitInitializationMode());
 }
 
-TEST_F(ExternalClientTest, fmi2SetupExperiment)
+TEST_F(FmuProxyTest, fmi2SetupExperiment)
 {
 	bool toleranceDefined = true;
 	double tolerance = 0.1;
@@ -104,28 +104,28 @@ TEST_F(ExternalClientTest, fmi2SetupExperiment)
 	bool stopTimeDefined = true;
 	double stopTime = 1.1;
 
-	EXPECT_EQ(ExternalClient::fmi2OK,
+	EXPECT_EQ(FmuProxy::fmi2OK,
 			m_client->fmi2SetupExperiment(toleranceDefined, tolerance, startTime,
 					stopTimeDefined, stopTime));
 }
 
-TEST_F(ExternalClientTest, fmi2Terminate)
+TEST_F(FmuProxyTest, fmi2Terminate)
 {
-	EXPECT_EQ(ExternalClient::fmi2OK, m_client->fmi2Terminate());
+	EXPECT_EQ(FmuProxy::fmi2OK, m_client->fmi2Terminate());
 }
 
-TEST_F(ExternalClientTest, fmi2SetDebugLogging)
+TEST_F(FmuProxyTest, fmi2SetDebugLogging)
 {
 	int loggingOn = true;
 	size_t nCategories = 3;
 	const char* categories[3] =
 	{ "all", "all+1", "all+2" };
 
-	EXPECT_EQ(ExternalClient::fmi2OK,
+	EXPECT_EQ(FmuProxy::fmi2OK,
 			m_client->fmi2SetDebugLogging(loggingOn, nCategories, categories));
 }
 
-TEST_F(ExternalClientTest, SetGetReals)
+TEST_F(FmuProxyTest, SetGetReals)
 {
 	unsigned int vr[] =
 	{ 1, 2, 3 };
@@ -134,13 +134,13 @@ TEST_F(ExternalClientTest, SetGetReals)
 
 	int size = 3;
 
-	EXPECT_EQ(ExternalClient::fmi2OK, m_client->fmi2SetReal(vr, size, vals));
+	EXPECT_EQ(FmuProxy::fmi2OK, m_client->fmi2SetReal(vr, size, vals));
 
 	this->resetServiceThread();
 
 	double res[size];
 
-	EXPECT_EQ(ExternalClient::fmi2OK, m_client->fmi2GetReal(vr, size, res));
+	EXPECT_EQ(FmuProxy::fmi2OK, m_client->fmi2GetReal(vr, size, res));
 
 	for (int i = 0; i < size; i++)
 	{
@@ -148,7 +148,7 @@ TEST_F(ExternalClientTest, SetGetReals)
 	}
 }
 
-TEST_F(ExternalClientTest, SetGetBools)
+TEST_F(FmuProxyTest, SetGetBools)
 {
 	unsigned int vr[] =
 	{ 1, 2, 3 };
@@ -157,12 +157,12 @@ TEST_F(ExternalClientTest, SetGetBools)
 
 	int size = 3;
 
-	EXPECT_EQ(ExternalClient::fmi2OK, m_client->fmi2SetBoolean(vr, size, vals));
+	EXPECT_EQ(FmuProxy::fmi2OK, m_client->fmi2SetBoolean(vr, size, vals));
 
 	this->resetServiceThread();
 
 	int res[size];
-	EXPECT_EQ(ExternalClient::fmi2OK, m_client->fmi2GetBoolean(vr, size, res));
+	EXPECT_EQ(FmuProxy::fmi2OK, m_client->fmi2GetBoolean(vr, size, res));
 
 	for (int i = 0; i < size; i++)
 	{
@@ -170,7 +170,7 @@ TEST_F(ExternalClientTest, SetGetBools)
 	}
 }
 
-TEST_F(ExternalClientTest, SetGetIntegers)
+TEST_F(FmuProxyTest, SetGetIntegers)
 {
 	unsigned int vr[] =
 	{ 1, 2, 3 };
@@ -179,12 +179,12 @@ TEST_F(ExternalClientTest, SetGetIntegers)
 
 	int size = 3;
 
-	EXPECT_EQ(ExternalClient::fmi2OK, m_client->fmi2SetInteger(vr, size, vals));
+	EXPECT_EQ(FmuProxy::fmi2OK, m_client->fmi2SetInteger(vr, size, vals));
 
 	this->resetServiceThread();
 
 	int res[size];
-	EXPECT_EQ(ExternalClient::fmi2OK, m_client->fmi2GetInteger(vr, size, res));
+	EXPECT_EQ(FmuProxy::fmi2OK, m_client->fmi2GetInteger(vr, size, res));
 
 	for (int i = 0; i < size; i++)
 	{
@@ -192,7 +192,7 @@ TEST_F(ExternalClientTest, SetGetIntegers)
 	}
 }
 
-TEST_F(ExternalClientTest, SetGetStrings)
+TEST_F(FmuProxyTest, SetGetStrings)
 {
 	unsigned int vr[] =
 	{ 1, 2, 3 };
@@ -209,12 +209,12 @@ TEST_F(ExternalClientTest, SetGetStrings)
 		svals[i] = vals[i].c_str();
 	}
 
-	EXPECT_EQ(ExternalClient::fmi2OK, m_client->fmi2SetString(vr, size, svals));
+	EXPECT_EQ(FmuProxy::fmi2OK, m_client->fmi2SetString(vr, size, svals));
 
 	this->resetServiceThread();
 
 	const char* res[size];
-	EXPECT_EQ(ExternalClient::fmi2OK, m_client->fmi2GetString(vr, size, res));
+	EXPECT_EQ(FmuProxy::fmi2OK, m_client->fmi2GetString(vr, size, res));
 
 	for (int i = 0; i < size; i++)
 	{
@@ -222,7 +222,7 @@ TEST_F(ExternalClientTest, SetGetStrings)
 	}
 }
 
-TEST_F(ExternalClientTest, fmi2DoStep)
+TEST_F(FmuProxyTest, fmi2DoStep)
 {
 
 
@@ -230,67 +230,67 @@ TEST_F(ExternalClientTest, fmi2DoStep)
 	double communicationStepSize = 0.1;
 	int noSetFMUStatePriorToCurrentPoint = false;
 
-	EXPECT_EQ(ExternalClient::fmi2OK,
+	EXPECT_EQ(FmuProxy::fmi2OK,
 			m_client->fmi2DoStep(currentCommunicationPoint, communicationStepSize,
 					noSetFMUStatePriorToCurrentPoint));
 }
 
-TEST_F(ExternalClientTest, fmi2GetStatus)
+TEST_F(FmuProxyTest, fmi2GetStatus)
 {
 
 
-	ExternalClient::fmi2StatusKind s = ExternalClient::fmi2LastSuccessfulTime;
-	ExternalClient::fmi2Status value;
+	FmuProxy::fmi2StatusKind s = FmuProxy::fmi2LastSuccessfulTime;
+	FmuProxy::fmi2Status value;
 
-	EXPECT_EQ(ExternalClient::fmi2OK, m_client->fmi2GetStatus(s, &value));
-	EXPECT_EQ(ExternalClient::fmi2OK, value);
+	EXPECT_EQ(FmuProxy::fmi2OK, m_client->fmi2GetStatus(s, &value));
+	EXPECT_EQ(FmuProxy::fmi2OK, value);
 
 }
 
-TEST_F(ExternalClientTest, fmi2GetRealStatus)
+TEST_F(FmuProxyTest, fmi2GetRealStatus)
 {
 
 
-	ExternalClient::fmi2StatusKind s = ExternalClient::fmi2LastSuccessfulTime;
+	FmuProxy::fmi2StatusKind s = FmuProxy::fmi2LastSuccessfulTime;
 	double value;
 
-	EXPECT_EQ(ExternalClient::fmi2OK, m_client->fmi2GetRealStatus(s, &value));
+	EXPECT_EQ(FmuProxy::fmi2OK, m_client->fmi2GetRealStatus(s, &value));
 	EXPECT_EQ(100.5, value);
 
 }
 
-TEST_F(ExternalClientTest, fmi2GetIntegerStatus)
+TEST_F(FmuProxyTest, fmi2GetIntegerStatus)
 {
 
 
-	ExternalClient::fmi2StatusKind s = ExternalClient::fmi2LastSuccessfulTime;
+	FmuProxy::fmi2StatusKind s = FmuProxy::fmi2LastSuccessfulTime;
 	int value;
 
-	EXPECT_EQ(ExternalClient::fmi2OK, m_client->fmi2GetIntegerStatus(s, &value));
+	EXPECT_EQ(FmuProxy::fmi2OK, m_client->fmi2GetIntegerStatus(s, &value));
 	EXPECT_EQ(100, value);
 
 }
 
-TEST_F(ExternalClientTest, fmi2GetBooleanStatus)
+TEST_F(FmuProxyTest, fmi2GetBooleanStatus)
 {
 
 
-	ExternalClient::fmi2StatusKind s = ExternalClient::fmi2Terminated;
+	FmuProxy::fmi2StatusKind s = FmuProxy::fmi2Terminated;
 	int value;
 
-	EXPECT_EQ(ExternalClient::fmi2OK, m_client->fmi2GetBooleanStatus(s, &value));
+	EXPECT_EQ(FmuProxy::fmi2OK, m_client->fmi2GetBooleanStatus(s, &value));
 	EXPECT_EQ(true, value);
 
 }
 
-TEST_F(ExternalClientTest, fmi2GetStringStatus)
+TEST_F(FmuProxyTest, fmi2GetStringStatus)
 {
 
 
-	ExternalClient::fmi2StatusKind s = ExternalClient::fmi2DoStepStatus;
+	FmuProxy::fmi2StatusKind s = FmuProxy::fmi2DoStepStatus;
 	const char* value;
 
-	EXPECT_EQ(ExternalClient::fmi2OK, m_client->fmi2GetStringStatus(s, &value));
+	EXPECT_EQ(FmuProxy::fmi2OK, m_client->fmi2GetStringStatus(s, &value));
 	ASSERT_STREQ("waiting", value);
 
 }

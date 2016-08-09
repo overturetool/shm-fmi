@@ -7,11 +7,11 @@
 
 #include "FmuContainer.h"
 
-FmuContainer::FmuContainer(ExternalClient *client, const char* name, const fmi2CallbackFunctions *functions, JavaLauncher* launcher)
+FmuContainer::FmuContainer(FmuProxy *proxy, const char* name, const fmi2CallbackFunctions *functions, JavaLauncher* launcher)
 {
 
   this->m_functions=functions;
-  this->m_client=client;
+  this->m_proxy=proxy;
   this->m_name=name;
   this->m_javaLauncher = launcher;
 }

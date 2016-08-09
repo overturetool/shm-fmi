@@ -27,7 +27,7 @@ endif()
 
 include_directories(${libshmipc_INCLUDE_DIRS})
 
-add_library(${PROJECT_NAME} ../libshmipc/FmiIpc.cpp ${PROTO_SRCS} ${PROTO_HDRS} ExternalClient.cpp)
+add_library(${PROJECT_NAME} ../libshmipc/FmiIpc.cpp ${PROTO_SRCS} ${PROTO_HDRS} FmuProxy.cpp)
 
 set_target_properties(${PROJECT_NAME}
                       PROPERTIES POSITION_INDEPENDENT_CODE ON)

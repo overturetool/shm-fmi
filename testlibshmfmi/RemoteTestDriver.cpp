@@ -4,7 +4,7 @@
  *  Created on: Oct 5, 2015
  *      Author: parallels
  */
-#include "ExternalClient.h"
+#include "FmuProxy.h"
 #include <string>
 #include <iostream>
 #include <thread>

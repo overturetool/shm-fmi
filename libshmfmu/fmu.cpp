@@ -19,9 +19,9 @@
 #include <string.h>
 
 //#include <map>
-#include "ExternalClient.h"
+#include "FmuProxy.h"
 
-//static std::map <int, ExternalClient> clients;
+//static std::map <int, FmuProxy> clients;
 #include <vector>
 #include "FmuContainer.h"
 #include <sstream>
@@ -44,38 +44,38 @@ static FmuContainer* getFmuContainer(fmi2Component c)
 	return NULL;
 }
 
-static fmi2Status convertStatus(ExternalClient::fmi2Status status)
+static fmi2Status convertStatus(FmuProxy::fmi2Status status)
 {
 	switch (status)
 	{
-	case ExternalClient::fmi2Status::fmi2Discard:
+	case FmuProxy::fmi2Status::fmi2Discard:
 		return fmi2Discard;
-	case ExternalClient::fmi2Status::fmi2Error:
+	case FmuProxy::fmi2Status::fmi2Error:
 		return fmi2Error;
-	case ExternalClient::fmi2Status::fmi2Fatal:
+	case FmuProxy::fmi2Status::fmi2Fatal:
 		return fmi2Fatal;
-	case ExternalClient::fmi2Status::fmi2OK:
+	case FmuProxy::fmi2Status::fmi2OK:
 		return fmi2OK;
-	case ExternalClient::fmi2Status::fmi2Pending:
+	case FmuProxy::fmi2Status::fmi2Pending:
 		return fmi2Pending;
-	case ExternalClient::fmi2Status::fmi2Warning:
+	case FmuProxy::fmi2Status::fmi2Warning:
 		return fmi2Warning;
 	}
 	return fmi2Error;
 }
 
-static ExternalClient::fmi2StatusKind convertStatusKind(fmi2StatusKind kind)
+static FmuProxy::fmi2StatusKind convertStatusKind(fmi2StatusKind kind)
 {
 	switch (kind)
 	{
 	case fmi2DoStepStatus:
-		return ExternalClient::fmi2StatusKind::fmi2DoStepStatus;
+		return FmuProxy::fmi2StatusKind::fmi2DoStepStatus;
 	case fmi2LastSuccessfulTime:
-		return ExternalClient::fmi2StatusKind::fmi2LastSuccessfulTime;
+		return FmuProxy::fmi2StatusKind::fmi2LastSuccessfulTime;
 	case fmi2PendingStatus:
-		return ExternalClient::fmi2StatusKind::fmi2PendingStatus;
+		return FmuProxy::fmi2StatusKind::fmi2PendingStatus;
 	case fmi2Terminated:
-		return ExternalClient::fmi2StatusKind::fmi2Terminated;
+		return FmuProxy::fmi2StatusKind::fmi2Terminated;
 
 	}
 
@@ -155,7 +155,7 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 
 	LOG(functions,(void*)clients.size() , instanceName, fmi2OK, "logFmiCall", "FMU: Launching with shared memory key: '%s'", shared_memory_key.c_str());
 
-	ExternalClient *client = new ExternalClient(shared_memory_key);
+	FmuProxy *client = new FmuProxy(shared_memory_key);
 
 	if(!client->initialize())
 	{
@@ -207,7 +207,7 @@ extern "C" fmi2Status fmi2SetupExperiment(fmi2Component c,
 	if (fmu != NULL)
 	{
 		return convertStatus(
-				fmu->m_client->fmi2SetupExperiment(toleranceDefined, tolerance,
+				fmu->m_proxy->fmi2SetupExperiment(toleranceDefined, tolerance,
 						startTime, stopTimeDefined, stopTime));
 	}
 
@@ -220,7 +220,7 @@ extern "C" fmi2Status fmi2EnterInitializationMode(fmi2Component c)
 
 	if (fmu != NULL)
 	{
-		return convertStatus(fmu->m_client->fmi2EnterInitializationMode());
+		return convertStatus(fmu->m_proxy->fmi2EnterInitializationMode());
 	}
 
 	return fmi2Fatal;
@@ -232,7 +232,7 @@ extern "C" fmi2Status fmi2ExitInitializationMode(fmi2Component c)
 
 	if (fmu != NULL)
 	{
-		return convertStatus(fmu->m_client->fmi2ExitInitializationMode());
+		return convertStatus(fmu->m_proxy->fmi2ExitInitializationMode());
 	}
 	return fmi2Fatal;
 }
@@ -243,7 +243,7 @@ extern "C" fmi2Status fmi2Terminate(fmi2Component c)
 
 	if (fmu != NULL)
 	{
-		return convertStatus(fmu->m_client->fmi2Terminate());
+		return convertStatus(fmu->m_proxy->fmi2Terminate());
 	}
 	return fmi2Fatal;
 }
@@ -254,7 +254,7 @@ extern "C" fmi2Status fmi2Reset(fmi2Component c)
 
 	if (fmu != NULL)
 	{
-		return convertStatus(fmu->m_client->fmi2Reset());
+		return convertStatus(fmu->m_proxy->fmi2Reset());
 	}
 	return fmi2Fatal;
 }
@@ -301,7 +301,7 @@ extern "C" fmi2Status fmi2SetDebugLogging(fmi2Component c,
 	if (fmu != NULL)
 	{
 		return convertStatus(
-				fmu->m_client->fmi2SetDebugLogging(loggingOn, nCategories,
+				fmu->m_proxy->fmi2SetDebugLogging(loggingOn, nCategories,
 						categories));
 	}
 	return fmi2Fatal;
@@ -314,7 +314,7 @@ extern "C" fmi2Status fmi2GetReal(fmi2Component c,
 
 	if (fmu != NULL)
 	{
-		return convertStatus(fmu->m_client->fmi2GetReal(vr, nvr, value));
+		return convertStatus(fmu->m_proxy->fmi2GetReal(vr, nvr, value));
 	}
 	return fmi2Fatal;
 }
@@ -326,7 +326,7 @@ extern "C" fmi2Status fmi2GetInteger(fmi2Component c,
 
 	if (fmu != NULL)
 	{
-		return convertStatus(fmu->m_client->fmi2GetInteger(vr, nvr, value));
+		return convertStatus(fmu->m_proxy->fmi2GetInteger(vr, nvr, value));
 	}
 	return fmi2Fatal;
 }
@@ -338,7 +338,7 @@ extern "C" fmi2Status fmi2GetBoolean(fmi2Component c,
 
 	if (fmu != NULL)
 	{
-		return convertStatus(fmu->m_client->fmi2GetBoolean(vr, nvr, value));
+		return convertStatus(fmu->m_proxy->fmi2GetBoolean(vr, nvr, value));
 	}
 	return fmi2Fatal;
 }
@@ -350,7 +350,7 @@ extern "C" fmi2Status fmi2GetString(fmi2Component c,
 
 	if (fmu != NULL)
 	{
-		return convertStatus(fmu->m_client->fmi2GetString(vr, nvr, value));
+		return convertStatus(fmu->m_proxy->fmi2GetString(vr, nvr, value));
 	}
 	return fmi2Fatal;
 }
@@ -362,7 +362,7 @@ extern "C" fmi2Status fmi2SetReal(fmi2Component c,
 
 	if (fmu != NULL)
 	{
-		return convertStatus(fmu->m_client->fmi2SetReal(vr, nvr, value));
+		return convertStatus(fmu->m_proxy->fmi2SetReal(vr, nvr, value));
 	}
 	return fmi2Fatal;
 }
@@ -374,7 +374,7 @@ extern "C" fmi2Status fmi2SetInteger(fmi2Component c,
 
 	if (fmu != NULL)
 	{
-		return convertStatus(fmu->m_client->fmi2SetInteger(vr, nvr, value));
+		return convertStatus(fmu->m_proxy->fmi2SetInteger(vr, nvr, value));
 	}
 	return fmi2Fatal;
 }
@@ -386,7 +386,7 @@ extern "C" fmi2Status fmi2SetBoolean(fmi2Component c,
 
 	if (fmu != NULL)
 	{
-		return convertStatus(fmu->m_client->fmi2SetBoolean(vr, nvr, value));
+		return convertStatus(fmu->m_proxy->fmi2SetBoolean(vr, nvr, value));
 	}
 	return fmi2Fatal;
 }
@@ -398,7 +398,7 @@ extern "C" fmi2Status fmi2SetString(fmi2Component c,
 
 	if (fmu != NULL)
 	{
-		return convertStatus(fmu->m_client->fmi2SetString(vr, nvr, value));
+		return convertStatus(fmu->m_proxy->fmi2SetString(vr, nvr, value));
 	}
 	return fmi2Fatal;
 }
@@ -482,7 +482,7 @@ extern "C" fmi2Status fmi2DoStep(fmi2Component c,
 	if (fmu != NULL)
 	{
 		return convertStatus(
-				fmu->m_client->fmi2DoStep(currentCommunicationPoint,
+				fmu->m_proxy->fmi2DoStep(currentCommunicationPoint,
 						communicationStepSize,
 						noSetFMUStatePriorToCurrentPoint));
 	}
@@ -497,10 +497,10 @@ extern "C" fmi2Status fmi2GetStatus(fmi2Component c, const fmi2StatusKind s,
 
 	if (fmu != NULL)
 	{
-		ExternalClient::fmi2Status status;
-		ExternalClient::fmi2StatusKind kind = convertStatusKind(s);
+		FmuProxy::fmi2Status status;
+		FmuProxy::fmi2StatusKind kind = convertStatusKind(s);
 		fmi2Status s = convertStatus(
-				fmu->m_client->fmi2GetStatus(kind, &status));
+				fmu->m_proxy->fmi2GetStatus(kind, &status));
 		*value = convertStatus(status);
 		return s;
 	}
@@ -515,7 +515,7 @@ extern "C" fmi2Status fmi2GetRealStatus(fmi2Component c, const fmi2StatusKind s,
 	if (fmu != NULL)
 	{
 		return convertStatus(
-				fmu->m_client->fmi2GetRealStatus(convertStatusKind(s), value));
+				fmu->m_proxy->fmi2GetRealStatus(convertStatusKind(s), value));
 	}
 	return fmi2Fatal;
 }
@@ -528,7 +528,7 @@ extern "C" fmi2Status fmi2GetIntegerStatus(fmi2Component c,
 	if (fmu != NULL)
 	{
 		return convertStatus(
-				fmu->m_client->fmi2GetIntegerStatus(convertStatusKind(s),
+				fmu->m_proxy->fmi2GetIntegerStatus(convertStatusKind(s),
 						value));
 	}
 	return fmi2Fatal;
@@ -542,7 +542,7 @@ extern "C" fmi2Status fmi2GetBooleanStatus(fmi2Component c,
 	if (fmu != NULL)
 	{
 		return convertStatus(
-				fmu->m_client->fmi2GetBooleanStatus(convertStatusKind(s),
+				fmu->m_proxy->fmi2GetBooleanStatus(convertStatusKind(s),
 						value));
 	}
 	return fmi2Fatal;
@@ -556,7 +556,7 @@ extern "C" fmi2Status fmi2GetStringStatus(fmi2Component c,
 	if (fmu != NULL)
 	{
 		return convertStatus(
-				fmu->m_client->fmi2GetStringStatus(convertStatusKind(s), value));
+				fmu->m_proxy->fmi2GetStringStatus(convertStatusKind(s), value));
 	}
 	return fmi2Fatal;
 }
@@ -568,7 +568,7 @@ extern "C" fmi2Status fmi2GetMaxStepsize(fmi2Component c, fmi2Real* size)
 
 	if (fmu != NULL)
 	{
-		return convertStatus(fmu->m_client->fmi2GetMaxStepsize(size));
+		return convertStatus(fmu->m_proxy->fmi2GetMaxStepsize(size));
 	}
 
 	return fmi2Fatal;
