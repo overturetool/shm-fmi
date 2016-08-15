@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.intocps.java.fmi.service.IServiceProtocol;
+import org.intocps.java.fmi.service.LogProtocolDriver;
 import org.intocps.java.fmi.service.ProtocolDriver;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -89,6 +90,10 @@ public class TestResponder implements IServiceProtocol{
 	@Override
 	public Fmi2StatusReply EnterInitializationMode(Fmi2Empty parseFrom) {
 		System.out.println("Called fmi2EnterInitializationMode");
+		if(logDriver!=null)
+		{
+			logDriver.log("Called fmi2EnterInitializationMode");
+		}
 		return ok();
 	}
 
@@ -164,10 +169,19 @@ public class TestResponder implements IServiceProtocol{
 
 		return (builder.build());
 	}
+	
+	LogProtocolDriver logDriver =null;
 
 	@Override
 	public Fmi2StatusReply Instantiate(Fmi2InstantiateRequest parseFrom) {
 		System.out.println("Called fmi2Instantiate");
+		
+		if(parseFrom.getLogginOn())
+		{
+			 logDriver = new LogProtocolDriver(parseFrom.getCallbackShmName());
+			
+		}
+		
 		return ok();
 	}
 

@@ -81,14 +81,12 @@ static FmuProxy::fmi2StatusKind convertStatusKind(fmi2StatusKind kind)
 
 }
 
-static void log(const fmi2CallbackFunctions *functions,
-		fmi2ComponentEnvironment componentEnvironment, fmi2String instanceName,
-		fmi2Status status, fmi2String category, fmi2String message)
+static void log(const fmi2CallbackFunctions *functions, fmi2ComponentEnvironment componentEnvironment,
+		fmi2String instanceName, fmi2Status status, fmi2String category, fmi2String message)
 {
 	if (functions != NULL && functions->logger != NULL)
 	{
-		functions->logger(componentEnvironment, instanceName, status, category,
-				message);
+		functions->logger(componentEnvironment, instanceName, status, category, message);
 	}
 }
 
@@ -98,20 +96,85 @@ static void notimplemented(fmi2Component c, fmi2String message)
 
 	if (fmu != NULL)
 	{
-		std::string base("Not imeplemented: ");
+		std::string base("Not implemented: ");
 		std::string m(message);
-		log(fmu->m_functions, NULL, fmu->m_name, fmi2Error, "error",
-				(base + m).c_str());
+		log(fmu->m_functions, NULL, fmu->m_name->c_str(), fmi2Error, "error", (base + m).c_str());
 	}
+}
+
+void sleepcp(int milliseconds) // cross-platform sleep function
+{
+#ifdef WIN32
+	Sleep(milliseconds);
+#else
+	usleep(milliseconds * 1000);
+#endif // win32
+}
+
+void callback(FmuContainer *container, std::string shmCallbackKey)
+{
+	if (container->logger == NULL)
+	{
+		return;
+	}
+
+	FmiIpc::Client* callbackClient = NULL;
+	bool success = false;
+	while (container->active && !success)
+	{
+		callbackClient = new FmiIpc::Client(shmCallbackKey.c_str(), &success);
+
+		if (!success)
+		{
+			delete callbackClient;
+			callbackClient = NULL;
+			printf("Unable to connect to callback shm: %s retry in 1 sec.\n\n", shmCallbackKey.c_str());
+			sleepcp(1000);
+		}
+
+	}
+
+	if (callbackClient != NULL)
+	{
+		while (container->active)
+		{
+			SharedFmiMessage* msg = callbackClient->getMessage(INFINITE);
+
+			if (msg == NULL)
+			{
+				return;
+			}
+
+			if (msg->cmd == sharedfmimemory::fmi2Log)
+			{
+				Fmi2StringStatusReply* r = new Fmi2StringStatusReply();
+				r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
+
+				//handle message
+//				printf("Received log data from client '%s': '%s'\n", container->m_name->c_str(), r->value().c_str());
+				container->logger(container->componentEnvironment, container->m_name->c_str(), fmi2OK, "logFmiCall",
+						r->value().c_str());
+
+				SharedFmiMessage* msgReply = new SharedFmiMessage();
+
+				Fmi2Empty request;
+
+				msgReply->protoBufMsgSize = request.ByteSize();
+				request.SerializeWithCachedSizesToArray(msgReply->protoBufMsg);
+				msgReply->cmd = sharedfmimemory::fmi2Log;
+				callbackClient->sendReply(msgReply);
+			}
+		}
+	}
+
 }
 
 #define LOG(functions,comp,name,status,category, message,args...) if(functions!=NULL){	if(functions->logger!=NULL)	{functions->logger((void*)comp , name, status, category, message, args);}}
 // ---------------------------------------------------------------------------
 // FMI functions
 // ---------------------------------------------------------------------------
-extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
-		fmi2Type fmuType, fmi2String fmuGUID, fmi2String fmuResourceLocation,
-		const fmi2CallbackFunctions *functions, fmi2Boolean visible,
+extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuType, fmi2String fmuGUID,
+		fmi2String fmuResourceLocation, const fmi2CallbackFunctions *functions, fmi2Boolean visible,
 		fmi2Boolean loggingOn)
 {
 //	if(functions!=NULL)
@@ -122,12 +185,13 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 //		}
 //	}
 
-	LOG(functions,(void*)clients.size() , instanceName, fmi2OK, "logFmiCall", "FMU: Called instantiate with instance %s and guid %s", instanceName,fmuGUID);
+	LOG(functions, (void* )clients.size(), instanceName, fmi2OK, "logFmiCall",
+			"FMU: Called instantiate with instance %s and guid %s", instanceName, fmuGUID);
 
 	std::string shared_memory_key(fmuGUID);
 	shared_memory_key.append(instanceName);
 
-	setbuf(stdout, NULL);//fixme remove
+	setbuf(stdout, NULL); //fixme remove
 
 	std::string resourceLocationStr(fmuResourceLocation);
 
@@ -137,14 +201,14 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 	resourceLocationStr = resourceLocationStr.substr(5);
 #endif
 
-	LOG(functions,(void*)clients.size() , instanceName, fmi2OK, "logFmiCall", "FMU: Launching Tool Wrapper memory key: '%s'  and resource location %s", shared_memory_key.c_str(),resourceLocationStr.c_str());
-
+	LOG(functions, (void* )clients.size(), instanceName, fmi2OK, "logFmiCall",
+			"FMU: Launching Tool Wrapper memory key: '%s'  and resource location %s", shared_memory_key.c_str(),
+			resourceLocationStr.c_str());
 
 	std::string configFile = resourceLocationStr + std::string("/config.txt");
 	ConfigFile config(configFile, shared_memory_key);
 
-	JavaLauncher *launcher = new JavaLauncher(resourceLocationStr.c_str(),
-			config.m_args);
+	JavaLauncher *launcher = new JavaLauncher(resourceLocationStr.c_str(), config.m_args);
 
 	if (config.m_skipLaunch)
 	{
@@ -152,24 +216,23 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 		shared_memory_key = "shmFmiTest";
 	}
 
-
-	LOG(functions,(void*)clients.size() , instanceName, fmi2OK, "logFmiCall", "FMU: Launching with shared memory key: '%s'", shared_memory_key.c_str());
+	LOG(functions, (void* )clients.size(), instanceName, fmi2OK, "logFmiCall",
+			"FMU: Launching with shared memory key: '%s'", shared_memory_key.c_str());
 
 	FmuProxy *client = new FmuProxy(shared_memory_key);
 
-	if(!client->initialize())
+	if (!client->initialize())
 	{
 		printf("FMU: FMU Debug FATAL: cannot create and initialize IPC server for FMU\n");
 		return NULL;
 	}
 
-	LOG(functions,(void*)clients.size() , instanceName, fmi2OK, "logFmiCall", "FMU: FMU Server client create, hosting SHM with raw key: %s", shared_memory_key.c_str());
+	LOG(functions, (void* )clients.size(), instanceName, fmi2OK, "logFmiCall",
+			"FMU: FMU Server create, hosting SHM with raw key: %s", shared_memory_key.c_str());
 
+	fflush(stdout); //FIXME remove
 
-	fflush(stdout);//FIXME remove
-
-	FmuContainer *container = new FmuContainer(client, instanceName, functions,
-			launcher);
+	FmuContainer *container = new FmuContainer(client, instanceName, functions, launcher);
 
 	//do not return null
 	if (clients.size() == 0)
@@ -184,31 +247,38 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 	}
 
 	clients.push_back(container);
+	intptr_t compid = clients.size() - 1;
+	container->componentEnvironment = (void*) compid;
 
 	if (!config.m_skipLaunch)
 	{
 		launcher->launch();
 	}
 
-	client->fmi2Instantiate(instanceName, fmuGUID, fmuResourceLocation, "",
-			8900, visible, loggingOn);
+	std::string callbackId = shared_memory_key + std::string("Callback");
+	if (client->fmi2Instantiate(instanceName, fmuGUID, fmuResourceLocation, callbackId.c_str(), visible, loggingOn))
+	{
+		//connected
+		if (functions != NULL && functions->logger != NULL)
+		{
+			container->logger = functions->logger;
+			//configure callback
+			std::thread* callbackThread = new std::thread(callback, container, callbackId);
+		}
+	}
 
-	intptr_t compid = clients.size() - 1;
-
-	return (void*) compid;
+	return container->componentEnvironment;
 }
 
-extern "C" fmi2Status fmi2SetupExperiment(fmi2Component c,
-		fmi2Boolean toleranceDefined, fmi2Real tolerance, fmi2Real startTime,
-		fmi2Boolean stopTimeDefined, fmi2Real stopTime)
+extern "C" fmi2Status fmi2SetupExperiment(fmi2Component c, fmi2Boolean toleranceDefined, fmi2Real tolerance,
+		fmi2Real startTime, fmi2Boolean stopTimeDefined, fmi2Real stopTime)
 {
 	FmuContainer* fmu = getFmuContainer(c);
 
 	if (fmu != NULL)
 	{
 		return convertStatus(
-				fmu->m_proxy->fmi2SetupExperiment(toleranceDefined, tolerance,
-						startTime, stopTimeDefined, stopTime));
+				fmu->m_proxy->fmi2SetupExperiment(toleranceDefined, tolerance, startTime, stopTimeDefined, stopTime));
 	}
 
 	return fmi2OK;
@@ -265,6 +335,7 @@ extern "C" void fmi2FreeInstance(fmi2Component c)
 
 	if (fmu != NULL)
 	{
+		fmu->active = false;
 		fmu->m_javaLauncher->terminate();
 		intptr_t index = (intptr_t) c;
 		clients.at(index) = NULL;
@@ -292,23 +363,19 @@ extern "C" const char* fmi2GetTypesPlatform()
 // Boolean, String
 // ---------------------------------------------------------------------------
 
-extern "C" fmi2Status fmi2SetDebugLogging(fmi2Component c,
-		fmi2Boolean loggingOn, size_t nCategories,
+extern "C" fmi2Status fmi2SetDebugLogging(fmi2Component c, fmi2Boolean loggingOn, size_t nCategories,
 		const fmi2String categories[])
 {
 	FmuContainer* fmu = getFmuContainer(c);
 
 	if (fmu != NULL)
 	{
-		return convertStatus(
-				fmu->m_proxy->fmi2SetDebugLogging(loggingOn, nCategories,
-						categories));
+		return convertStatus(fmu->m_proxy->fmi2SetDebugLogging(loggingOn, nCategories, categories));
 	}
 	return fmi2Fatal;
 }
 
-extern "C" fmi2Status fmi2GetReal(fmi2Component c,
-		const fmi2ValueReference vr[], size_t nvr, fmi2Real value[])
+extern "C" fmi2Status fmi2GetReal(fmi2Component c, const fmi2ValueReference vr[], size_t nvr, fmi2Real value[])
 {
 	FmuContainer* fmu = getFmuContainer(c);
 
@@ -319,8 +386,7 @@ extern "C" fmi2Status fmi2GetReal(fmi2Component c,
 	return fmi2Fatal;
 }
 
-extern "C" fmi2Status fmi2GetInteger(fmi2Component c,
-		const fmi2ValueReference vr[], size_t nvr, fmi2Integer value[])
+extern "C" fmi2Status fmi2GetInteger(fmi2Component c, const fmi2ValueReference vr[], size_t nvr, fmi2Integer value[])
 {
 	FmuContainer* fmu = getFmuContainer(c);
 
@@ -331,8 +397,7 @@ extern "C" fmi2Status fmi2GetInteger(fmi2Component c,
 	return fmi2Fatal;
 }
 
-extern "C" fmi2Status fmi2GetBoolean(fmi2Component c,
-		const fmi2ValueReference vr[], size_t nvr, fmi2Boolean value[])
+extern "C" fmi2Status fmi2GetBoolean(fmi2Component c, const fmi2ValueReference vr[], size_t nvr, fmi2Boolean value[])
 {
 	FmuContainer* fmu = getFmuContainer(c);
 
@@ -343,8 +408,7 @@ extern "C" fmi2Status fmi2GetBoolean(fmi2Component c,
 	return fmi2Fatal;
 }
 
-extern "C" fmi2Status fmi2GetString(fmi2Component c,
-		const fmi2ValueReference vr[], size_t nvr, fmi2String value[])
+extern "C" fmi2Status fmi2GetString(fmi2Component c, const fmi2ValueReference vr[], size_t nvr, fmi2String value[])
 {
 	FmuContainer* fmu = getFmuContainer(c);
 
@@ -355,8 +419,7 @@ extern "C" fmi2Status fmi2GetString(fmi2Component c,
 	return fmi2Fatal;
 }
 
-extern "C" fmi2Status fmi2SetReal(fmi2Component c,
-		const fmi2ValueReference vr[], size_t nvr, const fmi2Real value[])
+extern "C" fmi2Status fmi2SetReal(fmi2Component c, const fmi2ValueReference vr[], size_t nvr, const fmi2Real value[])
 {
 	FmuContainer* fmu = getFmuContainer(c);
 
@@ -367,8 +430,8 @@ extern "C" fmi2Status fmi2SetReal(fmi2Component c,
 	return fmi2Fatal;
 }
 
-extern "C" fmi2Status fmi2SetInteger(fmi2Component c,
-		const fmi2ValueReference vr[], size_t nvr, const fmi2Integer value[])
+extern "C" fmi2Status fmi2SetInteger(fmi2Component c, const fmi2ValueReference vr[], size_t nvr,
+		const fmi2Integer value[])
 {
 	FmuContainer* fmu = getFmuContainer(c);
 
@@ -379,8 +442,8 @@ extern "C" fmi2Status fmi2SetInteger(fmi2Component c,
 	return fmi2Fatal;
 }
 
-extern "C" fmi2Status fmi2SetBoolean(fmi2Component c,
-		const fmi2ValueReference vr[], size_t nvr, const fmi2Boolean value[])
+extern "C" fmi2Status fmi2SetBoolean(fmi2Component c, const fmi2ValueReference vr[], size_t nvr,
+		const fmi2Boolean value[])
 {
 	FmuContainer* fmu = getFmuContainer(c);
 
@@ -391,8 +454,8 @@ extern "C" fmi2Status fmi2SetBoolean(fmi2Component c,
 	return fmi2Fatal;
 }
 
-extern "C" fmi2Status fmi2SetString(fmi2Component c,
-		const fmi2ValueReference vr[], size_t nvr, const fmi2String value[])
+extern "C" fmi2Status fmi2SetString(fmi2Component c, const fmi2ValueReference vr[], size_t nvr,
+		const fmi2String value[])
 {
 	FmuContainer* fmu = getFmuContainer(c);
 
@@ -418,29 +481,27 @@ extern "C" fmi2Status fmi2FreeFMUstate(fmi2Component c, fmi2FMUstate* FMUstate)
 	notimplemented(c, "fmi2FreeFMUstate");
 	return fmi2Error;
 }
-extern "C" fmi2Status fmi2SerializedFMUstateSize(fmi2Component c,
-		fmi2FMUstate FMUstate, size_t *size)
+extern "C" fmi2Status fmi2SerializedFMUstateSize(fmi2Component c, fmi2FMUstate FMUstate, size_t *size)
 {
 	notimplemented(c, "fmi2SerializedFMUstateSize");
 	return fmi2Error;
 }
-extern "C" fmi2Status fmi2SerializeFMUstate(fmi2Component c,
-		fmi2FMUstate FMUstate, fmi2Byte serializedState[], size_t size)
+extern "C" fmi2Status fmi2SerializeFMUstate(fmi2Component c, fmi2FMUstate FMUstate, fmi2Byte serializedState[],
+		size_t size)
 {
 	notimplemented(c, "fmi2SerializeFMUstate");
 	return fmi2Error;
 }
-extern "C" fmi2Status fmi2DeSerializeFMUstate(fmi2Component c,
-		const fmi2Byte serializedState[], size_t size, fmi2FMUstate* FMUstate)
+extern "C" fmi2Status fmi2DeSerializeFMUstate(fmi2Component c, const fmi2Byte serializedState[], size_t size,
+		fmi2FMUstate* FMUstate)
 {
 	notimplemented(c, "fmi2DeSerializeFMUstate");
 	return fmi2Error;
 }
 
-extern "C" fmi2Status fmi2GetDirectionalDerivative(fmi2Component c,
-		const fmi2ValueReference vUnknown_ref[], size_t nUnknown,
-		const fmi2ValueReference vKnown_ref[], size_t nKnown,
-		const fmi2Real dvKnown[], fmi2Real dvUnknown[])
+extern "C" fmi2Status fmi2GetDirectionalDerivative(fmi2Component c, const fmi2ValueReference vUnknown_ref[],
+		size_t nUnknown, const fmi2ValueReference vKnown_ref[], size_t nKnown, const fmi2Real dvKnown[],
+		fmi2Real dvUnknown[])
 {
 	notimplemented(c, "fmi2GetDirectionalDerivative");
 	return fmi2Error;
@@ -451,17 +512,15 @@ extern "C" fmi2Status fmi2GetDirectionalDerivative(fmi2Component c,
 // ---------------------------------------------------------------------------
 #ifdef FMI_COSIMULATION
 /* Simulating the slave */
-extern "C" fmi2Status fmi2SetRealInputDerivatives(fmi2Component c,
-		const fmi2ValueReference vr[], size_t nvr, const fmi2Integer order[],
-		const fmi2Real value[])
+extern "C" fmi2Status fmi2SetRealInputDerivatives(fmi2Component c, const fmi2ValueReference vr[], size_t nvr,
+		const fmi2Integer order[], const fmi2Real value[])
 {
 	notimplemented(c, "fmi2SetRealInputDerivatives");
 	return fmi2Error;
 }
 
-extern "C" fmi2Status fmi2GetRealOutputDerivatives(fmi2Component c,
-		const fmi2ValueReference vr[], size_t nvr, const fmi2Integer order[],
-		fmi2Real value[])
+extern "C" fmi2Status fmi2GetRealOutputDerivatives(fmi2Component c, const fmi2ValueReference vr[], size_t nvr,
+		const fmi2Integer order[], fmi2Real value[])
 {
 	notimplemented(c, "fmi2GetRealOutputDerivatives");
 	return fmi2Error;
@@ -473,8 +532,7 @@ extern "C" fmi2Status fmi2CancelStep(fmi2Component c)
 	return fmi2Error;
 }
 
-extern "C" fmi2Status fmi2DoStep(fmi2Component c,
-		fmi2Real currentCommunicationPoint, fmi2Real communicationStepSize,
+extern "C" fmi2Status fmi2DoStep(fmi2Component c, fmi2Real currentCommunicationPoint, fmi2Real communicationStepSize,
 		fmi2Boolean noSetFMUStatePriorToCurrentPoint)
 {
 	FmuContainer* fmu = getFmuContainer(c);
@@ -482,16 +540,14 @@ extern "C" fmi2Status fmi2DoStep(fmi2Component c,
 	if (fmu != NULL)
 	{
 		return convertStatus(
-				fmu->m_proxy->fmi2DoStep(currentCommunicationPoint,
-						communicationStepSize,
+				fmu->m_proxy->fmi2DoStep(currentCommunicationPoint, communicationStepSize,
 						noSetFMUStatePriorToCurrentPoint));
 	}
 
 	return fmi2Fatal;
 }
 
-extern "C" fmi2Status fmi2GetStatus(fmi2Component c, const fmi2StatusKind s,
-		fmi2Status *value)
+extern "C" fmi2Status fmi2GetStatus(fmi2Component c, const fmi2StatusKind s, fmi2Status *value)
 {
 	FmuContainer* fmu = getFmuContainer(c);
 
@@ -499,64 +555,53 @@ extern "C" fmi2Status fmi2GetStatus(fmi2Component c, const fmi2StatusKind s,
 	{
 		FmuProxy::fmi2Status status;
 		FmuProxy::fmi2StatusKind kind = convertStatusKind(s);
-		fmi2Status s = convertStatus(
-				fmu->m_proxy->fmi2GetStatus(kind, &status));
+		fmi2Status s = convertStatus(fmu->m_proxy->fmi2GetStatus(kind, &status));
 		*value = convertStatus(status);
 		return s;
 	}
 	return fmi2Fatal;
 }
 
-extern "C" fmi2Status fmi2GetRealStatus(fmi2Component c, const fmi2StatusKind s,
-		fmi2Real *value)
+extern "C" fmi2Status fmi2GetRealStatus(fmi2Component c, const fmi2StatusKind s, fmi2Real *value)
 {
 	FmuContainer* fmu = getFmuContainer(c);
 
 	if (fmu != NULL)
 	{
-		return convertStatus(
-				fmu->m_proxy->fmi2GetRealStatus(convertStatusKind(s), value));
+		return convertStatus(fmu->m_proxy->fmi2GetRealStatus(convertStatusKind(s), value));
 	}
 	return fmi2Fatal;
 }
 
-extern "C" fmi2Status fmi2GetIntegerStatus(fmi2Component c,
-		const fmi2StatusKind s, fmi2Integer *value)
+extern "C" fmi2Status fmi2GetIntegerStatus(fmi2Component c, const fmi2StatusKind s, fmi2Integer *value)
 {
 	FmuContainer* fmu = getFmuContainer(c);
 
 	if (fmu != NULL)
 	{
-		return convertStatus(
-				fmu->m_proxy->fmi2GetIntegerStatus(convertStatusKind(s),
-						value));
+		return convertStatus(fmu->m_proxy->fmi2GetIntegerStatus(convertStatusKind(s), value));
 	}
 	return fmi2Fatal;
 }
 
-extern "C" fmi2Status fmi2GetBooleanStatus(fmi2Component c,
-		const fmi2StatusKind s, fmi2Boolean *value)
+extern "C" fmi2Status fmi2GetBooleanStatus(fmi2Component c, const fmi2StatusKind s, fmi2Boolean *value)
 {
 	FmuContainer* fmu = getFmuContainer(c);
 
 	if (fmu != NULL)
 	{
-		return convertStatus(
-				fmu->m_proxy->fmi2GetBooleanStatus(convertStatusKind(s),
-						value));
+		return convertStatus(fmu->m_proxy->fmi2GetBooleanStatus(convertStatusKind(s), value));
 	}
 	return fmi2Fatal;
 }
 
-extern "C" fmi2Status fmi2GetStringStatus(fmi2Component c,
-		const fmi2StatusKind s, fmi2String *value)
+extern "C" fmi2Status fmi2GetStringStatus(fmi2Component c, const fmi2StatusKind s, fmi2String *value)
 {
 	FmuContainer* fmu = getFmuContainer(c);
 
 	if (fmu != NULL)
 	{
-		return convertStatus(
-				fmu->m_proxy->fmi2GetStringStatus(convertStatusKind(s), value));
+		return convertStatus(fmu->m_proxy->fmi2GetStringStatus(convertStatusKind(s), value));
 	}
 	return fmi2Fatal;
 }

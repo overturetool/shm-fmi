@@ -244,6 +244,21 @@
 												<errormapper type="merge" to="target/redirector-mac.err" />
 											</redirector>
 										</exec>
+
+   <exec dir="${project.basedir}/src/main/native" executable="javah" failonerror="true">
+
+                      <arg value="-classpath" />
+                      <arg value="../../../target/classes" />
+                      <arg value="org.intocps.java.fmi.shm.SharedMemoryServer" />
+
+                      <redirector outputproperty="redirector.out" errorproperty="redirector.err">
+                        <inputfilterchain>
+                          <replacestring from="before" to="after" />
+                        </inputfilterchain>
+                        <outputmapper type="merge" to="target/redirector-mac.out" />
+                        <errormapper type="merge" to="target/redirector-mac.err" />
+                      </redirector>
+                    </exec>
 									</tasks>
 								</configuration>
 								<goals>

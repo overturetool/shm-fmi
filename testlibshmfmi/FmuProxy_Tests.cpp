@@ -80,8 +80,7 @@ TEST_F(FmuProxyTest, fmi2Instantiate)
 
 	EXPECT_EQ(true,
 			m_client->fmi2Instantiate(instanceName.c_str(), fmuGUID.c_str(),
-					fmuResourceLocation.c_str(), callbackAddress, callbackPort,
-					visible, loggingOn));
+					fmuResourceLocation.c_str(), callbackAddress, visible, loggingOn));
 }
 
 TEST_F(FmuProxyTest, fmi2EnterInitializationMode)

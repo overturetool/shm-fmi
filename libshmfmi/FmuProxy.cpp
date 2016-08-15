@@ -275,7 +275,7 @@ FmuProxy::fmi2Status FmuProxy::getStatus(Fmi2StatusReply* reply)
 
 bool FmuProxy::fmi2Instantiate(fmi2String instanceName,
 		fmi2String fmuGUID, fmi2String fmuResourceLocation,
-		const char* callbackAddress, int callbackPort, fmi2Boolean visible,
+		const char* callbackAddress, fmi2Boolean visible,
 		fmi2Boolean loggingOn)
 {
 
@@ -284,7 +284,6 @@ bool FmuProxy::fmi2Instantiate(fmi2String instanceName,
 	request.set_fmuguid(fmuGUID);
 	request.set_fmuresourcelocation(fmuResourceLocation);
 	request.set_callbackshmname(callbackAddress);
-	//request.set_callbackport(callbackPort);
 	request.set_visible(visible);
 	request.set_logginon(loggingOn);
 

@@ -14,7 +14,7 @@ JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setId(
 		JNIEnv *env, jobject obj, jstring id) {
 
 	const char * idString = env->GetStringUTFChars(id, NULL);
-	printf("%s\n",idString);
+	printf("Native Client (java) starting client with shm key: %s\n",idString);
 	fflush(stdout);
 	bool success;
 

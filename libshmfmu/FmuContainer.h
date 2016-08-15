@@ -11,19 +11,25 @@
 #include "FmuProxy.h"
 #include "fmi2Functions.h"
 #include "JavaLauncher.h"
-
+#include "SharedFmiMessage.h"
+#include <thread>
 
 class FmuContainer
 {
 public:
-	FmuContainer(FmuProxy *proxy, const char* name, const fmi2CallbackFunctions *functions,JavaLauncher* launcher);
+	FmuContainer(FmuProxy *proxy, const char* name, const fmi2CallbackFunctions *functions, JavaLauncher* launcher);
 	virtual ~FmuContainer();
 
 public:
 	const fmi2CallbackFunctions *m_functions;
 	FmuProxy* m_proxy;
-	const char* m_name;
+	std::string* m_name;
 	JavaLauncher *m_javaLauncher;
+	bool active;
+
+	//FMI
+	fmi2CallbackLogger logger;
+	fmi2ComponentEnvironment componentEnvironment;
 };
 
 #endif /* FMUCONTAINER_H_ */

@@ -57,8 +57,7 @@ public:
 	bool initialize();
 
 	bool fmi2Instantiate(fmi2String instanceName, fmi2String fmuGUID,
-			fmi2String fmuResourceLocation, const char* callbackAddress,
-			int callbackPort, fmi2Boolean visible, fmi2Boolean loggingOn);
+			fmi2String fmuResourceLocation, const char* callbackAddress, fmi2Boolean visible, fmi2Boolean loggingOn);
 
 	fmi2Status fmi2SetupExperiment(fmi2Boolean toleranceDefined,
 			fmi2Real tolerance, fmi2Real startTime, fmi2Boolean stopTimeDefined,

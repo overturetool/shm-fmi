@@ -40,7 +40,9 @@ typedef enum
 	fmi2GetRealStatus=18,
 	fmi2GetIntegerStatus=19,
 	fmi2GetBooleanStatus=20,
-	fmi2GetStringStatus=21
+	fmi2GetStringStatus=21,
+	//
+	fmi2Log=22
 
 } fmi2Command;
 

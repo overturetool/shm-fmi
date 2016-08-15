@@ -53,7 +53,7 @@ std::string* getMappedName(const char* baseName, const char* name)
 		std::string hash = std::to_string(std::hash<std::string>()(*nameOfMapping));
 		*nameOfMapping = "/";
 		*nameOfMapping += hash;
-		printf("New Apple shm key is: %s from baseName %s and name %s\n", nameOfMapping->c_str(),baseName,name);
+		printf("New Apple shm key is: %s from baseName %s and name %s\n", nameOfMapping->c_str(), baseName, name);
 	}
 
 #endif
@@ -70,18 +70,18 @@ FmiIpc::Server::Server()
 	m_pBuf = NULL;
 	m_name = NULL;
 	// create the server
-//	create(connectionName);
 }
 
 FmiIpc::Server::~Server()
 {
 	// Free memory
-
 	// Close the server
 	close();
 
 	if (m_name != NULL)
+	{
 		delete m_name;
+	}
 }
 
 void FmiIpc::Server::close()
@@ -130,7 +130,7 @@ void FmiIpc::Server::close()
 
 bool FmiIpc::Server::create(const char* name)
 {
-bool ok = true;
+	bool ok = true;
 	std::string* nameOfMapping = getMappedName(SHARED_MEM_BASE_NAME, name);
 	printf("Starting IPC server with key: %s\n", nameOfMapping->c_str());
 	// Create the file mapping
@@ -196,7 +196,7 @@ bool ok = true;
 			0, 0, sizeof(SharedFmiMem));
 	if (m_pBuf == NULL)
 	{
-		printf("server_create: failed: %01d\n", __LINE__);
+		fprintf(stderr,"server_create: failed: %01d\n", __LINE__);
 		return false;
 	}
 	// Clear the buffer
@@ -229,15 +229,6 @@ bool ok = true;
 		printf("server_create: failed: unable to truncate. %s\n", strerror( errno));
 		return false;
 	}
-
-	/*	struct stat sb;
-	 if (fstat(m_hMapFile, &sb)) {
-	 perror("fstat");
-	 exit(1);
-	 }
-
-	 int ds = sizeof(SharedFmiMem);
-	 sb.st_size*/
 
 	void *ptr = mmap(NULL, sizeof(SharedFmiMem), PROT_READ | PROT_WRITE, MAP_SHARED, m_hMapFile, 0);
 	if (ptr == MAP_FAILED)
@@ -291,10 +282,6 @@ bool ok = true;
 		printf("server_create: failed: %01d\n", __LINE__);
 		return false;
 	}
-//#elif   __linux
-//POSIX
-//	sem_init(&m_pBuf->semSignal, 1, 0);
-//	sem_init(&m_pBuf->semAvail, 1, 0);
 #elif __APPLE__ || __linux
 
 	std::string* signalName = getMappedName(SIGNAL_NAME, name);
@@ -330,8 +317,6 @@ bool ok = true;
 		ok = false;
 	}
 
-	//m_pBuf->message.cmd = fmi2Reset;
-
 	return ok;
 }
 
@@ -349,19 +334,11 @@ SharedFmiMessage* FmiIpc::Server::send(SharedFmiMessage* message, DWORD dwTimeou
 		return NULL;
 	}
 #elif __APPLE__ || __linux
-//		printf("Server signaled avail\n");
 	sem_post(this->m_hAvail);
 
 	DEBUG_PRINTF(("IPC Server signaled\n"));
 
-//		printf("Server waiting signal\n");
 	sem_wait(this->m_hSignal);
-//		printf("Server done waiting signal\n");
-//#elif  __linux
-//POSIX
-//	sem_post(&this->m_pBuf->semAvail);
-//	DEBUG_PRINTF(("Server signaled\n"));
-//	sem_wait(&this->m_pBuf->semSignal);
 #endif
 
 	DEBUG_PRINTF(("IPC Server ret msg\n"));
@@ -518,9 +495,6 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 	}
 	delete signalAvailName;
 
-//#elif __linux
-//real POSIX
-
 #endif
 
 	*success = true;
@@ -542,7 +516,6 @@ FmiIpc::Client::~Client()
 	}
 
 	// Unmap the memory
-	//UnmapViewOfFile(m_pBuf);
 	if (m_pBuf)
 	{
 		FmiIpc::unmap(m_pBuf, m_name);
@@ -554,8 +527,6 @@ FmiIpc::Client::~Client()
 #ifdef _WIN32
 		FmiIpc::close(m_hMapFile);
 #elif __APPLE__ ||  __linux
-//POSIX
-//		shm_unlink(m_name->c_str());
 #endif
 	}
 	if (m_name != NULL)
@@ -570,12 +541,7 @@ bool FmiIpc::Client::waitAvailable(DWORD dwTimeout)
 	if (WaitForSingleObject(m_hAvail, dwTimeout) != WAIT_OBJECT_0)
 	return false;
 #elif __APPLE__ || __linux__
-//	printf("Client waiting\n");
 	sem_wait(this->m_hAvail);
-//	printf("Client done waiting\n");
-//#elif __linux
-//POSIX
-//	sem_wait(&this->m_pBuf->semAvail);
 #endif
 
 	// Success
@@ -597,7 +563,6 @@ SharedFmiMessage* FmiIpc::Client::getMessage(DWORD dwTimeout)
 void FmiIpc::Client::sendReply(SharedFmiMessage* reply)
 {
 	DEBUG_PRINTF(("IPC Client write msg\n"));
-	//memcpy(&this->m_pBuf->message, reply, sizeof(SharedFmiMessage));
 	this->m_pBuf->message = *reply;
 
 #ifdef _WIN32
@@ -606,9 +571,6 @@ void FmiIpc::Client::sendReply(SharedFmiMessage* reply)
 
 	sem_post(this->m_hSignal);
 
-//#elif __linux
-//POSIX
-//	sem_post(&this->m_pBuf->semSignal);
 #endif
 	DEBUG_PRINTF(("IPC Client signaled\n"));
 }
