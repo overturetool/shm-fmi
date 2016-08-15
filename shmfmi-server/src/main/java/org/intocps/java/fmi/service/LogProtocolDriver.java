@@ -4,7 +4,8 @@ import org.intocps.java.fmi.shm.SharedMemoryServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.lausdahl.examples.Service.Fmi2StringStatusReply;
+import com.lausdahl.examples.Service.Fmi2LogReply;
+import com.lausdahl.examples.Service.Fmi2LogReply.Status;
 
 public class LogProtocolDriver
 {
@@ -42,10 +43,10 @@ public class LogProtocolDriver
 
 	}
 
-	public void log(String message)
+	public void log(String category, Status status, String message)
 	{
-		logger.debug("Sending callback log message: {}",message);
-		Fmi2StringStatusReply msg = Fmi2StringStatusReply.newBuilder().setValue(message).build();
+		logger.debug("Sending callback log message: {}", message);
+		Fmi2LogReply msg = Fmi2LogReply.newBuilder().setValue(message).setCategory(category).setStatus(status).build();
 		mem.serverSend(Commands.fmi2Log.id, msg.toByteArray());
 	}
 

@@ -12,6 +12,7 @@ import com.lausdahl.examples.Service.Fmi2BooleanStatusReply;
 import com.lausdahl.examples.Service.Fmi2DoStepRequest;
 import com.lausdahl.examples.Service.Fmi2Empty;
 import com.lausdahl.examples.Service.Fmi2IntegerStatusReply;
+import com.lausdahl.examples.Service.Fmi2LogReply;
 import com.lausdahl.examples.Service.Fmi2RealStatusReply;
 import com.lausdahl.examples.Service.Fmi2StatusReply;
 import com.lausdahl.examples.Service.Fmi2StatusReply.Status;
@@ -32,18 +33,18 @@ import com.lausdahl.examples.Service.Fmi2SetupExperimentRequest;
 import com.lausdahl.examples.Service.Fmi2StatusRequest;
 import com.lausdahl.examples.Service.Fmi2StringStatusReply;
 
-public class TestResponder implements IServiceProtocol{
-	
-	public static void main(String[] args) throws InterruptedException {
-		
-		
-		String memoryKey = "shmFmiTest";//"OvertureFmiFileMappingObject";
-		if(args.length>0)
+public class TestResponder implements IServiceProtocol
+{
+
+	public static void main(String[] args) throws InterruptedException
+	{
+
+		String memoryKey = "shmFmiTest";// "OvertureFmiFileMappingObject";
+		if (args.length > 0)
 		{
 			memoryKey = args[0];
 		}
-		
-		
+
 		ProtocolDriver driver = new ProtocolDriver(memoryKey, new TestResponder());
 
 		driver.start();
@@ -57,60 +58,67 @@ public class TestResponder implements IServiceProtocol{
 	Map<Integer, Boolean> booleans = new HashMap<Integer, Boolean>();
 	Map<Integer, Integer> integers = new HashMap<Integer, Integer>();
 	Map<Integer, String> strings = new HashMap<Integer, String>();
-	
-	public TestResponder() {
+
+	public TestResponder()
+	{
 		reals.put(10, 9.9);
 		integers.put(11, 1);
 		booleans.put(12, true);
 		strings.put(13, "undefined");
 	}
-	
-	static Fmi2StatusReply ok(){
+
+	static Fmi2StatusReply ok()
+	{
 		return Fmi2StatusReply.newBuilder().setStatus(Status.Ok).build();
 	}
-	
-	
+
 	@Override
-	public void error(String string) {
+	public void error(String string)
+	{
 		System.err.println(string);
 	}
 
 	@Override
-	public Fmi2StatusReply DoStep(Fmi2DoStepRequest parseFrom) {
+	public Fmi2StatusReply DoStep(Fmi2DoStepRequest parseFrom)
+	{
 		System.out.println("Called fmi2DoStep");
 		return ok();
 	}
 
 	@Override
-	public Fmi2StatusReply Terminate(Fmi2Empty parseFrom) {
+	public Fmi2StatusReply Terminate(Fmi2Empty parseFrom)
+	{
 		System.out.println("Called fmi2Terminate");
 		return ok();
 	}
 
 	@Override
-	public Fmi2StatusReply EnterInitializationMode(Fmi2Empty parseFrom) {
+	public Fmi2StatusReply EnterInitializationMode(Fmi2Empty parseFrom)
+	{
 		System.out.println("Called fmi2EnterInitializationMode");
-		if(logDriver!=null)
+		if (logDriver != null)
 		{
-			logDriver.log("Called fmi2EnterInitializationMode");
+			logDriver.log("logAll", Fmi2LogReply.Status.Ok, "Called fmi2EnterInitializationMode");
 		}
 		return ok();
 	}
 
 	@Override
-	public Fmi2StatusReply ExitInitializationMode(Fmi2Empty parseFrom) {
+	public Fmi2StatusReply ExitInitializationMode(Fmi2Empty parseFrom)
+	{
 		System.out.println("Called fmi2ExitInitializationMode");
 		return ok();
 	}
 
 	@Override
-	public Fmi2GetBooleanReply GetBoolean(Fmi2GetRequest parseFrom) {
+	public Fmi2GetBooleanReply GetBoolean(Fmi2GetRequest parseFrom)
+	{
 		System.out.println("Called fmi2GetBoolean");
 
-		Fmi2GetBooleanReply.Builder builder = Fmi2GetBooleanReply
-				.newBuilder();
+		Fmi2GetBooleanReply.Builder builder = Fmi2GetBooleanReply.newBuilder();
 
-		for (Integer id : parseFrom.getValueReferenceList()) {
+		for (Integer id : parseFrom.getValueReferenceList())
+		{
 			if (booleans.containsKey(id))
 				builder.addValues(booleans.get(id));
 		}
@@ -119,13 +127,14 @@ public class TestResponder implements IServiceProtocol{
 	}
 
 	@Override
-	public Fmi2GetIntegerReply GetInteger(Fmi2GetRequest parseFrom) {
+	public Fmi2GetIntegerReply GetInteger(Fmi2GetRequest parseFrom)
+	{
 		System.out.println("Called fmi2GetInteger");
 
-		Fmi2GetIntegerReply.Builder builder = Fmi2GetIntegerReply
-				.newBuilder();
+		Fmi2GetIntegerReply.Builder builder = Fmi2GetIntegerReply.newBuilder();
 
-		for (Integer id : parseFrom.getValueReferenceList()) {
+		for (Integer id : parseFrom.getValueReferenceList())
+		{
 			if (integers.containsKey(id))
 				builder.addValues(integers.get(id));
 		}
@@ -134,21 +143,23 @@ public class TestResponder implements IServiceProtocol{
 	}
 
 	@Override
-	public Fmi2GetMaxStepSizeReply GetMaxStepSize(Fmi2Empty parseFrom) {
+	public Fmi2GetMaxStepSizeReply GetMaxStepSize(Fmi2Empty parseFrom)
+	{
 		System.out.println("Called fmi2GetMaxStepSize");
-		
-		Fmi2GetMaxStepSizeReply reply =Fmi2GetMaxStepSizeReply.newBuilder().setMaxStepSize(100).build();
+
+		Fmi2GetMaxStepSizeReply reply = Fmi2GetMaxStepSizeReply.newBuilder().setMaxStepSize(100).build();
 		return (reply);
 	}
 
 	@Override
-	public Fmi2GetRealReply GetReal(Fmi2GetRequest parseFrom) {
+	public Fmi2GetRealReply GetReal(Fmi2GetRequest parseFrom)
+	{
 		System.out.println("Called fmi2GetReal");
 
-		Fmi2GetRealReply.Builder builder = Fmi2GetRealReply
-				.newBuilder();
+		Fmi2GetRealReply.Builder builder = Fmi2GetRealReply.newBuilder();
 
-		for (Integer id : parseFrom.getValueReferenceList()) {
+		for (Integer id : parseFrom.getValueReferenceList())
+		{
 			if (reals.containsKey(id))
 				builder.addValues(reals.get(id));
 		}
@@ -157,81 +168,94 @@ public class TestResponder implements IServiceProtocol{
 	}
 
 	@Override
-	public Fmi2GetStringReply GetString(Fmi2GetRequest parseFrom) {
+	public Fmi2GetStringReply GetString(Fmi2GetRequest parseFrom)
+	{
 		System.out.println("Called fmi2GetString");
 
 		Builder builder = Fmi2GetStringReply.newBuilder();
 
-		for (Integer id : parseFrom.getValueReferenceList()) {
+		for (Integer id : parseFrom.getValueReferenceList())
+		{
 			if (strings.containsKey(id))
 				builder.addValues(strings.get(id));
 		}
 
 		return (builder.build());
 	}
-	
-	LogProtocolDriver logDriver =null;
+
+	LogProtocolDriver logDriver = null;
 
 	@Override
-	public Fmi2StatusReply Instantiate(Fmi2InstantiateRequest parseFrom) {
+	public Fmi2StatusReply Instantiate(Fmi2InstantiateRequest parseFrom)
+	{
 		System.out.println("Called fmi2Instantiate");
-		
-		if(parseFrom.getLogginOn())
+
+		if (parseFrom.getLogginOn())
 		{
-			 logDriver = new LogProtocolDriver(parseFrom.getCallbackShmName());
-			
+			logDriver = new LogProtocolDriver(parseFrom.getCallbackShmName());
+
 		}
-		
+
 		return ok();
 	}
 
 	@Override
-	public Fmi2StatusReply Reset(Fmi2Empty parseFrom) {
+	public Fmi2StatusReply Reset(Fmi2Empty parseFrom)
+	{
 		System.out.println("Called fmi2Reset");
 		return ok();
 	}
 
 	@Override
-	public Fmi2StatusReply SetBoolean(Fmi2SetBooleanRequest request) {
+	public Fmi2StatusReply SetBoolean(Fmi2SetBooleanRequest request)
+	{
 		System.out.println("Called fmi2SetBoolean");
 
-		for (int i = 0; i < request.getValueReferenceCount(); i++) {
+		for (int i = 0; i < request.getValueReferenceCount(); i++)
+		{
 			booleans.put(request.getValueReference(i), request.getValues(i));
 		}
 		return ok();
 	}
 
 	@Override
-	public Fmi2StatusReply SetDebugLogging(Fmi2SetDebugLoggingRequest parseFrom) {
+	public Fmi2StatusReply SetDebugLogging(Fmi2SetDebugLoggingRequest parseFrom)
+	{
 		System.out.println("Called fmi2SetDebugLogging");
 		return ok();
 	}
 
 	@Override
-	public Fmi2StatusReply SetInteger(Fmi2SetIntegerRequest request) {
+	public Fmi2StatusReply SetInteger(Fmi2SetIntegerRequest request)
+	{
 		System.out.println("Called fmi2SetInteger");
 
-		for (int i = 0; i < request.getValueReferenceCount(); i++) {
+		for (int i = 0; i < request.getValueReferenceCount(); i++)
+		{
 			integers.put(request.getValueReference(i), request.getValues(i));
 		}
-return ok();
+		return ok();
 	}
 
 	@Override
-	public Fmi2StatusReply SetReal(Fmi2SetRealRequest parseFrom) {
+	public Fmi2StatusReply SetReal(Fmi2SetRealRequest parseFrom)
+	{
 		System.out.println("Called fmi2SetReal");
 
-		for (int i = 0; i < parseFrom.getValueReferenceCount(); i++) {
+		for (int i = 0; i < parseFrom.getValueReferenceCount(); i++)
+		{
 			reals.put(parseFrom.getValueReference(i), parseFrom.getValues(i));
 		}
-return ok();
+		return ok();
 	}
 
 	@Override
-	public Fmi2StatusReply SetString(Fmi2SetStringRequest request) {
+	public Fmi2StatusReply SetString(Fmi2SetStringRequest request)
+	{
 		System.out.println("Called fmi2SetString");
 
-		for (int i = 0; i < request.getValueReferenceCount(); i++) {
+		for (int i = 0; i < request.getValueReferenceCount(); i++)
+		{
 			strings.put(request.getValueReference(i), request.getValues(i));
 			System.out.println("\t" + request.getValues(i));
 		}
@@ -239,44 +263,53 @@ return ok();
 	}
 
 	@Override
-	public Fmi2StatusReply SetupExperiment(Fmi2SetupExperimentRequest parseFrom) {
+	public Fmi2StatusReply SetupExperiment(Fmi2SetupExperimentRequest parseFrom)
+	{
 		System.out.println("Called fmi2SetupExperiment");
 		return ok();
 	}
 
 	@Override
-	public void error(InvalidProtocolBufferException e) {
+	public void error(InvalidProtocolBufferException e)
+	{
 		e.printStackTrace();
 	}
 
 	@Override
-	public Fmi2StatusReply GetStatus(Fmi2StatusRequest request) {
+	public Fmi2StatusReply GetStatus(Fmi2StatusRequest request)
+	{
 		return ok();
 	}
 
 	@Override
-	public Fmi2RealStatusReply GetRealStatus(Fmi2StatusRequest request) {
+	public Fmi2RealStatusReply GetRealStatus(Fmi2StatusRequest request)
+	{
 		return Fmi2RealStatusReply.newBuilder().setValue(100.5).build();
 	}
 
 	@Override
-	public Fmi2IntegerStatusReply GetIntegerStatus(Fmi2StatusRequest request) {
+	public Fmi2IntegerStatusReply GetIntegerStatus(Fmi2StatusRequest request)
+	{
 		return Fmi2IntegerStatusReply.newBuilder().setValue(100).build();
 	}
 
 	@Override
-	public Fmi2BooleanStatusReply GetBooleanStatus(Fmi2StatusRequest request) {
-		if(request.getStatus()==Fmi2StatusRequest.FmiStatusKind.fmi2Terminated)
-		return Fmi2BooleanStatusReply.newBuilder().setValue(true).build();
-		else return Fmi2BooleanStatusReply.newBuilder().setValue(false).build();
-			
+	public Fmi2BooleanStatusReply GetBooleanStatus(Fmi2StatusRequest request)
+	{
+		if (request.getStatus() == Fmi2StatusRequest.FmiStatusKind.fmi2Terminated)
+			return Fmi2BooleanStatusReply.newBuilder().setValue(true).build();
+		else
+			return Fmi2BooleanStatusReply.newBuilder().setValue(false).build();
+
 	}
 
 	@Override
-	public Fmi2StringStatusReply GetStringStatus(Fmi2StatusRequest request) {
-		if(request.getStatus()==Fmi2StatusRequest.FmiStatusKind.fmi2DoStepStatus)
+	public Fmi2StringStatusReply GetStringStatus(Fmi2StatusRequest request)
+	{
+		if (request.getStatus() == Fmi2StatusRequest.FmiStatusKind.fmi2DoStepStatus)
 			return Fmi2StringStatusReply.newBuilder().setValue("waiting").build();
-			else return Fmi2StringStatusReply.newBuilder().setValue("nothing").build();
+		else
+			return Fmi2StringStatusReply.newBuilder().setValue("nothing").build();
 	}
 
 }

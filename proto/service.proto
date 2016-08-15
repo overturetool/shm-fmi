@@ -198,3 +198,19 @@ message Fmi2GetMaxStepSizeReply
 }
 
 
+
+//callback logging
+
+message Fmi2LogReply{
+  string value = 1;
+ enum Status{   
+    Ok = 0;
+    Warning = 1;
+    Discard = 2;
+    Error = 3;
+    Fatal = 4;
+    Pending = 5;
+  }
+  Status status = 2;
+  string category =3;
+}

@@ -147,12 +147,40 @@ void callback(FmuContainer *container, std::string shmCallbackKey)
 
 			if (msg->cmd == sharedfmimemory::fmi2Log)
 			{
-				Fmi2StringStatusReply* r = new Fmi2StringStatusReply();
+				Fmi2LogReply* r = new Fmi2LogReply();
 				r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
 
 				//handle message
 //				printf("Received log data from client '%s': '%s'\n", container->m_name->c_str(), r->value().c_str());
-				container->logger(container->componentEnvironment, container->m_name->c_str(), fmi2OK, "logFmiCall",
+
+				fmi2Status status = fmi2Status::fmi2Error;
+
+				switch (r->status())
+				{
+				case Fmi2LogReply_Status_Ok:
+					status = fmi2Status::fmi2OK;
+					break;
+				case Fmi2LogReply_Status_Warning:
+					status = fmi2Status::fmi2Warning;
+					break;
+				case Fmi2LogReply_Status_Discard:
+					status = fmi2Status::fmi2Discard;
+					break;
+				case Fmi2LogReply_Status_Error:
+					status = fmi2Status::fmi2Error;
+					break;
+				case Fmi2LogReply_Status_Fatal:
+					status = fmi2Status::fmi2Fatal;
+					break;
+				case Fmi2LogReply_Status_Pending:
+					status = fmi2Status::fmi2Pending;
+					break;
+				default:
+					status = fmi2Status::fmi2Error;
+					break;
+				}
+
+				container->logger(container->componentEnvironment, container->m_name->c_str(), status, r->category().c_str(),
 						r->value().c_str());
 
 				SharedFmiMessage* msgReply = new SharedFmiMessage();
@@ -177,13 +205,6 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 		fmi2String fmuResourceLocation, const fmi2CallbackFunctions *functions, fmi2Boolean visible,
 		fmi2Boolean loggingOn)
 {
-//	if(functions!=NULL)
-//	{
-//		if(functions->logger!=NULL)
-//		{
-//			functions->logger((void*)clients.size() , instanceName, fmi2OK, "logFmiCall", "Called instantiate with instance %s and guid %s", instanceName,fmuGUID);
-//		}
-//	}
 
 	LOG(functions, (void* )clients.size(), instanceName, fmi2OK, "logFmiCall",
 			"FMU: Called instantiate with instance %s and guid %s", instanceName, fmuGUID);
@@ -234,13 +255,13 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 
 	FmuContainer *container = new FmuContainer(client, instanceName, functions, launcher);
 
-	//do not return null
+//do not return null
 	if (clients.size() == 0)
 	{
 		clients.push_back(NULL); //Dummy var
 	}
 
-	//do not return null
+//do not return null
 	if (clients.size() == 0)
 	{
 		clients.push_back(NULL); //Dummy var
