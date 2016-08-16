@@ -216,7 +216,7 @@ bool FmiIpc::Server::create(const char* name)
 			0, 0, sizeof(SharedFmiMem));
 	if (m_pBuf == NULL)
 	{
-		dfprintf(stderr,"server_create: failed: %01d\n", __LINE__);
+		FmiIpc::debugPrintPtr(this,"server_create: failed: %01d\n", __LINE__);
 		return false;
 	}
 	// Clear the buffer
@@ -347,7 +347,7 @@ SharedFmiMessage* FmiIpc::Server::send(SharedFmiMessage* message, DWORD dwTimeou
 
 #ifdef _WIN32
 	SetEvent(this->m_hAvail);
-	dsprintf("IPC Server signaled\n");
+	FmiIpc::debugPrintPtr(this,"IPC Server signaled\n");
 
 	if (WaitForSingleObject(this->m_hSignal, dwTimeout) != WAIT_OBJECT_0)
 	{
