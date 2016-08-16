@@ -646,3 +646,8 @@ FmuProxy::fmi2Status FmuProxy::fmi2GetStringStatus(
 	*value = reply->value().c_str();
 	return fmi2OK;
 }
+
+void* FmuProxy::getChannel()
+{
+	return (void*)this->server;
+}

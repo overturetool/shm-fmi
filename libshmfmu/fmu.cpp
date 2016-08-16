@@ -21,25 +21,22 @@
 //#include <map>
 #include "FmuProxy.h"
 
-//static std::map <int, FmuProxy> clients;
+//static std::map <int, FmuProxy> g_clients;
 #include <vector>
 #include "FmuContainer.h"
 #include <sstream>
 #include "JavaLauncher.h"
 #include "ConfigFile.h"
 
-#define SSTR( x ) dynamic_cast< std::ostringstream & >( \
-        ( std::ostringstream() << std::dec << x ) ).str()
-
-std::vector<FmuContainer*> clients;
+std::vector<FmuContainer*> g_clients;
 
 static FmuContainer* getFmuContainer(fmi2Component c)
 {
 	intptr_t index = (intptr_t) c;
 
-	if (clients.size() > index)
+	if (g_clients.size() > index)
 	{
-		return clients.at(index);
+		return g_clients.at(index);
 	}
 	return NULL;
 }
@@ -180,8 +177,8 @@ void callback(FmuContainer *container, std::string shmCallbackKey)
 					break;
 				}
 
-				container->logger(container->componentEnvironment, container->m_name->c_str(), status, r->category().c_str(),
-						r->value().c_str());
+				container->logger(container->componentEnvironment, container->m_name->c_str(), status,
+						r->category().c_str(), r->value().c_str());
 
 				SharedFmiMessage* msgReply = new SharedFmiMessage();
 
@@ -197,7 +194,40 @@ void callback(FmuContainer *container, std::string shmCallbackKey)
 
 }
 
-#define LOG(functions,comp,name,status,category, message,args...) if(functions!=NULL){	if(functions->logger!=NULL)	{functions->logger((void*)comp , name, status, category, message, args);}}
+#define LOG(functions,comp,name,status,category, message,args...) \
+	if(functions!=NULL){ \
+if(functions->logger!=NULL) \
+{ \
+	functions->logger((void*)comp , name, status, category, message, args);\
+}\
+}else {\
+	fprintf (stderr, "Name '%s', Category: '%s'\n",name,category);\
+	fprintf (stderr, message,args);\
+	fprintf (stderr, "\n");\
+}
+
+int fmuInternalDebugPrint(void* sender, const char * format, ...)
+{
+	printf("fmuInternalDebugPrint called...\n");
+	va_list args;
+	va_start(args, format);
+	for (int i = 0; i < g_clients.size() - 1; i++)
+	{
+		FmuContainer* c = g_clients.at(i);
+		if (c->m_proxy->getChannel() == sender)
+		{
+
+			// g_clients.at(i)->logger(c->componentEnvironment, c->m_name->c_str(),fmi2OK, "LogAll", format, args);
+			va_end(args);
+			return 1;
+		}
+	}
+
+	int ret = vfprintf(stdout, format, args);
+	va_end(args);
+	return ret;
+}
+
 // ---------------------------------------------------------------------------
 // FMI functions
 // ---------------------------------------------------------------------------
@@ -205,14 +235,22 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 		fmi2String fmuResourceLocation, const fmi2CallbackFunctions *functions, fmi2Boolean visible,
 		fmi2Boolean loggingOn)
 {
+	//do not return null
+	if (g_clients.size() == 0)
+	{
+		g_clients.push_back(NULL); //Dummy var
+	}
 
-	LOG(functions, (void* )clients.size(), instanceName, fmi2OK, "logFmiCall",
-			"FMU: Called instantiate with instance %s and guid %s", instanceName, fmuGUID);
-
+	intptr_t compid = g_clients.size();
+	if (loggingOn)
+	{
+		LOG(functions, compid, instanceName, fmi2OK, "logFmiCall",
+				"FMU: Called instantiate with instance %s and GUID %s", instanceName, fmuGUID);
+	}
 	std::string shared_memory_key(fmuGUID);
 	shared_memory_key.append(instanceName);
 
-	setbuf(stdout, NULL); //fixme remove
+//	setbuf(stdout, NULL); //fixme remove
 
 	std::string resourceLocationStr(fmuResourceLocation);
 
@@ -222,53 +260,61 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 	resourceLocationStr = resourceLocationStr.substr(5);
 #endif
 
-	LOG(functions, (void* )clients.size(), instanceName, fmi2OK, "logFmiCall",
-			"FMU: Launching Tool Wrapper memory key: '%s'  and resource location %s", shared_memory_key.c_str(),
-			resourceLocationStr.c_str());
+	if (loggingOn)
+	{
+		LOG(functions, compid, instanceName, fmi2OK, "logFmiCall",
+				"FMU: Launching Tool Wrapper memory key: '%s'  and resource location %s", shared_memory_key.c_str(),
+				resourceLocationStr.c_str());
+	}
 
 	std::string configFile = resourceLocationStr + std::string("/config.txt");
 	ConfigFile config(configFile, shared_memory_key);
 
+	JavaLauncher::debug = false;
 	JavaLauncher *launcher = new JavaLauncher(resourceLocationStr.c_str(), config.m_args);
 
 	if (config.m_skipLaunch)
 	{
-		printf("FMU: FMU Debug skipping launch of external FMU\n");
+		LOG(functions, compid, instanceName, fmi2OK, "logFmiCall",
+				"FMU: FMU Debug skipping launch of external FMU. SHM is '%s'", shared_memory_key.c_str());
 		shared_memory_key = "shmFmiTest";
 	}
 
-	LOG(functions, (void* )clients.size(), instanceName, fmi2OK, "logFmiCall",
-			"FMU: Launching with shared memory key: '%s'", shared_memory_key.c_str());
+	if (loggingOn)
+	{
+		LOG(functions, compid, instanceName, fmi2OK, "logFmiCall", "FMU: Launching with shared memory key: '%s'",
+				shared_memory_key.c_str());
+	}
 
 	FmuProxy *client = new FmuProxy(shared_memory_key);
 
-	if (!client->initialize())
-	{
-		printf("FMU: FMU Debug FATAL: cannot create and initialize IPC server for FMU\n");
-		return NULL;
-	}
-
-	LOG(functions, (void* )clients.size(), instanceName, fmi2OK, "logFmiCall",
-			"FMU: FMU Server create, hosting SHM with raw key: %s", shared_memory_key.c_str());
-
-	fflush(stdout); //FIXME remove
+	FmiIpc::debug = false;
 
 	FmuContainer *container = new FmuContainer(client, instanceName, functions, launcher);
 
-//do not return null
-	if (clients.size() == 0)
+	g_clients.push_back(container);
+
+	if (functions != NULL && functions->logger != NULL)
 	{
-		clients.push_back(NULL); //Dummy var
+		container->logger = functions->logger;
 	}
 
-//do not return null
-	if (clients.size() == 0)
+	if (!client->initialize())
 	{
-		clients.push_back(NULL); //Dummy var
+		LOG(functions, compid, instanceName, fmi2Fatal, "logFmiCall",
+				"FMU: FMU Debug FATAL: cannot create and initialize IPC server for FMU. SHM is '%s'\n",
+				shared_memory_key.c_str());
+		return NULL;
 	}
 
-	clients.push_back(container);
-	intptr_t compid = clients.size() - 1;
+	if (loggingOn)
+	{
+		LOG(functions, compid, instanceName, fmi2OK, "logFmiCall",
+				"FMU: FMU Server create, hosting SHM with raw key: %s", shared_memory_key.c_str());
+	}
+
+//	fflush(stdout); //FIXME remove
+
 	container->componentEnvironment = (void*) compid;
 
 	if (!config.m_skipLaunch)
@@ -282,7 +328,6 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 		//connected
 		if (functions != NULL && functions->logger != NULL)
 		{
-			container->logger = functions->logger;
 			//configure callback
 			std::thread* callbackThread = new std::thread(callback, container, callbackId);
 		}
@@ -359,7 +404,7 @@ extern "C" void fmi2FreeInstance(fmi2Component c)
 		fmu->active = false;
 		fmu->m_javaLauncher->terminate();
 		intptr_t index = (intptr_t) c;
-		clients.at(index) = NULL;
+		g_clients.at(index) = NULL;
 		delete fmu;
 
 	}
@@ -387,6 +432,26 @@ extern "C" const char* fmi2GetTypesPlatform()
 extern "C" fmi2Status fmi2SetDebugLogging(fmi2Component c, fmi2Boolean loggingOn, size_t nCategories,
 		const fmi2String categories[])
 {
+
+	for (int i = 0; i < nCategories; i++)
+	{
+		if (strcmp(categories[i], "logShm") == 0)
+		{
+			if (loggingOn)
+			{
+				FmiIpc::debugPrintPtr = &fmuInternalDebugPrint;
+				FmiIpc::debug = true;
+			}
+		}else if (strcmp(categories[i], "logLaunch") == 0)
+		{
+			if (loggingOn)
+			{
+				FmiIpc::debugPrintPtr = &fmuInternalDebugPrint;
+				FmiIpc::debug = true;
+			}
+		}
+	}
+
 	FmuContainer* fmu = getFmuContainer(c);
 
 	if (fmu != NULL)

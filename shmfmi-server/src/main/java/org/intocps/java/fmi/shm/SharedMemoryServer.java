@@ -17,7 +17,7 @@ public class SharedMemoryServer
 
 	public native boolean serverStart(String id);
 
-	// public native byte[] read(byte[] type);
+	public static native void setServerDebug(boolean on);
 
 	public native void serverSend(int type, byte[] data);
 

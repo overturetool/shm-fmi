@@ -8,32 +8,47 @@
 #include "org_intocps_java_fmi_shm_SharedMemoryServer.h"
 #include "FmiIpc.h"
 
-FmiIpc::Server* server;
+FmiIpc::Server* g_server;
+bool g_serverDebug = true;
 
-JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemoryServer_serverStart(JNIEnv *env, jobject obj, jstring id)
+JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemoryServer_setServerDebug(JNIEnv *env, jclass clz,
+		jboolean on)
 {
-	fflush(stdout); //FIXME remove
+	g_serverDebug = on;
+}
+
+JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemoryServer_serverStart(JNIEnv *env, jobject obj,
+		jstring id)
+{
 	const char * shmKey = env->GetStringUTFChars(id, NULL);
-	printf("\nNative Server: Starting callback server with key: %s\n", shmKey);
-	fflush(stdout);
 
-	server = new FmiIpc::Server();
+	if (g_serverDebug)
+	{
+		printf("\nNative Server: Starting callback g_server with key: %s\n", shmKey);
+		fflush(stdout);
+	}
 
+	g_server = new FmiIpc::Server();
 
-	bool success = server->create(shmKey);
+	bool success = g_server->create(shmKey);
 	if (!success)
 	{
-		printf("Native Server: Unable to create callback server with key: %s\n",shmKey);
-		delete server;
-		server = NULL;
+		if (g_serverDebug)
+		{
+			printf("Native Server: Unable to create callback g_server with key: %s\n", shmKey);
+		}
+		delete g_server;
+		g_server = NULL;
 	}
 
 	env->ReleaseStringUTFChars(id, shmKey);
-	fflush(stdout); //FIXME remove
+	if (g_serverDebug)
+	{
+		fflush(stdout);
+	}
 	return success;
 
 }
-
 
 JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemoryServer_serverSend(JNIEnv *env, jobject obj, jint type,
 		jbyteArray bytes)
@@ -54,13 +69,12 @@ JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemoryServer_serverSe
 	env->ReleaseByteArrayElements(bytes, vbody, 0);
 
 	//printf("Sending type: %i Size: %i\n",m.cmd,m.protoBufMsgSize);
-	SharedFmiMessage* reply = server->send(msg, INFINITE);
+	SharedFmiMessage* reply = g_server->send(msg, INFINITE);
 	delete msg;
 
 	if (reply == NULL)
 	{
-		return ; //timeout
+		return; //timeout
 	}
-
 
 }

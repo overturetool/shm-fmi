@@ -45,9 +45,9 @@ typedef sem_t* SIGNAL_HANDLE;
 //typedef HANDLE SIGNAL_HANDLE;
 //#endif
 
-
 #include <stdio.h>
 
+#include <stdarg.h>
 #include <string>
 
 #include "SharedFmiMessage.h"
@@ -59,74 +59,82 @@ using namespace sharedfmimemory;
 
 #define IPC_MAX_ADDR			256
 
-class FmiIpc {
+
+class FmiIpc
+{
 public:
+typedef int debugPrintType ( void* sender, const char * format, ... );
 	FmiIpc();
 	virtual ~FmiIpc();
 
 	static const char* SIGNAL_NAME;
 	static const char* SIGNAL_AVALIABLE_NAME;
 	static const char* SHARED_MEM_BASE_NAME;
+	static bool debug;
+	static debugPrintType *debugPrintPtr;
 
-	static void close(HANDLE handle){
+	static void close(HANDLE handle)
+	{
 #ifdef _WIN32
 		CloseHandle(handle);
 #elif __APPLE__ ||  __linux
 //POSIX
-	close(handle);
+		close(handle);
 #endif
 	}
 
 #ifdef __APPLE__
-	static void close(SIGNAL_HANDLE handle){
+	static void close(SIGNAL_HANDLE handle)
+	{
 		sem_close(handle);
 	}
 #elif __linux
-	static void close(SIGNAL_HANDLE handle){
-			sem_close(handle);
-		}
+	static void close(SIGNAL_HANDLE handle)
+	{
+		sem_close(handle);
+	}
 #endif
 
 	static void unmap(void* ptr, std::string* name)
 	{
-	#ifdef _WIN32
+#ifdef _WIN32
 		UnmapViewOfFile(ptr);
-	#elif __APPLE__ ||  __linux
-	//POSIX
+#elif __APPLE__ ||  __linux
+		//POSIX
 		int r = munmap(ptr, sizeof(SharedFmiMem));
-		  if (r != 0)
-		    printf("munmap");
-
-//		  r = shm_unlink(name->c_str());
-//		  if (r != 0)
-//			  printf("shm_unlink");
-	#endif
+		if (r != 0)
+		{
+			if (debug)
+			{
+				printf("munmap");
+			}
 		}
+#endif
+	}
 
-	class Server {
+	class Server
+	{
 	public:
 		// Construct / Destruct
-		Server();//const char* name ="server");
+		Server(); //const char* name ="server");
 		~Server();
 
 	private:
 		// Internal variables
 		HANDLE m_hMapFile;		// Handle to the mapped memory file
 		SIGNAL_HANDLE m_hSignal;		// Event used to signal when data exists
-		SIGNAL_HANDLE m_hAvail;// Event used to signal when some blocks become available
+		SIGNAL_HANDLE m_hAvail;		// Event used to signal when some blocks become available
 		std::string* m_name;
 		SharedFmiMem *m_pBuf;		// Buffer that points to the shared memory
 	public:
 		// Create and destroy functions
-		bool create(const char* name="server");
+		bool create(const char* name = "server");
 		void close(void);
-
-		// TCHAR szName[];
-
 		SharedFmiMessage* send(SharedFmiMessage* message, DWORD dwTimeout);
 	};
 
-	class Client {
+	class Client
+	{
 	public:
 		// Construct / Destruct
 		Client(void);
@@ -137,21 +145,20 @@ public:
 		// Internal variables
 		HANDLE m_hMapFile;		// Handle to the mapped memory file
 		SIGNAL_HANDLE m_hSignal;		// Event used to signal when data exists
-		SIGNAL_HANDLE m_hAvail;// Event used to signal when some blocks become available
+		SIGNAL_HANDLE m_hAvail;		// Event used to signal when some blocks become available
 		std::string* m_name;
 		SharedFmiMem *m_pBuf;		// Buffer that points to the shared memory
 
 		// Exposed functions
-		//	DWORD					write(void *pBuff, DWORD amount, DWORD dwTimeout = INFINITE);	// Writes to the buffer
 		bool waitAvailable(DWORD dwTimeout = INFINITE);	// Waits until some blocks become available
 	public:
-		//Block*					getBlock(DWORD dwTimeout = INFINITE);							// Gets a block
-		//void					postBlock(Block *pBlock);										// Posts a block to be processed
+
 		SharedFmiMessage* getMessage(DWORD dwTimeout = INFINITE);
 		void sendReply(SharedFmiMessage* reply);
 
 		// Functions
-		BOOL IsOk(void) {
+		BOOL IsOk(void)
+		{
 			if (m_pBuf)
 				return true;
 			else
@@ -160,7 +167,5 @@ public:
 		;
 	};
 };
-
-//const TCHAR FmiIpc::Server::szName[]=TEXT("Local\\MyFileMappingObject");
 
 #endif /* FMIIPC_H_ */

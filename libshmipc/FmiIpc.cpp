@@ -23,24 +23,43 @@ const char* FmiIpc::SIGNAL_AVALIABLE_NAME = "sigAvail";
 const char* FmiIpc::SIGNAL_NAME = "sig";
 #endif
 
-//#define DEBUG
+bool FmiIpc::debug = true;
 
-#if defined( DEBUG )
-#define DEBUG_PRINTF(x) printf x
-#else
-#define DEBUG_PRINTF(x)
-#endif
+int internalDebugPrint(void* sender, const char * format, ...)
+{
+	if (!FmiIpc::debug)
+	{
+		return 0;
+	}
+	va_list args;
+	va_start(args, format);
+	int ret = vfprintf(stdout, format, args);
+	va_end(args);
+	return ret;
+}
+
+FmiIpc::debugPrintType* FmiIpc::debugPrintPtr = &internalDebugPrint;
+
+//#define FmiIpc::debugPrintPtr(this,sender,message,args...) \
+//	if(FmiIpc::debug){\
+//		FmiIpc::debugPrintPtr(sender, message,args);\
+//	}
+//
+//#define dsprintf(sender,message) \
+//	if(FmiIpc::debug){\
+//		FmiIpc::debugPrintPtr (sender, message);\
+//	}
 
 FmiIpc::FmiIpc()
 {
-
+	this->debugPrintPtr = &internalDebugPrint;
 }
 
 FmiIpc::~FmiIpc()
 {
 }
 
-std::string* getMappedName(const char* baseName, const char* name)
+std::string* getMappedName(void* self, const char* baseName, const char* name)
 {
 	std::string* nameOfMapping = new std::string(baseName);
 	*nameOfMapping += std::string(name);
@@ -53,7 +72,8 @@ std::string* getMappedName(const char* baseName, const char* name)
 		std::string hash = std::to_string(std::hash<std::string>()(*nameOfMapping));
 		*nameOfMapping = "/";
 		*nameOfMapping += hash;
-		printf("New Apple shm key is: %s from baseName %s and name %s\n", nameOfMapping->c_str(), baseName, name);
+		FmiIpc::debugPrintPtr(self, "New Apple shm key is: %s from baseName %s and name %s\n", nameOfMapping->c_str(),
+				baseName, name);
 	}
 
 #endif
@@ -131,8 +151,8 @@ void FmiIpc::Server::close()
 bool FmiIpc::Server::create(const char* name)
 {
 	bool ok = true;
-	std::string* nameOfMapping = getMappedName(SHARED_MEM_BASE_NAME, name);
-	printf("Starting IPC server with key: %s\n", nameOfMapping->c_str());
+	std::string* nameOfMapping = getMappedName(this, SHARED_MEM_BASE_NAME, name);
+	FmiIpc::debugPrintPtr(this, "Starting IPC server with key: %s\n", nameOfMapping->c_str());
 	// Create the file mapping
 
 #ifdef _WIN32
@@ -185,7 +205,7 @@ bool FmiIpc::Server::create(const char* name)
 			break;
 		}
 
-		printf("server_create: failed: %01d %s\n", __LINE__, strerror( errno));
+		FmiIpc::debugPrintPtr(this, "server_create: failed: %01d %s\n", __LINE__, strerror( errno));
 
 		return false;
 	}
@@ -196,7 +216,7 @@ bool FmiIpc::Server::create(const char* name)
 			0, 0, sizeof(SharedFmiMem));
 	if (m_pBuf == NULL)
 	{
-		fprintf(stderr,"server_create: failed: %01d\n", __LINE__);
+		dfprintf(stderr,"server_create: failed: %01d\n", __LINE__);
 		return false;
 	}
 	// Clear the buffer
@@ -226,7 +246,7 @@ bool FmiIpc::Server::create(const char* name)
 			break;
 		}
 
-		printf("server_create: failed: unable to truncate. %s\n", strerror( errno));
+		FmiIpc::debugPrintPtr(this, "server_create: failed: unable to truncate. %s\n", strerror( errno));
 		return false;
 	}
 
@@ -254,7 +274,7 @@ bool FmiIpc::Server::create(const char* name)
 		default:
 			break;
 		}
-		printf("server_create: failed: mmap: %s\n", strerror( errno));
+		FmiIpc::debugPrintPtr(this, "server_create: failed: mmap: %s\n", strerror( errno));
 		return false;
 	}
 
@@ -263,46 +283,46 @@ bool FmiIpc::Server::create(const char* name)
 
 	// Create the events
 #ifdef _WIN32
-	std::string* signalName = getMappedName(SIGNAL_NAME, name);
+	std::string* signalName = getMappedName(this,SIGNAL_NAME, name);
 	m_hSignal = CreateEventA(NULL, FALSE, FALSE, signalName->c_str());
 	delete signalName;
 
 	if (m_hSignal == NULL || m_hSignal == INVALID_HANDLE_VALUE)
 	{
-		printf("server_create: failed: %01d\n", __LINE__);
+		FmiIpc::debugPrintPtr(this,"server_create: failed: %01d\n", __LINE__);
 		return false;
 	}
 
-	std::string* signalAvailName = getMappedName(SIGNAL_AVALIABLE_NAME, name);
+	std::string* signalAvailName = getMappedName(this,SIGNAL_AVALIABLE_NAME, name);
 	m_hAvail = CreateEventA(NULL, FALSE, FALSE, signalAvailName->c_str());
 	delete signalAvailName;
 
 	if (m_hAvail == NULL || m_hSignal == INVALID_HANDLE_VALUE)
 	{
-		printf("server_create: failed: %01d\n", __LINE__);
+		FmiIpc::debugPrintPtr(this,"server_create: failed: %01d\n", __LINE__);
 		return false;
 	}
 #elif __APPLE__ || __linux
 
-	std::string* signalName = getMappedName(SIGNAL_NAME, name);
+	std::string* signalName = getMappedName(this, SIGNAL_NAME, name);
 	sem_unlink(signalName->c_str());
 	m_hSignal = sem_open(signalName->c_str(), O_CREAT, ALLPERMS, 0);
 
 	if (m_hSignal == (sem_t *) SEM_FAILED)
 	{
-		printf("server_create: failed: sem_open signal: %s\n", strerror( errno));
+		FmiIpc::debugPrintPtr(this, "server_create: failed: sem_open signal: %s\n", strerror( errno));
 		ok = false;
 
 	}
 	delete signalName;
 
-	std::string* signalAvailName = getMappedName(SIGNAL_AVALIABLE_NAME, name);
+	std::string* signalAvailName = getMappedName(this, SIGNAL_AVALIABLE_NAME, name);
 	sem_unlink(signalAvailName->c_str());
 	m_hAvail = sem_open(signalAvailName->c_str(), O_CREAT, ALLPERMS, 0);
 
 	if (m_hAvail == (sem_t *) SEM_FAILED)
 	{
-		printf("server_create: failed: sem_open signal: %s\n", strerror( errno));
+		FmiIpc::debugPrintPtr(this, "server_create: failed: sem_open signal: %s\n", strerror( errno));
 		ok = false;
 
 	}
@@ -313,7 +333,7 @@ bool FmiIpc::Server::create(const char* name)
 
 	if (m_pBuf == NULL)
 	{
-		printf("Error in IPC server ctr, buf NULL\n");
+		FmiIpc::debugPrintPtr(this, "Error in IPC server ctr, buf NULL\n");
 		ok = false;
 	}
 
@@ -322,12 +342,12 @@ bool FmiIpc::Server::create(const char* name)
 
 SharedFmiMessage* FmiIpc::Server::send(SharedFmiMessage* message, DWORD dwTimeout)
 {
-	DEBUG_PRINTF(("IPC Server write msg\n"));
+	FmiIpc::debugPrintPtr(this, "IPC Server write msg\n");
 	this->m_pBuf->message = *message;
 
 #ifdef _WIN32
 	SetEvent(this->m_hAvail);
-	DEBUG_PRINTF(("IPC Server signaled\n"));
+	dsprintf("IPC Server signaled\n");
 
 	if (WaitForSingleObject(this->m_hSignal, dwTimeout) != WAIT_OBJECT_0)
 	{
@@ -336,12 +356,12 @@ SharedFmiMessage* FmiIpc::Server::send(SharedFmiMessage* message, DWORD dwTimeou
 #elif __APPLE__ || __linux
 	sem_post(this->m_hAvail);
 
-	DEBUG_PRINTF(("IPC Server signaled\n"));
+	FmiIpc::debugPrintPtr(this, "IPC Server signaled\n");
 
 	sem_wait(this->m_hSignal);
 #endif
 
-	DEBUG_PRINTF(("IPC Server ret msg\n"));
+	FmiIpc::debugPrintPtr(this, "IPC Server ret msg\n");
 	return &this->m_pBuf->message;
 }
 
@@ -363,10 +383,10 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 	m_hAvail = 0;
 	m_pBuf = NULL;
 
-	printf("IPC Client key %s\n", connectAddr);
+	FmiIpc::debugPrintPtr(this, "IPC Client key %s\n", connectAddr);
 
-	std::string* nameOfMapping = getMappedName(SHARED_MEM_BASE_NAME, connectAddr);
-	printf("Starting IPC client with key: %s\n", nameOfMapping->c_str());
+	std::string* nameOfMapping = getMappedName(this, SHARED_MEM_BASE_NAME, connectAddr);
+	FmiIpc::debugPrintPtr(this, "Starting IPC client with key: %s\n", nameOfMapping->c_str());
 	// Open the shared file
 
 #ifdef _WIN32
@@ -388,9 +408,6 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 	if (m_hMapFile < 0)
 	{
 #endif
-
-		//	printf("Starting client with key: %s - faild\n",				nameOfMapping->c_str());
-
 		switch (errno)
 		{
 		case EACCES:
@@ -428,7 +445,7 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 			0, 0, sizeof(SharedFmiMem));
 	if (m_pBuf == NULL)
 	{
-		printf("server_create: failed: %01d\n", __LINE__);
+		FmiIpc::debugPrintPtr(this,"server_create: failed: %01d\n", __LINE__);
 		return;
 	}
 
@@ -439,7 +456,7 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 	MAP_SHARED, m_hMapFile, 0);
 	if (ptr == MAP_FAILED)
 	{
-		printf("server_create: failed: mmap\n");
+		FmiIpc::debugPrintPtr(this, "server_create: failed: mmap\n");
 		return;
 	}
 
@@ -453,7 +470,7 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 	}
 
 #ifdef _WIN32
-	std::string* signalName = getMappedName(SIGNAL_NAME, connectAddr);
+	std::string* signalName = getMappedName(this,SIGNAL_NAME, connectAddr);
 
 	// Create the events
 	m_hSignal = CreateEventA(NULL, FALSE, FALSE, signalName->c_str());
@@ -465,7 +482,7 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 		return;
 	}
 
-	std::string* signalAvailName = getMappedName(SIGNAL_AVALIABLE_NAME,
+	std::string* signalAvailName = getMappedName(this,SIGNAL_AVALIABLE_NAME,
 			connectAddr);
 	m_hAvail = CreateEventA(NULL, FALSE, FALSE, signalAvailName->c_str());
 	delete signalAvailName;
@@ -476,21 +493,21 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 	}
 #elif __APPLE__ || __linux__
 
-	std::string* signalName = getMappedName(SIGNAL_NAME, connectAddr);
+	std::string* signalName = getMappedName(this, SIGNAL_NAME, connectAddr);
 	m_hSignal = sem_open(signalName->c_str(), 0);
 
 	if (m_hSignal == (sem_t *) SEM_FAILED)
 	{
-		printf("client_create: failed: sem_open signal: %s\n", strerror( errno));
+		FmiIpc::debugPrintPtr(this, "client_create: failed: sem_open signal: %s\n", strerror( errno));
 		*success = false;
 	}
 	delete signalName;
 
-	std::string* signalAvailName = getMappedName(SIGNAL_AVALIABLE_NAME, connectAddr);
+	std::string* signalAvailName = getMappedName(this, SIGNAL_AVALIABLE_NAME, connectAddr);
 	m_hAvail = sem_open(signalAvailName->c_str(), 0);
 	if (m_hAvail == (sem_t *) SEM_FAILED)
 	{
-		printf("client_create: failed: sem_open signal: %s\n", strerror( errno));
+		FmiIpc::debugPrintPtr(this, "client_create: failed: sem_open signal: %s\n", strerror( errno));
 		*success = false;
 	}
 	delete signalAvailName;
@@ -498,7 +515,8 @@ FmiIpc::Client::Client(const char* connectAddr, bool* success)
 #endif
 
 	*success = true;
-	DEBUG_PRINTF(("IPC Client connected to shared memory %s, status %d\n",this->m_name->c_str(),*success));
+	FmiIpc::debugPrintPtr(this, "IPC Client connected to shared memory %s, status %d\n", this->m_name->c_str(),
+			*success);
 }
 
 FmiIpc::Client::~Client()
@@ -530,7 +548,9 @@ FmiIpc::Client::~Client()
 #endif
 	}
 	if (m_name != NULL)
+	{
 		delete m_name;
+	}
 }
 
 bool FmiIpc::Client::waitAvailable(DWORD dwTimeout)
@@ -551,10 +571,9 @@ bool FmiIpc::Client::waitAvailable(DWORD dwTimeout)
 
 SharedFmiMessage* FmiIpc::Client::getMessage(DWORD dwTimeout)
 {
-
 	if (waitAvailable(dwTimeout))
 	{
-		DEBUG_PRINTF(("IPC Client ret msg\n"));
+		FmiIpc::debugPrintPtr(this, "IPC Client ret msg\n");
 
 		return &this->m_pBuf->message;
 	}
@@ -562,7 +581,7 @@ SharedFmiMessage* FmiIpc::Client::getMessage(DWORD dwTimeout)
 }
 void FmiIpc::Client::sendReply(SharedFmiMessage* reply)
 {
-	DEBUG_PRINTF(("IPC Client write msg\n"));
+	FmiIpc::debugPrintPtr(this, "IPC Client write msg\n");
 	this->m_pBuf->message = *reply;
 
 #ifdef _WIN32
@@ -572,5 +591,5 @@ void FmiIpc::Client::sendReply(SharedFmiMessage* reply)
 	sem_post(this->m_hSignal);
 
 #endif
-	DEBUG_PRINTF(("IPC Client signaled\n"));
+	FmiIpc::debugPrintPtr(this, "IPC Client signaled\n");
 }

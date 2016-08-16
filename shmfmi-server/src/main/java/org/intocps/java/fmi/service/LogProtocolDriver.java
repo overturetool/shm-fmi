@@ -22,7 +22,6 @@ public class LogProtocolDriver
 		int retries = 10;
 		boolean connected = false;
 
-		System.out.println("Starting shared memory with key: " + id);
 		logger.debug("Starting shared memory with key: {}", id);
 		while (!(connected = this.mem.serverStart(id)) && retries >= 0)
 		{

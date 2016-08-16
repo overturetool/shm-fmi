@@ -101,6 +101,9 @@ public:
 	//INTO specific
 	fmi2Status fmi2GetMaxStepsize(fmi2Real* size);
 
+
+	void* getChannel();
+
 private:
 	std::string* m_url;
 	FmiIpc::Server* server;
