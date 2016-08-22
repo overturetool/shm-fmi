@@ -158,7 +158,7 @@ void callback(FmuContainer *container, std::string shmCallbackKey)
 
 				printf("Received log data '%s'\n", r->value().c_str());fflush(stdout);
 
-				std::cout << *container->m_name << std::endl;
+				std::cout << *(container->m_name) << std::endl;
 
 				container->logger(container->componentEnvironment, "some name that I dont have", fmi2OK,
 												"message %s", "'the message'");
