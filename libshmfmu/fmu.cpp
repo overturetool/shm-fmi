@@ -159,6 +159,12 @@ void callback(FmuContainer *container, std::string shmCallbackKey)
 				printf("Received log data '%s'\n", r->value().c_str());fflush(stdout);
 
 				std::cout << *container->m_name << std::endl;
+
+				container->logger(container->componentEnvironment, "some name that I dont have", fmi2OK,
+												"message %s", "'the message'");
+				container->logger(container->componentEnvironment, "some name that I dont have", fmi2OK,
+										r->category().c_str(), r->value().c_str());
+
 				//handle message
 				printf("Received log data from client '%s': '%s'\n", container->m_name->c_str(), r->value().c_str());fflush(stdout);
 
@@ -304,7 +310,7 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 
 	FmiIpc::debug = false;
 
-	FmuContainer *container = new FmuContainer(client, std::string(instanceName).c_str(), functions, launcher);
+	FmuContainer *container = new FmuContainer(client, instanceName, functions, launcher);
 	printf("fmi container name is: %s\n",container->m_name->c_str());fflush(stdout);
 
 	g_clients.push_back(container);
