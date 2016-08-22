@@ -131,16 +131,21 @@ void callback(FmuContainer *container, std::string shmCallbackKey)
 
 	}
 
+	printf("callback thread connected\n");fflush(stdout);
+
 	if (callbackClient != NULL)
 	{
 		while (container->active)
 		{
 			SharedFmiMessage* msg = callbackClient->getMessage(INFINITE);
+			printf("callback thread got message\n");fflush(stdout);
 
 			if (msg == NULL)
 			{
+				printf("callback thread got message ==null, returning, stopping thread\n");fflush(stdout);
 				return;
 			}
+			printf("callback thread got message !=null\n");fflush(stdout);
 
 			if (msg->cmd == sharedfmimemory::fmi2Log)
 			{
@@ -192,6 +197,7 @@ void callback(FmuContainer *container, std::string shmCallbackKey)
 			}
 		}
 	}
+	printf("callback thread exit\n");fflush(stdout);
 
 }
 
