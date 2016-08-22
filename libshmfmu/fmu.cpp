@@ -156,10 +156,10 @@ void callback(FmuContainer *container, std::string shmCallbackKey)
 				printf("\n");fflush(stdout);
 				r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
 
-				printf("Received log data '%s'\n", r->value().c_str());
+				printf("Received log data '%s'\n", r->value().c_str());fflush(stdout);
 
 				//handle message
-				printf("Received log data from client '%s': '%s'\n", container->m_name->c_str(), r->value().c_str());
+				printf("Received log data from client '%s': '%s'\n", container->m_name->c_str(), r->value().c_str());fflush(stdout);
 
 				fmi2Status status = fmi2Status::fmi2Error;
 
@@ -198,7 +198,7 @@ void callback(FmuContainer *container, std::string shmCallbackKey)
 				msgReply->protoBufMsgSize = request.ByteSize();
 				request.SerializeWithCachedSizesToArray(msgReply->protoBufMsg);
 				msgReply->cmd = sharedfmimemory::fmi2Log;
-				printf("sending callback confirm reply\n");
+				printf("sending callback confirm reply\n");fflush(stdout);
 				callbackClient->sendReply(msgReply);
 			}
 		}
