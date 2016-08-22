@@ -150,6 +150,10 @@ void callback(FmuContainer *container, std::string shmCallbackKey)
 			if (msg->cmd == sharedfmimemory::fmi2Log)
 			{
 				Fmi2LogReply* r = new Fmi2LogReply();
+				printf("protoBufMsgSize %d\n",msg->protoBufMsgSize);
+				for(int j = 0; j < msg->protoBufMsgSize; j++)
+				    printf( "%02X", msg->protoBufMsg[j]);
+				printf("\n");fflush(stdout);
 				r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
 
 				//handle message
