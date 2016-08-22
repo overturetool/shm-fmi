@@ -326,7 +326,7 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 	if (client->fmi2Instantiate(instanceName, fmuGUID, fmuResourceLocation, callbackId.c_str(), visible, loggingOn))
 	{
 		//connected
-		if (functions != NULL && functions->logger != NULL)
+		if (functions != NULL && functions->logger != NULL && loggingOn)
 		{
 			//configure callback
 			std::thread* callbackThread = new std::thread(callback, container, callbackId);
