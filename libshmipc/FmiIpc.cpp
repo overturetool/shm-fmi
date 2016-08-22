@@ -573,7 +573,7 @@ SharedFmiMessage* FmiIpc::Client::getMessage(DWORD dwTimeout)
 {
 	if (waitAvailable(dwTimeout))
 	{
-		FmiIpc::debugPrintPtr(this, "IPC Client ret msg\n");
+		FmiIpc::debugPrintPtr(this, "IPC Client received msg\n");
 
 		return &this->m_pBuf->message;
 	}
