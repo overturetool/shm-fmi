@@ -304,7 +304,8 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 
 	FmiIpc::debug = false;
 
-	FmuContainer *container = new FmuContainer(client, instanceName, functions, launcher);
+	FmuContainer *container = new FmuContainer(client, std::string(instanceName).c_str(), functions, launcher);
+	printf("fmi container name is: %s\n",container->m_name->c_str());fflush(stdout);
 
 	g_clients.push_back(container);
 
