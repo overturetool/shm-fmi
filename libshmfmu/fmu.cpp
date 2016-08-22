@@ -158,6 +158,7 @@ void callback(FmuContainer *container, std::string shmCallbackKey)
 
 				printf("Received log data '%s'\n", r->value().c_str());fflush(stdout);
 
+				std::cout << container->m_name << std::endl;
 				//handle message
 				printf("Received log data from client '%s': '%s'\n", container->m_name->c_str(), r->value().c_str());fflush(stdout);
 
