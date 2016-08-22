@@ -156,6 +156,8 @@ void callback(FmuContainer *container, std::string shmCallbackKey)
 				printf("\n");fflush(stdout);
 				r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
 
+				printf("Received log data '%s'\n", r->value().c_str());
+
 				//handle message
 				printf("Received log data from client '%s': '%s'\n", container->m_name->c_str(), r->value().c_str());
 
