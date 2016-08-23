@@ -157,10 +157,10 @@ HANDLE IpcBase::openShm(bool*success, const char* name, bool create)
 #elif __APPLE__
 		//POSIX
 		shm_unlink(name);
-		handle = shm_open(name, O_CREAT | O_RDWR, ALLPERMS);
+		handle = shm_open(name, O_CREAT | O_RDWR, ACCESSPERMS);
 
 #elif  __linux
-		handle = shm_open(name, O_CREAT | O_TRUNC | O_RDWR,0666);
+		handle = shm_open(name, O_CREAT | O_TRUNC | O_RDWR,ACCESSPERMS);
 #endif
 
 	} else
