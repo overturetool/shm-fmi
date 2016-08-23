@@ -17,7 +17,7 @@ namespace FmiIpc
 
 IpcBase::IpcBase(int id, const char* shmName)
 {
-	this->debugPrintPtr =NULL;// &IpcBase::internalDebugPrint;
+	this->debugPrintPtr = NULL; // &IpcBase::internalDebugPrint;
 	this->id = id;
 	this->m_name = new std::string(shmName);
 
@@ -69,11 +69,15 @@ IpcBase::~IpcBase()
 
 	}
 
-
 	if (this->m_name)
 	{
 		delete this->m_name;
 	}
+}
+
+void IpcBase::enableConsoleDebug()
+{
+	this->debugPrintPtr = &IpcBase::internalDebugPrint;
 }
 
 #ifdef __APPLE__
@@ -144,7 +148,7 @@ static std::string GetLastErrorAsString()
 
 HANDLE IpcBase::openShm(bool*success, const char* name, bool create)
 {
-	HANDLE handle = (HANDLE)NULL;
+	HANDLE handle = (HANDLE) NULL;
 	if (create)
 	{
 		//create
@@ -189,7 +193,7 @@ HANDLE IpcBase::openShm(bool*success, const char* name, bool create)
 		*success = false;
 	}
 #endif
-return handle;
+	return handle;
 }
 
 /**

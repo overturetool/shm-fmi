@@ -111,6 +111,7 @@ public:
 	}
 
 	 int getId(){return this->id;};
+	 void enableConsoleDebug();
 
 private:
 	static int internalDebugPrint(int sender, const char * format, ...);

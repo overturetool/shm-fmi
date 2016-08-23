@@ -32,6 +32,7 @@ public:
 	void SetUp()
 	{
 		m_client = new FmuProxy(0,MEM_KEY);
+		m_client->getChannel()->enableConsoleDebug();
 
 		EXPECT_EQ(true, m_client->initialize());
 
