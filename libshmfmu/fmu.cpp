@@ -20,6 +20,7 @@
 
 //#include <map>
 #include "FmuProxy.h"
+#include "IpcClient.h"
 
 //static std::map <int, FmuProxy> g_clients;
 #include <vector>
@@ -27,6 +28,8 @@
 #include <sstream>
 #include "JavaLauncher.h"
 #include "ConfigFile.h"
+
+static int currentId = 0;
 
 std::vector<FmuContainer*> g_clients;
 
@@ -115,11 +118,11 @@ void callback(FmuContainer *container, std::string shmCallbackKey)
 		return;
 	}
 
-	FmiIpc::Client* callbackClient = NULL;
+	FmiIpc::IpcClient* callbackClient = NULL;
 	bool success = false;
 	while (container->active && !success)
 	{
-		callbackClient = new FmiIpc::Client(shmCallbackKey.c_str(), &success);
+		callbackClient = new FmiIpc::IpcClient(container->id,&success,shmCallbackKey.c_str());
 
 		if (!success)
 		{
@@ -138,32 +141,32 @@ void callback(FmuContainer *container, std::string shmCallbackKey)
 		while (container->active)
 		{
 			SharedFmiMessage* msg = callbackClient->getMessage(INFINITE);
-			printf("callback thread got message\n");fflush(stdout);
+//			printf("callback thread got message\n");fflush(stdout);
 
 			if (msg == NULL)
 			{
 				printf("callback thread got message ==null, returning, stopping thread\n");fflush(stdout);
 				return;
 			}
-			printf("callback thread got message !=null\n");fflush(stdout);
+//			printf("callback thread got message !=null\n");fflush(stdout);
 
 			if (msg->cmd == sharedfmimemory::fmi2Log)
 			{
 				Fmi2LogReply* r = new Fmi2LogReply();
-				printf("protoBufMsgSize %d\n",msg->protoBufMsgSize);
-				for(int j = 0; j < msg->protoBufMsgSize; j++)
-				    printf( "%02X", msg->protoBufMsg[j]);
-				printf("\n");fflush(stdout);
+//				printf("protoBufMsgSize %d\n",msg->protoBufMsgSize);
+//				for(int j = 0; j < msg->protoBufMsgSize; j++)
+//				    printf( "%02X", msg->protoBufMsg[j]);
+//				printf("\n");fflush(stdout);
 				r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
 
 				printf("Received log data '%s'\n", r->value().c_str());fflush(stdout);
 
 //				std::cout << *(container->m_name) << std::endl;
 
-				container->logger(container->componentEnvironment, "some name that I dont have", fmi2OK,
-												"message %s", "'the message'");
-				container->logger(container->componentEnvironment, "some name that I dont have", fmi2OK,
-										r->category().c_str(), r->value().c_str());
+//				container->logger(container->componentEnvironment, "some name that I dont have", fmi2OK,
+//												"message %s", "'the message'");
+//				container->logger(container->componentEnvironment, "some name that I dont have", fmi2OK,
+//										r->category().c_str(), r->value().c_str());
 
 				//handle message
 				printf("Received log data from client '%s': '%s'\n", container->m_name->c_str(), r->value().c_str());fflush(stdout);
@@ -226,23 +229,23 @@ if(functions->logger!=NULL) \
 	fprintf (stderr, "\n");\
 }
 
-int fmuInternalDebugPrint(void* sender, const char * format, ...)
+int fmuInternalDebugPrint(int sender, const char * format, ...)
 {
-	printf("fmuInternalDebugPrint called...\n");
 	va_list args;
 	va_start(args, format);
-	for (int i = 0; i < g_clients.size() - 1; i++)
+	for (int i = 0; i < g_clients.size(); i++)
 	{
+		printf("fmuInternalDebugPrint called...3-%d\n",i);fflush(stdout);
 		FmuContainer* c = g_clients.at(i);
-		if (c->m_proxy->getChannel() == sender)
+		if (c && c->m_proxy->getChannel()->getId() == sender)
 		{
-
-			// g_clients.at(i)->logger(c->componentEnvironment, c->m_name->c_str(),fmi2OK, "LogAll", format, args);
+			printf("fmuInternalDebugPrint called...logg\n");fflush(stdout);
+			g_clients.at(i)->logger(c->componentEnvironment, c->m_name->c_str(),fmi2OK, "LogAll", format, args);
 			va_end(args);
 			return 1;
 		}
 	}
-
+	printf("fmuInternalDebugPrint called...vsprintf\n");fflush(stdout);
 	int ret = vfprintf(stdout, format, args);
 	va_end(args);
 	return ret;
@@ -306,12 +309,12 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 				shared_memory_key.c_str());
 	}
 
-	FmuProxy *client = new FmuProxy(shared_memory_key);
 
-	FmiIpc::debug = false;
+	FmuProxy *client = new FmuProxy(currentId++,shared_memory_key);
+	client->getChannel()->debugPrintPtr= NULL;
 
-	FmuContainer *container = new FmuContainer(client, instanceName, functions, launcher);
-	printf("fmi container name is: %s\n",container->m_name->c_str());fflush(stdout);
+
+	FmuContainer *container = new FmuContainer(currentId,client, instanceName, functions, launcher);
 
 	g_clients.push_back(container);
 
@@ -454,29 +457,30 @@ extern "C" fmi2Status fmi2SetDebugLogging(fmi2Component c, fmi2Boolean loggingOn
 		const fmi2String categories[])
 {
 
-	for (int i = 0; i < nCategories; i++)
-	{
-		if (strcmp(categories[i], "logShm") == 0)
-		{
-			if (loggingOn)
-			{
-				FmiIpc::debugPrintPtr = &fmuInternalDebugPrint;
-				FmiIpc::debug = true;
-			}
-		}else if (strcmp(categories[i], "logLaunch") == 0)
-		{
-			if (loggingOn)
-			{
-				FmiIpc::debugPrintPtr = &fmuInternalDebugPrint;
-				FmiIpc::debug = true;
-			}
-		}
-	}
-
-	FmuContainer* fmu = getFmuContainer(c);
+FmuContainer* fmu = getFmuContainer(c);
 
 	if (fmu != NULL)
 	{
+
+		for (int i = 0; i < nCategories; i++)
+		{
+			if (strcmp(categories[i], "logShm") == 0)
+			{
+				if (loggingOn)
+				{
+					fmu->m_proxy->getChannel()->debugPrintPtr= &fmuInternalDebugPrint;
+				}
+			}else if (strcmp(categories[i], "logLaunch") == 0)
+			{
+				if (loggingOn)
+				{
+					fmu->m_proxy->getChannel()->debugPrintPtr= &fmuInternalDebugPrint;
+				}
+			}
+		}
+
+
+
 		return convertStatus(fmu->m_proxy->fmi2SetDebugLogging(loggingOn, nCategories, categories));
 	}
 	return fmi2Fatal;

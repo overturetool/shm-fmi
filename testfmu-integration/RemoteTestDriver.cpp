@@ -9,6 +9,7 @@
 #include <iostream>
 #include <thread>
 #include "RemoteTestDriver.h"
+#include "IpcClient.h"
 
 #define realIdGet 10
 #define intIdGet 11
@@ -36,7 +37,7 @@ void okReply(SharedFmiMessage* msg)
 	r->SerializeWithCachedSizesToArray(msg->protoBufMsg);
 }
 
-static  FmiIpc::Client* globalClient = NULL;
+static  FmiIpc::IpcClient* globalClient = NULL;
 
 void remoteTestDriverSingle(const char * shmKey)
 {
@@ -55,7 +56,7 @@ void remoteTestDriver(const char * shmKey)
 
 	bool success;
 
-	FmiIpc::Client* client = globalClient;
+	FmiIpc::IpcClient* client = globalClient;
 
 	if (globalClient == NULL)
 	{
@@ -63,7 +64,7 @@ void remoteTestDriver(const char * shmKey)
 		while(!success || client==NULL)
 		{
 	//	printf(".");
-			client = new FmiIpc::Client(shmKey, &success);
+			client = new FmiIpc::IpcClient(0, &success,shmKey);
 		}
 	//	printf("\n Connected.\n");
 

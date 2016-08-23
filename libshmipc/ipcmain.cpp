@@ -5,7 +5,8 @@
  *      Author: kel
  */
 
-#include "FmiIpc.h"
+#include "IpcServer.h"
+#include"IpcClient.h"
 
 using namespace sharedfmimemory;
 
@@ -22,8 +23,8 @@ int main(int argc, char *argv[])
 	{
 		printf("Server mode selected\n");
 
-		FmiIpc::Server* server = new FmiIpc::Server();
-		server->create(key);
+		FmiIpc::IpcServer* server = new FmiIpc::IpcServer(0,key);
+		server->create();
 		SharedFmiMessage message;
 
 		message.cmd = fmi2Command::fmi2DoStep;
@@ -49,12 +50,12 @@ int main(int argc, char *argv[])
 
 		bool success;
 
-		FmiIpc::Client* client = NULL;
+		FmiIpc::IpcClient* client = NULL;
 
 		while (!success)
 		{
 			printf("Trying to connect and answer. Key: %s\n", key);
-			client = new FmiIpc::Client(key, &success);
+			client = new FmiIpc::IpcClient(1, &success,key);
 		}
 
 		printf("Connected.\n");
@@ -71,7 +72,7 @@ int main(int argc, char *argv[])
 
 		printf("Received Cmd: %i, Data: %s, Length: %i\n", message->cmd, message->protoBufMsg,
 				message->protoBufMsgSize);
-		//client->sendReply(message);
+		client->sendReply(message);
 		delete client;
 		return 0;
 

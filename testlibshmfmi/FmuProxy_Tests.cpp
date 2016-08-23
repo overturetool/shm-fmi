@@ -6,7 +6,7 @@
 #include <thread>
 #include "RemoteTestDriver.h"
 
-
+#include "IpcClient.h"
 
 #include "FmuProxyTest.h"
 
@@ -18,7 +18,7 @@
 void clientThread()
 {
 	bool success;
-	FmiIpc::Client client(MEM_KEY, &success);
+	FmiIpc::IpcClient client(0, &success,MEM_KEY);
 	if (!success)
 	{
 		//recurse until connected
@@ -37,9 +37,9 @@ void clientThread()
 
 TEST(FmiIpc, shmbasetest)
 {
-	FmiIpc::Server server;
+	FmiIpc::IpcServer server(0,MEM_KEY);
 
-	EXPECT_EQ(true,server.create(MEM_KEY));
+	EXPECT_EQ(true,server.create());
 
 	std::thread t1(clientThread);
 

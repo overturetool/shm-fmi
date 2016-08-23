@@ -7,10 +7,10 @@
 
 #include "FmuProxy.h"
 
-FmuProxy::FmuProxy(std::string url)
+FmuProxy::FmuProxy(int id, std::string url)
 {
 	this->m_url = new std::string(url);
-	this->server = new FmiIpc::Server();
+	this->server = new FmiIpc::IpcServer(id, this->m_url->c_str());
 }
 
 FmuProxy::~FmuProxy()
@@ -19,14 +19,12 @@ FmuProxy::~FmuProxy()
 	delete this->server;
 }
 
-
 bool FmuProxy::initialize()
 {
-	return this->server->create(this->m_url->c_str());
+	return this->server->create();
 }
 
-google::protobuf::Message* FmuProxy::send(
-		sharedfmimemory::fmi2Command type, google::protobuf::Message* msg)
+google::protobuf::Message* FmuProxy::send(sharedfmimemory::fmi2Command type, google::protobuf::Message* msg)
 {
 
 	sharedfmimemory::SharedFmiMessage m = sharedfmimemory::SharedFmiMessage();
@@ -142,6 +140,14 @@ google::protobuf::Message* FmuProxy::send(
 	}
 		break;
 
+	case sharedfmimemory::fmi2Log:
+	{
+		Fmi2LogReply* im = (Fmi2LogReply*) msg;
+		m.protoBufMsgSize = im->ByteSize();
+		im->SerializeWithCachedSizesToArray(m.protoBufMsg);
+	}
+		break;
+
 	}
 
 	//printf("Sending type: %i Size: %i\n",m.cmd,m.protoBufMsgSize);
@@ -167,6 +173,7 @@ google::protobuf::Message* FmuProxy::send(
 	case sharedfmimemory::fmi2SetBoolean:
 	case sharedfmimemory::fmi2SetString:
 	case sharedfmimemory::fmi2GetStatus:
+	case sharedfmimemory::fmi2Log:
 	{
 		Fmi2StatusReply* r = new Fmi2StatusReply();
 		r->ParseFromArray(reply->protoBufMsg, reply->protoBufMsgSize);
@@ -236,8 +243,7 @@ google::protobuf::Message* FmuProxy::send(
 	return NULL;
 }
 
-FmuProxy::fmi2Status FmuProxy::sendRetStatus(
-		sharedfmimemory::fmi2Command type, google::protobuf::Message* msg)
+FmuProxy::fmi2Status FmuProxy::sendRetStatus(sharedfmimemory::fmi2Command type, google::protobuf::Message* msg)
 {
 
 	Fmi2StatusReply* reply = (Fmi2StatusReply*) send(type, msg);
@@ -273,10 +279,8 @@ FmuProxy::fmi2Status FmuProxy::getStatus(Fmi2StatusReply* reply)
 	return fmi2Fatal;
 }
 
-bool FmuProxy::fmi2Instantiate(fmi2String instanceName,
-		fmi2String fmuGUID, fmi2String fmuResourceLocation,
-		const char* callbackAddress, fmi2Boolean visible,
-		fmi2Boolean loggingOn)
+bool FmuProxy::fmi2Instantiate(fmi2String instanceName, fmi2String fmuGUID, fmi2String fmuResourceLocation,
+		const char* callbackAddress, fmi2Boolean visible, fmi2Boolean loggingOn)
 {
 
 	Fmi2InstantiateRequest request;
@@ -287,8 +291,7 @@ bool FmuProxy::fmi2Instantiate(fmi2String instanceName,
 	request.set_visible(visible);
 	request.set_logginon(loggingOn);
 
-	Fmi2StatusReply* reply = (Fmi2StatusReply*) send(
-			sharedfmimemory::fmi2Instantiate, &request);
+	Fmi2StatusReply* reply = (Fmi2StatusReply*) send(sharedfmimemory::fmi2Instantiate, &request);
 
 	if (reply == NULL || getStatus(reply) != fmi2OK)
 		return false;
@@ -297,8 +300,7 @@ bool FmuProxy::fmi2Instantiate(fmi2String instanceName,
 
 }
 
-FmuProxy::fmi2Status FmuProxy::fmi2SetupExperiment(
-		fmi2Boolean toleranceDefined, fmi2Real tolerance, fmi2Real startTime,
+FmuProxy::fmi2Status FmuProxy::fmi2SetupExperiment(fmi2Boolean toleranceDefined, fmi2Real tolerance, fmi2Real startTime,
 		fmi2Boolean stopTimeDefined, fmi2Real stopTime)
 {
 	Fmi2SetupExperimentRequest request;
@@ -336,8 +338,7 @@ FmuProxy::fmi2Status FmuProxy::fmi2Reset()
 	return sendRetStatus(sharedfmimemory::fmi2Reset, &request);
 }
 
-FmuProxy::fmi2Status FmuProxy::fmi2SetDebugLogging(
-		fmi2Boolean loggingOn, size_t nCategories,
+FmuProxy::fmi2Status FmuProxy::fmi2SetDebugLogging(fmi2Boolean loggingOn, size_t nCategories,
 		const fmi2String categories[])
 {
 	Fmi2SetDebugLoggingRequest request;
@@ -353,8 +354,7 @@ FmuProxy::fmi2Status FmuProxy::fmi2SetDebugLogging(
 	return sendRetStatus(sharedfmimemory::fmi2SetDebugLogging, &request);
 }
 
-Fmi2GetRequest createGetRequest(const FmuProxy::fmi2ValueReference vr[],
-		size_t nvr)
+Fmi2GetRequest createGetRequest(const FmuProxy::fmi2ValueReference vr[], size_t nvr)
 {
 	Fmi2GetRequest request;
 
@@ -370,13 +370,11 @@ Fmi2GetRequest createGetRequest(const FmuProxy::fmi2ValueReference vr[],
 //
 // get
 //
-FmuProxy::fmi2Status FmuProxy::fmi2GetReal(
-		const fmi2ValueReference vr[], size_t nvr, fmi2Real value[])
+FmuProxy::fmi2Status FmuProxy::fmi2GetReal(const fmi2ValueReference vr[], size_t nvr, fmi2Real value[])
 {
 	Fmi2GetRequest request = createGetRequest(vr, nvr);
 
-	Fmi2GetRealReply* reply = (Fmi2GetRealReply*) send(
-			sharedfmimemory::fmi2GetReal, &request);
+	Fmi2GetRealReply* reply = (Fmi2GetRealReply*) send(sharedfmimemory::fmi2GetReal, &request);
 
 	if (reply == NULL)
 		return fmi2Fatal;
@@ -388,32 +386,11 @@ FmuProxy::fmi2Status FmuProxy::fmi2GetReal(
 	return fmi2OK;
 }
 
-FmuProxy::fmi2Status FmuProxy::fmi2GetInteger(
-		const fmi2ValueReference vr[], size_t nvr, fmi2Integer value[])
+FmuProxy::fmi2Status FmuProxy::fmi2GetInteger(const fmi2ValueReference vr[], size_t nvr, fmi2Integer value[])
 {
 	Fmi2GetRequest request = createGetRequest(vr, nvr);
 
-	Fmi2GetIntegerReply* reply = (Fmi2GetIntegerReply*) send(
-			sharedfmimemory::fmi2GetInteger, &request);
-
-	if (reply == NULL)
-		return fmi2Fatal;
-
-	for (int i = 0; i < reply->values_size(); ++i)
-	{
-		value[i] = reply->values(i);
-	}
-	return fmi2OK;
-
-}
-
-FmuProxy::fmi2Status FmuProxy::fmi2GetBoolean(
-		const fmi2ValueReference vr[], size_t nvr, fmi2Boolean value[])
-{
-	Fmi2GetRequest request = createGetRequest(vr, nvr);
-
-	Fmi2GetBooleanReply* reply = (Fmi2GetBooleanReply*) send(
-			sharedfmimemory::fmi2GetBoolean, &request);
+	Fmi2GetIntegerReply* reply = (Fmi2GetIntegerReply*) send(sharedfmimemory::fmi2GetInteger, &request);
 
 	if (reply == NULL)
 		return fmi2Fatal;
@@ -426,13 +403,28 @@ FmuProxy::fmi2Status FmuProxy::fmi2GetBoolean(
 
 }
 
-FmuProxy::fmi2Status FmuProxy::fmi2GetString(
-		const fmi2ValueReference vr[], size_t nvr, fmi2String value[])
+FmuProxy::fmi2Status FmuProxy::fmi2GetBoolean(const fmi2ValueReference vr[], size_t nvr, fmi2Boolean value[])
 {
 	Fmi2GetRequest request = createGetRequest(vr, nvr);
 
-	Fmi2GetStringReply* reply = (Fmi2GetStringReply*) send(
-			sharedfmimemory::fmi2GetString, &request);
+	Fmi2GetBooleanReply* reply = (Fmi2GetBooleanReply*) send(sharedfmimemory::fmi2GetBoolean, &request);
+
+	if (reply == NULL)
+		return fmi2Fatal;
+
+	for (int i = 0; i < reply->values_size(); ++i)
+	{
+		value[i] = reply->values(i);
+	}
+	return fmi2OK;
+
+}
+
+FmuProxy::fmi2Status FmuProxy::fmi2GetString(const fmi2ValueReference vr[], size_t nvr, fmi2String value[])
+{
+	Fmi2GetRequest request = createGetRequest(vr, nvr);
+
+	Fmi2GetStringReply* reply = (Fmi2GetStringReply*) send(sharedfmimemory::fmi2GetString, &request);
 
 	if (reply == NULL)
 		return fmi2Fatal;
@@ -449,8 +441,7 @@ FmuProxy::fmi2Status FmuProxy::fmi2GetString(
 // Set
 //
 
-FmuProxy::fmi2Status FmuProxy::fmi2SetReal(
-		const fmi2ValueReference vr[], size_t nvr, const fmi2Real value[])
+FmuProxy::fmi2Status FmuProxy::fmi2SetReal(const fmi2ValueReference vr[], size_t nvr, const fmi2Real value[])
 {
 	Fmi2SetRealRequest* request = new Fmi2SetRealRequest();
 
@@ -467,8 +458,7 @@ FmuProxy::fmi2Status FmuProxy::fmi2SetReal(
 	return sendRetStatus(sharedfmimemory::fmi2SetReal, request);
 }
 
-FmuProxy::fmi2Status FmuProxy::fmi2SetInteger(
-		const fmi2ValueReference vr[], size_t nvr, const fmi2Integer value[])
+FmuProxy::fmi2Status FmuProxy::fmi2SetInteger(const fmi2ValueReference vr[], size_t nvr, const fmi2Integer value[])
 {
 	Fmi2SetIntegerRequest request;
 
@@ -485,8 +475,7 @@ FmuProxy::fmi2Status FmuProxy::fmi2SetInteger(
 	return sendRetStatus(sharedfmimemory::fmi2SetInteger, &request);
 }
 
-FmuProxy::fmi2Status FmuProxy::fmi2SetBoolean(
-		const fmi2ValueReference vr[], size_t nvr, const fmi2Boolean value[])
+FmuProxy::fmi2Status FmuProxy::fmi2SetBoolean(const fmi2ValueReference vr[], size_t nvr, const fmi2Boolean value[])
 {
 	Fmi2SetBooleanRequest request;
 
@@ -503,8 +492,7 @@ FmuProxy::fmi2Status FmuProxy::fmi2SetBoolean(
 	return sendRetStatus(sharedfmimemory::fmi2SetBoolean, &request);
 }
 
-FmuProxy::fmi2Status FmuProxy::fmi2SetString(
-		const fmi2ValueReference vr[], size_t nvr, const fmi2String value[])
+FmuProxy::fmi2Status FmuProxy::fmi2SetString(const fmi2ValueReference vr[], size_t nvr, const fmi2String value[])
 {
 	Fmi2SetStringRequest request;
 
@@ -525,8 +513,7 @@ FmuProxy::fmi2Status FmuProxy::fmi2SetString(
 // do step
 //
 
-FmuProxy::fmi2Status FmuProxy::fmi2DoStep(
-		fmi2Real currentCommunicationPoint, fmi2Real communicationStepSize,
+FmuProxy::fmi2Status FmuProxy::fmi2DoStep(fmi2Real currentCommunicationPoint, fmi2Real communicationStepSize,
 		fmi2Boolean noSetFMUStatePriorToCurrentPoint)
 {
 	Fmi2DoStepRequest request;
@@ -543,8 +530,7 @@ FmuProxy::fmi2Status FmuProxy::fmi2DoStep(
 FmuProxy::fmi2Status FmuProxy::fmi2GetMaxStepsize(fmi2Real* size)
 {
 	Fmi2Empty request;
-	Fmi2GetMaxStepSizeReply* reply = (Fmi2GetMaxStepSizeReply*) send(
-			sharedfmimemory::fmi2GetMaxStepSize, &request);
+	Fmi2GetMaxStepSizeReply* reply = (Fmi2GetMaxStepSizeReply*) send(sharedfmimemory::fmi2GetMaxStepSize, &request);
 
 	if (reply == NULL)
 		return fmi2Fatal;
@@ -579,21 +565,18 @@ Fmi2StatusRequest FmuProxy::createGetStatusRequest(const fmi2StatusKind s)
 	return request;
 }
 
-FmuProxy::fmi2Status FmuProxy::fmi2GetStatus(const fmi2StatusKind s,
-		fmi2Status* value)
+FmuProxy::fmi2Status FmuProxy::fmi2GetStatus(const fmi2StatusKind s, fmi2Status* value)
 {
 	Fmi2StatusRequest request = createGetStatusRequest(s);
 	*value = sendRetStatus(sharedfmimemory::fmi2GetStatus, &request);
 	return *value;
 }
 
-FmuProxy::fmi2Status FmuProxy::fmi2GetRealStatus(
-		const fmi2StatusKind s, fmi2Real* value)
+FmuProxy::fmi2Status FmuProxy::fmi2GetRealStatus(const fmi2StatusKind s, fmi2Real* value)
 {
 	Fmi2StatusRequest request = createGetStatusRequest(s);
 
-	Fmi2RealStatusReply* reply = (Fmi2RealStatusReply*) send(
-			sharedfmimemory::fmi2GetRealStatus, &request);
+	Fmi2RealStatusReply* reply = (Fmi2RealStatusReply*) send(sharedfmimemory::fmi2GetRealStatus, &request);
 
 	if (reply == NULL)
 		return fmi2Fatal;
@@ -602,13 +585,11 @@ FmuProxy::fmi2Status FmuProxy::fmi2GetRealStatus(
 	return fmi2OK;
 }
 
-FmuProxy::fmi2Status FmuProxy::fmi2GetIntegerStatus(
-		const fmi2StatusKind s, fmi2Integer* value)
+FmuProxy::fmi2Status FmuProxy::fmi2GetIntegerStatus(const fmi2StatusKind s, fmi2Integer* value)
 {
 	Fmi2StatusRequest request = createGetStatusRequest(s);
 
-	Fmi2IntegerStatusReply* reply = (Fmi2IntegerStatusReply*) send(
-			sharedfmimemory::fmi2GetIntegerStatus, &request);
+	Fmi2IntegerStatusReply* reply = (Fmi2IntegerStatusReply*) send(sharedfmimemory::fmi2GetIntegerStatus, &request);
 
 	if (reply == NULL)
 		return fmi2Fatal;
@@ -617,13 +598,11 @@ FmuProxy::fmi2Status FmuProxy::fmi2GetIntegerStatus(
 	return fmi2OK;
 }
 
-FmuProxy::fmi2Status FmuProxy::fmi2GetBooleanStatus(
-		const fmi2StatusKind s, fmi2Boolean* value)
+FmuProxy::fmi2Status FmuProxy::fmi2GetBooleanStatus(const fmi2StatusKind s, fmi2Boolean* value)
 {
 	Fmi2StatusRequest request = createGetStatusRequest(s);
 
-	Fmi2BooleanStatusReply* reply = (Fmi2BooleanStatusReply*) send(
-			sharedfmimemory::fmi2GetBooleanStatus, &request);
+	Fmi2BooleanStatusReply* reply = (Fmi2BooleanStatusReply*) send(sharedfmimemory::fmi2GetBooleanStatus, &request);
 
 	if (reply == NULL)
 		return fmi2Fatal;
@@ -632,13 +611,11 @@ FmuProxy::fmi2Status FmuProxy::fmi2GetBooleanStatus(
 	return fmi2OK;
 }
 
-FmuProxy::fmi2Status FmuProxy::fmi2GetStringStatus(
-		const fmi2StatusKind s, fmi2String* value)
+FmuProxy::fmi2Status FmuProxy::fmi2GetStringStatus(const fmi2StatusKind s, fmi2String* value)
 {
 	Fmi2StatusRequest request = createGetStatusRequest(s);
 
-	Fmi2StringStatusReply* reply = (Fmi2StringStatusReply*) send(
-			sharedfmimemory::fmi2GetStringStatus, &request);
+	Fmi2StringStatusReply* reply = (Fmi2StringStatusReply*) send(sharedfmimemory::fmi2GetStringStatus, &request);
 
 	if (reply == NULL)
 		return fmi2Fatal;
@@ -647,7 +624,7 @@ FmuProxy::fmi2Status FmuProxy::fmi2GetStringStatus(
 	return fmi2OK;
 }
 
-void* FmuProxy::getChannel()
+FmiIpc::IpcBase* FmuProxy::getChannel()
 {
-	return (void*)this->server;
+	return  this->server;
 }

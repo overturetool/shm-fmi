@@ -6,9 +6,9 @@
  */
 
 #include "org_intocps_java_fmi_shm_SharedMemory.h"
-#include "FmiIpc.h"
+#include "IpcClient.h"
 
-FmiIpc::Client* g_client;
+FmiIpc::IpcClient* g_client;
 bool g_clientDebug = true;
 
 JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setDebug(JNIEnv *env, jclass clz, jboolean on)
@@ -27,8 +27,8 @@ JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setId(JNIE
 	}
 	bool success;
 
-	FmiIpc::debug = g_clientDebug;
-	g_client = new FmiIpc::Client(idString, &success);
+	g_client = new FmiIpc::IpcClient(0,&success,idString);
+//	g_client->debugPrintPtr= g_clientDebug;
 
 	if (!success)
 	{

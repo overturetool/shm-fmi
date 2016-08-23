@@ -6,9 +6,9 @@
  */
 
 #include "org_intocps_java_fmi_shm_SharedMemoryServer.h"
-#include "FmiIpc.h"
+#include "IpcServer.h"
 
-FmiIpc::Server* g_server;
+FmiIpc::IpcServer* g_server;
 bool g_serverDebug = true;
 
 JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemoryServer_setServerDebug(JNIEnv *env, jclass clz,
@@ -28,9 +28,9 @@ JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemoryServer_serv
 		fflush(stdout);
 	}
 
-	g_server = new FmiIpc::Server();
+	g_server = new FmiIpc::IpcServer(0,shmKey);
 
-	bool success = g_server->create(shmKey);
+	bool success = g_server->create();
 	if (!success)
 	{
 		if (g_serverDebug)

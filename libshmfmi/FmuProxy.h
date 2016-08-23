@@ -13,7 +13,7 @@
 #include <string>
 
 #include "service.pb.h"
-#include "FmiIpc.h"
+#include "IpcServer.h"
 #include "SharedFmiMessage.h"
 
 using service::Fmi2GetRequest;
@@ -51,7 +51,7 @@ public:
 	} fmi2StatusKind;
 
 	//FmuProxy(std::shared_ptr<ChannelInterface> channel);
-	FmuProxy(std::string url);
+	FmuProxy(int id, std::string url);
 	virtual ~FmuProxy();
 
 	bool initialize();
@@ -102,11 +102,11 @@ public:
 	fmi2Status fmi2GetMaxStepsize(fmi2Real* size);
 
 
-	void* getChannel();
+	FmiIpc::IpcBase* getChannel();
 
 private:
 	std::string* m_url;
-	FmiIpc::Server* server;
+	FmiIpc::IpcServer* server;
 	FmuProxy::fmi2Status getStatus(Fmi2StatusReply*);
 
 	google::protobuf::Message* send(sharedfmimemory::fmi2Command type,

@@ -22,7 +22,15 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
-add_executable(${PROJECT_NAME} FmiIpc.cpp ipcmain.cpp)
+if(APPLE)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/osx/include)
+endif(APPLE)
+
+file(GLOB C_FILES *.c)
+file(GLOB CPP_FILES *.cpp)
+
+add_executable(${PROJECT_NAME} ${C_FILES} ${CPP_FILES})
+
 
 # Expose A's public includes (including the ones of A's dependencies
 # transitively) to other subprojects through cache variable.

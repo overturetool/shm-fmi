@@ -7,7 +7,7 @@
 
 #include "FmuContainer.h"
 
-FmuContainer::FmuContainer(FmuProxy *proxy, const char* name, const fmi2CallbackFunctions *functions,
+FmuContainer::FmuContainer(int id,FmuProxy *proxy, const char* name, const fmi2CallbackFunctions *functions,
 		JavaLauncher* launcher)
 {
 	this->m_functions = functions;
@@ -17,6 +17,7 @@ FmuContainer::FmuContainer(FmuProxy *proxy, const char* name, const fmi2Callback
 	this->active = true;
 	this->componentEnvironment = NULL;
 	this->logger = NULL;
+	this->id = id;
 }
 
 FmuContainer::~FmuContainer()

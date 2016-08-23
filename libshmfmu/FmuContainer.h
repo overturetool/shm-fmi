@@ -17,7 +17,7 @@
 class FmuContainer
 {
 public:
-	FmuContainer(FmuProxy *proxy, const char* name, const fmi2CallbackFunctions *functions, JavaLauncher* launcher);
+	FmuContainer(int id, FmuProxy *proxy, const char* name, const fmi2CallbackFunctions *functions, JavaLauncher* launcher);
 	virtual ~FmuContainer();
 
 public:
@@ -30,6 +30,8 @@ public:
 	//FMI
 	fmi2CallbackLogger logger;
 	fmi2ComponentEnvironment componentEnvironment;
+
+	int id;
 };
 
 #endif /* FMUCONTAINER_H_ */

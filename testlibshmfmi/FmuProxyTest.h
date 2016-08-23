@@ -31,7 +31,7 @@ public:
 
 	void SetUp()
 	{
-		m_client = new FmuProxy(MEM_KEY);
+		m_client = new FmuProxy(0,MEM_KEY);
 
 		EXPECT_EQ(true, m_client->initialize());
 
