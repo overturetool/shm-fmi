@@ -57,8 +57,6 @@ IpcBase::~IpcBase()
 	// Close the file handle
 	if (m_hMapFile)
 	{
-		HANDLE handle = m_hMapFile;
-		m_hMapFile = (HANDLE) NULL;
 
 #ifdef _WIN32
 		close(m_hMapFile);
@@ -67,6 +65,7 @@ IpcBase::~IpcBase()
 		shm_unlink(m_name->c_str());
 #endif
 
+		m_hMapFile = (HANDLE) NULL;
 	}
 
 	if (this->m_name)
@@ -181,13 +180,13 @@ HANDLE IpcBase::openShm(bool*success, const char* name, bool create)
 	}
 
 #ifdef _WIN32
-	if (m_hMapFile == NULL || m_hMapFile == INVALID_HANDLE_VALUE)
+	if (handle == NULL || handle == INVALID_HANDLE_VALUE)
 	{
 		dprintf("Failed to create/open shm: %s\n",GetLastErrorAsString().c_str());
 		*success=false;
 	}
 #else
-	if (m_hMapFile == -1)
+	if (handle == -1)
 	{
 		dprintf("server_create: failed: %01d %s\n", __LINE__, strerror( errno));
 		*success = false;
@@ -204,7 +203,7 @@ void IpcBase::mapShm(bool*success, HANDLE handle, bool truncate)
 	*success = true;
 	//create
 #ifdef _WIN32
-	m_pBuf = (SharedFmiMem*) MapViewOfFile(m_hMapFile,	// handle to map object
+	m_pBuf = (SharedFmiMem*) MapViewOfFile(handle,	// handle to map object
 			FILE_MAP_ALL_ACCESS,// read/write permission
 			0, 0, sizeof(SharedFmiMem));
 	if (m_pBuf == NULL)
@@ -224,7 +223,7 @@ void IpcBase::mapShm(bool*success, HANDLE handle, bool truncate)
 #elif __APPLE__ ||  __linux
 	if (truncate)
 	{
-		if (ftruncate(m_hMapFile, sizeof(SharedFmiMem)) != 0)
+		if (ftruncate(handle, sizeof(SharedFmiMem)) != 0)
 		{
 			dprintf("ftruncate: failed: unable to truncate. %s\n", strerror( errno));
 			*success = false;
@@ -232,7 +231,7 @@ void IpcBase::mapShm(bool*success, HANDLE handle, bool truncate)
 		}
 	}
 
-	void *ptr = mmap(NULL, sizeof(SharedFmiMem), PROT_READ | PROT_WRITE, MAP_SHARED, m_hMapFile, 0);
+	void *ptr = mmap(NULL, sizeof(SharedFmiMem), PROT_READ | PROT_WRITE, MAP_SHARED, handle, 0);
 	if (ptr == MAP_FAILED)
 	{
 		dprintf("mmap: failed: mmap: %s\n", strerror( errno));

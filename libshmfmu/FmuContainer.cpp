@@ -25,5 +25,6 @@ FmuContainer::~FmuContainer()
 	m_javaLauncher->terminate();
 	delete this->m_javaLauncher;
 	delete this->m_name;
+	delete this->m_proxy;
 }
 

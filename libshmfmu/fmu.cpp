@@ -152,7 +152,8 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 			{
 				printf("callback thread got message ==null, returning, stopping thread\n");
 				fflush(stdout);
-				continue;
+				delete callbackClient;
+				return;
 			}
 //			printf("callback thread got message !=null\n");fflush(stdout);
 
@@ -224,7 +225,7 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 	}
 	printf("callback thread exit\n");
 	fflush(stdout);
-
+	delete callbackClient;
 }
 
 #define LOG(functions,comp,name,status,category, message,args...) \
