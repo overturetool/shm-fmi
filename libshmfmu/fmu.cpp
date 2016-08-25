@@ -118,6 +118,8 @@ void callback(FmuContainer *container, std::string* shmCallbackKey)
 		return;
 	}
 
+	std::cout<<"######### Callback function with callbackId: " << shmCallbackKey<<std::endl;
+
 	FmiIpc::IpcClient* callbackClient = NULL;
 	bool success = false;
 	while (container->active && !success)
