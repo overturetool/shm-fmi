@@ -69,7 +69,7 @@ void IpcClient::connect(bool* success)
 	m_hAvail = 0;
 	m_pBuf = NULL;
 
-	enableConsoleDebug();
+//	enableConsoleDebug();
 
 	dprintf("IPC Client key %s\n", this->m_name->c_str());
 
