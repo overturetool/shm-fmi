@@ -111,7 +111,7 @@ void sleepcp(int milliseconds) // cross-platform sleep function
 #endif // win32
 }
 
-void callback(FmuContainer *container, std::string shmCallbackKey)
+void callback(FmuContainer *container, std::string* shmCallbackKey)
 {
 	if (container->logger == NULL)
 	{
@@ -122,13 +122,13 @@ void callback(FmuContainer *container, std::string shmCallbackKey)
 	bool success = false;
 	while (container->active && !success)
 	{
-		callbackClient = new FmiIpc::IpcClient(container->id,&success,shmCallbackKey.c_str());
+		callbackClient = new FmiIpc::IpcClient(container->id,&success,shmCallbackKey->c_str());
 
 		if (!success)
 		{
 			delete callbackClient;
 			callbackClient = NULL;
-			printf("Unable to connect to callback shm: %s retry in 1 sec.\n\n", shmCallbackKey.c_str());
+			printf("Unable to connect to callback shm: %s retry in 1 sec.\n\n", shmCallbackKey->c_str());
 			sleepcp(1000);
 		}
 
@@ -346,8 +346,8 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 		launcher->launch();
 	}
 
-	std::string callbackId = shared_memory_key + std::string("Callback");
-	if (client->fmi2Instantiate(instanceName, fmuGUID, fmuResourceLocation, callbackId.c_str(), visible, loggingOn))
+	std::string* callbackId =new std::string( shared_memory_key + std::string("Callback"));
+	if (client->fmi2Instantiate(instanceName, fmuGUID, fmuResourceLocation, callbackId->c_str(), visible, loggingOn))
 	{
 		//connected
 		if (functions != NULL && functions->logger != NULL && loggingOn)
