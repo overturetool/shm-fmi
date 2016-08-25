@@ -21,6 +21,7 @@ FmuContainer::FmuContainer(int id, FmuProxy *proxy, const char* name, const fmi2
 	this->componentEnvironment = NULL;
 	this->logger = NULL;
 	this->id = id;
+	this->callbackThread = NULL;
 }
 
 FmuContainer::~FmuContainer()
@@ -29,5 +30,7 @@ FmuContainer::~FmuContainer()
 	delete this->m_javaLauncher;
 	delete this->m_name;
 	delete this->m_proxy;
+	if(this->callbackThread!=NULL)
+		delete this->callbackThread;
 }
 

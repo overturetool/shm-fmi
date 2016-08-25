@@ -10,7 +10,7 @@
 namespace FmiIpc
 {
 
-IpcClient::IpcClient(int id, bool* success, const char* name ) :
+IpcClient::IpcClient(int id, bool* success, const char* name) :
 		FmiIpc::IpcBase(id, name)
 {
 	this->connect(success);
@@ -28,7 +28,28 @@ bool IpcClient::waitAvailable(DWORD dwTimeout)
 	if (WaitForSingleObject(m_hAvail, dwTimeout) != WAIT_OBJECT_0)
 	return false;
 #elif __APPLE__ || __linux__
-	sem_wait(this->m_hAvail);
+
+	if (dwTimeout == 0)
+	{
+		if (sem_wait(this->m_hAvail) == -1)
+		{
+			return false;
+		}
+	} else
+	{
+		struct timespec ts;
+		clock_gettime(CLOCK_REALTIME, &ts);
+
+		ts.tv_sec = ts.tv_sec + (dwTimeout / 1000);
+
+		ts.tv_sec = ts.tv_sec + (dwTimeout / 1000);
+		ts.tv_nsec = ts.tv_nsec + ((dwTimeout % 1000) * 1000000);
+
+		if (sem_timedwait(this->m_hAvail, &ts) == -1)
+		{
+			return false;
+		}
+	}
 #endif
 
 	// Success
@@ -77,16 +98,15 @@ void IpcClient::connect(bool* success)
 	dprintf("Starting IPC client with key: %s\n", nameOfMapping->c_str());
 	// Open the shared file
 
-	m_hMapFile = openShm(success,nameOfMapping->c_str());
+	m_hMapFile = openShm(success, nameOfMapping->c_str());
 
 	// Map to the file
 
-	mapShm(success,m_hMapFile,false);
-
+	mapShm(success, m_hMapFile, false);
 
 	m_hSignal = this->createSignal(SIGNAL_NAME);
 	m_hAvail = this->createSignal(SIGNAL_AVALIABLE_NAME);
-	*success = m_hSignal!=NULL && m_hAvail!=NULL;
+	*success = m_hSignal != NULL && m_hAvail != NULL;
 
 	*success = true;
 	dprintf("IPC Client connected to shared memory %s, status %d\n", this->m_name->c_str(), *success);

@@ -14,6 +14,7 @@
 #include <tchar.h>
 typedef HANDLE SIGNAL_HANDLE;
 #elif __APPLE__ ||  __linux
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -9,6 +9,9 @@
 #define IPCCLIENT_H_
 
 #include "IpcBase.h"
+#include <sys/types.h>
+#include <time.h>
+#include "sem_timedwait.h"
 
 namespace FmiIpc
 {

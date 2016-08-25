@@ -32,6 +32,7 @@ public:
 	fmi2ComponentEnvironment componentEnvironment;
 
 	int id;
+	std::thread* callbackThread;
 };
 
 #endif /* FMUCONTAINER_H_ */
