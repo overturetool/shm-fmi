@@ -357,11 +357,18 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 		launcher->launch();
 	}
 
-	std::string* callbackId = new std::string(shared_memory_key + std::string("Callback"));
+//	printf("shm key is still: '%s'\n",fmuGUID);
+//	std::string* callbackId = new std::string( );
+//	callbackId->append(fmuGUID);
+//	callbackId->append(instanceName);
+//	callbackId->append("Callback");
 
-	char *category = (char *) calloc(sizeof(char), callbackId->length() + 1);
-	strcpy(category, callbackId->c_str());
-	const char* threadCallbackId = (const char*) callbackId;
+	const char * callbackTag  ="Callback";
+	char *threadCallbackId = (char *) calloc(sizeof(char), strlen(fmuGUID)+strlen(instanceName)+strlen(callbackTag)+1 );
+	strcpy(threadCallbackId, fmuGUID);
+	strcat(threadCallbackId,instanceName);
+	strcat(threadCallbackId,callbackTag);
+	printf("shm callback key is: '%s'\n",threadCallbackId);
 
 	if (client->fmi2Instantiate(instanceName, fmuGUID, fmuResourceLocation, threadCallbackId, visible, loggingOn))
 	{
@@ -375,7 +382,7 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 		}
 	}
 
-	delete callbackId;
+//	delete callbackId;
 
 	return container->componentEnvironment;
 }
