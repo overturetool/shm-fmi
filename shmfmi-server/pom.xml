@@ -9,7 +9,7 @@
 	<groupId>org.intocps.java.fmi</groupId>
 	<artifactId>fmi-shm-server</artifactId>
 	<name>Java SHM-FMI server</name>
-	<version>0.0.4</version>
+	<version>0.0.6</version>
 	<dependencies>
 
 		<dependency>
@@ -176,7 +176,7 @@
     <url>git@gitlab.au.dk:into-cps/shm-fmi.git</url>
     <connection>scm:git:git://gitlab.au.dk:into-cps/shm-fmi.git</connection>
     <developerConnection>scm:git:git@gitlab.au.dk:into-cps/shm-fmi.git</developerConnection>
-    <tag>Release/0.0.4</tag>
+    <tag>Release/0.0.6</tag>
   </scm>
 
 
@@ -244,6 +244,21 @@
 												<errormapper type="merge" to="target/redirector-mac.err" />
 											</redirector>
 										</exec>
+
+   <exec dir="${project.basedir}/src/main/native" executable="javah" failonerror="true">
+
+                      <arg value="-classpath" />
+                      <arg value="../../../target/classes" />
+                      <arg value="org.intocps.java.fmi.shm.SharedMemoryServer" />
+
+                      <redirector outputproperty="redirector.out" errorproperty="redirector.err">
+                        <inputfilterchain>
+                          <replacestring from="before" to="after" />
+                        </inputfilterchain>
+                        <outputmapper type="merge" to="target/redirector-mac.out" />
+                        <errormapper type="merge" to="target/redirector-mac.err" />
+                      </redirector>
+                    </exec>
 									</tasks>
 								</configuration>
 								<goals>

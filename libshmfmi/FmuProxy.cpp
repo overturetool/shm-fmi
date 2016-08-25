@@ -1,32 +1,30 @@
 /*
- * ExternalClient.cpp
+ * FmuProxy.cpp
  *
  *  Created on: Aug 20, 2015
  *      Author: parallels
  */
 
-#include "ExternalClient.h"
+#include "FmuProxy.h"
 
-ExternalClient::ExternalClient(std::string url)
+FmuProxy::FmuProxy(int id, std::string url)
 {
 	this->m_url = new std::string(url);
-	this->server = new FmiIpc::Server();
+	this->server = new FmiIpc::IpcServer(id, this->m_url->c_str());
 }
 
-ExternalClient::~ExternalClient()
+FmuProxy::~FmuProxy()
 {
 	delete this->m_url;
 	delete this->server;
 }
 
-
-bool ExternalClient::initialize()
+bool FmuProxy::initialize()
 {
-	return this->server->create(this->m_url->c_str());
+	return this->server->create();
 }
 
-google::protobuf::Message* ExternalClient::send(
-		sharedfmimemory::fmi2Command type, google::protobuf::Message* msg)
+google::protobuf::Message* FmuProxy::send(sharedfmimemory::fmi2Command type, google::protobuf::Message* msg)
 {
 
 	sharedfmimemory::SharedFmiMessage m = sharedfmimemory::SharedFmiMessage();
@@ -142,6 +140,14 @@ google::protobuf::Message* ExternalClient::send(
 	}
 		break;
 
+	case sharedfmimemory::fmi2Log:
+	{
+		Fmi2LogReply* im = (Fmi2LogReply*) msg;
+		m.protoBufMsgSize = im->ByteSize();
+		im->SerializeWithCachedSizesToArray(m.protoBufMsg);
+	}
+		break;
+
 	}
 
 	//printf("Sending type: %i Size: %i\n",m.cmd,m.protoBufMsgSize);
@@ -167,6 +173,7 @@ google::protobuf::Message* ExternalClient::send(
 	case sharedfmimemory::fmi2SetBoolean:
 	case sharedfmimemory::fmi2SetString:
 	case sharedfmimemory::fmi2GetStatus:
+	case sharedfmimemory::fmi2Log:
 	{
 		Fmi2StatusReply* r = new Fmi2StatusReply();
 		r->ParseFromArray(reply->protoBufMsg, reply->protoBufMsgSize);
@@ -236,8 +243,7 @@ google::protobuf::Message* ExternalClient::send(
 	return NULL;
 }
 
-ExternalClient::fmi2Status ExternalClient::sendRetStatus(
-		sharedfmimemory::fmi2Command type, google::protobuf::Message* msg)
+FmuProxy::fmi2Status FmuProxy::sendRetStatus(sharedfmimemory::fmi2Command type, google::protobuf::Message* msg)
 {
 
 	Fmi2StatusReply* reply = (Fmi2StatusReply*) send(type, msg);
@@ -248,7 +254,7 @@ ExternalClient::fmi2Status ExternalClient::sendRetStatus(
 	return getStatus(reply);
 }
 
-ExternalClient::fmi2Status ExternalClient::getStatus(Fmi2StatusReply* reply)
+FmuProxy::fmi2Status FmuProxy::getStatus(Fmi2StatusReply* reply)
 {
 	switch (reply->status())
 	{
@@ -273,10 +279,8 @@ ExternalClient::fmi2Status ExternalClient::getStatus(Fmi2StatusReply* reply)
 	return fmi2Fatal;
 }
 
-bool ExternalClient::fmi2Instantiate(fmi2String instanceName,
-		fmi2String fmuGUID, fmi2String fmuResourceLocation,
-		const char* callbackAddress, int callbackPort, fmi2Boolean visible,
-		fmi2Boolean loggingOn)
+bool FmuProxy::fmi2Instantiate(fmi2String instanceName, fmi2String fmuGUID, fmi2String fmuResourceLocation,
+		const char* callbackAddress, fmi2Boolean visible, fmi2Boolean loggingOn)
 {
 
 	Fmi2InstantiateRequest request;
@@ -284,12 +288,10 @@ bool ExternalClient::fmi2Instantiate(fmi2String instanceName,
 	request.set_fmuguid(fmuGUID);
 	request.set_fmuresourcelocation(fmuResourceLocation);
 	request.set_callbackshmname(callbackAddress);
-	//request.set_callbackport(callbackPort);
 	request.set_visible(visible);
 	request.set_logginon(loggingOn);
 
-	Fmi2StatusReply* reply = (Fmi2StatusReply*) send(
-			sharedfmimemory::fmi2Instantiate, &request);
+	Fmi2StatusReply* reply = (Fmi2StatusReply*) send(sharedfmimemory::fmi2Instantiate, &request);
 
 	if (reply == NULL || getStatus(reply) != fmi2OK)
 		return false;
@@ -298,8 +300,7 @@ bool ExternalClient::fmi2Instantiate(fmi2String instanceName,
 
 }
 
-ExternalClient::fmi2Status ExternalClient::fmi2SetupExperiment(
-		fmi2Boolean toleranceDefined, fmi2Real tolerance, fmi2Real startTime,
+FmuProxy::fmi2Status FmuProxy::fmi2SetupExperiment(fmi2Boolean toleranceDefined, fmi2Real tolerance, fmi2Real startTime,
 		fmi2Boolean stopTimeDefined, fmi2Real stopTime)
 {
 	Fmi2SetupExperimentRequest request;
@@ -313,32 +314,31 @@ ExternalClient::fmi2Status ExternalClient::fmi2SetupExperiment(
 
 }
 
-ExternalClient::fmi2Status ExternalClient::fmi2EnterInitializationMode()
+FmuProxy::fmi2Status FmuProxy::fmi2EnterInitializationMode()
 {
 	Fmi2Empty request;
 	return sendRetStatus(sharedfmimemory::fmi2EnterInitializationMode, &request);
 }
 
-ExternalClient::fmi2Status ExternalClient::fmi2ExitInitializationMode()
+FmuProxy::fmi2Status FmuProxy::fmi2ExitInitializationMode()
 {
 	Fmi2Empty request;
 	return sendRetStatus(sharedfmimemory::fmi2ExitInitializationMode, &request);
 }
 
-ExternalClient::fmi2Status ExternalClient::fmi2Terminate()
+FmuProxy::fmi2Status FmuProxy::fmi2Terminate()
 {
 	Fmi2Empty request;
 	return sendRetStatus(sharedfmimemory::fmi2Terminate, &request);
 }
 
-ExternalClient::fmi2Status ExternalClient::fmi2Reset()
+FmuProxy::fmi2Status FmuProxy::fmi2Reset()
 {
 	Fmi2Empty request;
 	return sendRetStatus(sharedfmimemory::fmi2Reset, &request);
 }
 
-ExternalClient::fmi2Status ExternalClient::fmi2SetDebugLogging(
-		fmi2Boolean loggingOn, size_t nCategories,
+FmuProxy::fmi2Status FmuProxy::fmi2SetDebugLogging(fmi2Boolean loggingOn, size_t nCategories,
 		const fmi2String categories[])
 {
 	Fmi2SetDebugLoggingRequest request;
@@ -354,8 +354,7 @@ ExternalClient::fmi2Status ExternalClient::fmi2SetDebugLogging(
 	return sendRetStatus(sharedfmimemory::fmi2SetDebugLogging, &request);
 }
 
-Fmi2GetRequest createGetRequest(const ExternalClient::fmi2ValueReference vr[],
-		size_t nvr)
+Fmi2GetRequest createGetRequest(const FmuProxy::fmi2ValueReference vr[], size_t nvr)
 {
 	Fmi2GetRequest request;
 
@@ -371,13 +370,11 @@ Fmi2GetRequest createGetRequest(const ExternalClient::fmi2ValueReference vr[],
 //
 // get
 //
-ExternalClient::fmi2Status ExternalClient::fmi2GetReal(
-		const fmi2ValueReference vr[], size_t nvr, fmi2Real value[])
+FmuProxy::fmi2Status FmuProxy::fmi2GetReal(const fmi2ValueReference vr[], size_t nvr, fmi2Real value[])
 {
 	Fmi2GetRequest request = createGetRequest(vr, nvr);
 
-	Fmi2GetRealReply* reply = (Fmi2GetRealReply*) send(
-			sharedfmimemory::fmi2GetReal, &request);
+	Fmi2GetRealReply* reply = (Fmi2GetRealReply*) send(sharedfmimemory::fmi2GetReal, &request);
 
 	if (reply == NULL)
 		return fmi2Fatal;
@@ -389,32 +386,11 @@ ExternalClient::fmi2Status ExternalClient::fmi2GetReal(
 	return fmi2OK;
 }
 
-ExternalClient::fmi2Status ExternalClient::fmi2GetInteger(
-		const fmi2ValueReference vr[], size_t nvr, fmi2Integer value[])
+FmuProxy::fmi2Status FmuProxy::fmi2GetInteger(const fmi2ValueReference vr[], size_t nvr, fmi2Integer value[])
 {
 	Fmi2GetRequest request = createGetRequest(vr, nvr);
 
-	Fmi2GetIntegerReply* reply = (Fmi2GetIntegerReply*) send(
-			sharedfmimemory::fmi2GetInteger, &request);
-
-	if (reply == NULL)
-		return fmi2Fatal;
-
-	for (int i = 0; i < reply->values_size(); ++i)
-	{
-		value[i] = reply->values(i);
-	}
-	return fmi2OK;
-
-}
-
-ExternalClient::fmi2Status ExternalClient::fmi2GetBoolean(
-		const fmi2ValueReference vr[], size_t nvr, fmi2Boolean value[])
-{
-	Fmi2GetRequest request = createGetRequest(vr, nvr);
-
-	Fmi2GetBooleanReply* reply = (Fmi2GetBooleanReply*) send(
-			sharedfmimemory::fmi2GetBoolean, &request);
+	Fmi2GetIntegerReply* reply = (Fmi2GetIntegerReply*) send(sharedfmimemory::fmi2GetInteger, &request);
 
 	if (reply == NULL)
 		return fmi2Fatal;
@@ -427,13 +403,28 @@ ExternalClient::fmi2Status ExternalClient::fmi2GetBoolean(
 
 }
 
-ExternalClient::fmi2Status ExternalClient::fmi2GetString(
-		const fmi2ValueReference vr[], size_t nvr, fmi2String value[])
+FmuProxy::fmi2Status FmuProxy::fmi2GetBoolean(const fmi2ValueReference vr[], size_t nvr, fmi2Boolean value[])
 {
 	Fmi2GetRequest request = createGetRequest(vr, nvr);
 
-	Fmi2GetStringReply* reply = (Fmi2GetStringReply*) send(
-			sharedfmimemory::fmi2GetString, &request);
+	Fmi2GetBooleanReply* reply = (Fmi2GetBooleanReply*) send(sharedfmimemory::fmi2GetBoolean, &request);
+
+	if (reply == NULL)
+		return fmi2Fatal;
+
+	for (int i = 0; i < reply->values_size(); ++i)
+	{
+		value[i] = reply->values(i);
+	}
+	return fmi2OK;
+
+}
+
+FmuProxy::fmi2Status FmuProxy::fmi2GetString(const fmi2ValueReference vr[], size_t nvr, fmi2String value[])
+{
+	Fmi2GetRequest request = createGetRequest(vr, nvr);
+
+	Fmi2GetStringReply* reply = (Fmi2GetStringReply*) send(sharedfmimemory::fmi2GetString, &request);
 
 	if (reply == NULL)
 		return fmi2Fatal;
@@ -450,8 +441,7 @@ ExternalClient::fmi2Status ExternalClient::fmi2GetString(
 // Set
 //
 
-ExternalClient::fmi2Status ExternalClient::fmi2SetReal(
-		const fmi2ValueReference vr[], size_t nvr, const fmi2Real value[])
+FmuProxy::fmi2Status FmuProxy::fmi2SetReal(const fmi2ValueReference vr[], size_t nvr, const fmi2Real value[])
 {
 	Fmi2SetRealRequest* request = new Fmi2SetRealRequest();
 
@@ -468,8 +458,7 @@ ExternalClient::fmi2Status ExternalClient::fmi2SetReal(
 	return sendRetStatus(sharedfmimemory::fmi2SetReal, request);
 }
 
-ExternalClient::fmi2Status ExternalClient::fmi2SetInteger(
-		const fmi2ValueReference vr[], size_t nvr, const fmi2Integer value[])
+FmuProxy::fmi2Status FmuProxy::fmi2SetInteger(const fmi2ValueReference vr[], size_t nvr, const fmi2Integer value[])
 {
 	Fmi2SetIntegerRequest request;
 
@@ -486,8 +475,7 @@ ExternalClient::fmi2Status ExternalClient::fmi2SetInteger(
 	return sendRetStatus(sharedfmimemory::fmi2SetInteger, &request);
 }
 
-ExternalClient::fmi2Status ExternalClient::fmi2SetBoolean(
-		const fmi2ValueReference vr[], size_t nvr, const fmi2Boolean value[])
+FmuProxy::fmi2Status FmuProxy::fmi2SetBoolean(const fmi2ValueReference vr[], size_t nvr, const fmi2Boolean value[])
 {
 	Fmi2SetBooleanRequest request;
 
@@ -504,8 +492,7 @@ ExternalClient::fmi2Status ExternalClient::fmi2SetBoolean(
 	return sendRetStatus(sharedfmimemory::fmi2SetBoolean, &request);
 }
 
-ExternalClient::fmi2Status ExternalClient::fmi2SetString(
-		const fmi2ValueReference vr[], size_t nvr, const fmi2String value[])
+FmuProxy::fmi2Status FmuProxy::fmi2SetString(const fmi2ValueReference vr[], size_t nvr, const fmi2String value[])
 {
 	Fmi2SetStringRequest request;
 
@@ -526,8 +513,7 @@ ExternalClient::fmi2Status ExternalClient::fmi2SetString(
 // do step
 //
 
-ExternalClient::fmi2Status ExternalClient::fmi2DoStep(
-		fmi2Real currentCommunicationPoint, fmi2Real communicationStepSize,
+FmuProxy::fmi2Status FmuProxy::fmi2DoStep(fmi2Real currentCommunicationPoint, fmi2Real communicationStepSize,
 		fmi2Boolean noSetFMUStatePriorToCurrentPoint)
 {
 	Fmi2DoStepRequest request;
@@ -541,11 +527,10 @@ ExternalClient::fmi2Status ExternalClient::fmi2DoStep(
 // INTOS specific
 //
 
-ExternalClient::fmi2Status ExternalClient::fmi2GetMaxStepsize(fmi2Real* size)
+FmuProxy::fmi2Status FmuProxy::fmi2GetMaxStepsize(fmi2Real* size)
 {
 	Fmi2Empty request;
-	Fmi2GetMaxStepSizeReply* reply = (Fmi2GetMaxStepSizeReply*) send(
-			sharedfmimemory::fmi2GetMaxStepSize, &request);
+	Fmi2GetMaxStepSizeReply* reply = (Fmi2GetMaxStepSizeReply*) send(sharedfmimemory::fmi2GetMaxStepSize, &request);
 
 	if (reply == NULL)
 		return fmi2Fatal;
@@ -558,7 +543,7 @@ ExternalClient::fmi2Status ExternalClient::fmi2GetMaxStepsize(fmi2Real* size)
 // get status
 //
 
-Fmi2StatusRequest ExternalClient::createGetStatusRequest(const fmi2StatusKind s)
+Fmi2StatusRequest FmuProxy::createGetStatusRequest(const fmi2StatusKind s)
 {
 	Fmi2StatusRequest request;
 
@@ -580,21 +565,18 @@ Fmi2StatusRequest ExternalClient::createGetStatusRequest(const fmi2StatusKind s)
 	return request;
 }
 
-ExternalClient::fmi2Status ExternalClient::fmi2GetStatus(const fmi2StatusKind s,
-		fmi2Status* value)
+FmuProxy::fmi2Status FmuProxy::fmi2GetStatus(const fmi2StatusKind s, fmi2Status* value)
 {
 	Fmi2StatusRequest request = createGetStatusRequest(s);
 	*value = sendRetStatus(sharedfmimemory::fmi2GetStatus, &request);
 	return *value;
 }
 
-ExternalClient::fmi2Status ExternalClient::fmi2GetRealStatus(
-		const fmi2StatusKind s, fmi2Real* value)
+FmuProxy::fmi2Status FmuProxy::fmi2GetRealStatus(const fmi2StatusKind s, fmi2Real* value)
 {
 	Fmi2StatusRequest request = createGetStatusRequest(s);
 
-	Fmi2RealStatusReply* reply = (Fmi2RealStatusReply*) send(
-			sharedfmimemory::fmi2GetRealStatus, &request);
+	Fmi2RealStatusReply* reply = (Fmi2RealStatusReply*) send(sharedfmimemory::fmi2GetRealStatus, &request);
 
 	if (reply == NULL)
 		return fmi2Fatal;
@@ -603,13 +585,11 @@ ExternalClient::fmi2Status ExternalClient::fmi2GetRealStatus(
 	return fmi2OK;
 }
 
-ExternalClient::fmi2Status ExternalClient::fmi2GetIntegerStatus(
-		const fmi2StatusKind s, fmi2Integer* value)
+FmuProxy::fmi2Status FmuProxy::fmi2GetIntegerStatus(const fmi2StatusKind s, fmi2Integer* value)
 {
 	Fmi2StatusRequest request = createGetStatusRequest(s);
 
-	Fmi2IntegerStatusReply* reply = (Fmi2IntegerStatusReply*) send(
-			sharedfmimemory::fmi2GetIntegerStatus, &request);
+	Fmi2IntegerStatusReply* reply = (Fmi2IntegerStatusReply*) send(sharedfmimemory::fmi2GetIntegerStatus, &request);
 
 	if (reply == NULL)
 		return fmi2Fatal;
@@ -618,13 +598,11 @@ ExternalClient::fmi2Status ExternalClient::fmi2GetIntegerStatus(
 	return fmi2OK;
 }
 
-ExternalClient::fmi2Status ExternalClient::fmi2GetBooleanStatus(
-		const fmi2StatusKind s, fmi2Boolean* value)
+FmuProxy::fmi2Status FmuProxy::fmi2GetBooleanStatus(const fmi2StatusKind s, fmi2Boolean* value)
 {
 	Fmi2StatusRequest request = createGetStatusRequest(s);
 
-	Fmi2BooleanStatusReply* reply = (Fmi2BooleanStatusReply*) send(
-			sharedfmimemory::fmi2GetBooleanStatus, &request);
+	Fmi2BooleanStatusReply* reply = (Fmi2BooleanStatusReply*) send(sharedfmimemory::fmi2GetBooleanStatus, &request);
 
 	if (reply == NULL)
 		return fmi2Fatal;
@@ -633,17 +611,20 @@ ExternalClient::fmi2Status ExternalClient::fmi2GetBooleanStatus(
 	return fmi2OK;
 }
 
-ExternalClient::fmi2Status ExternalClient::fmi2GetStringStatus(
-		const fmi2StatusKind s, fmi2String* value)
+FmuProxy::fmi2Status FmuProxy::fmi2GetStringStatus(const fmi2StatusKind s, fmi2String* value)
 {
 	Fmi2StatusRequest request = createGetStatusRequest(s);
 
-	Fmi2StringStatusReply* reply = (Fmi2StringStatusReply*) send(
-			sharedfmimemory::fmi2GetStringStatus, &request);
+	Fmi2StringStatusReply* reply = (Fmi2StringStatusReply*) send(sharedfmimemory::fmi2GetStringStatus, &request);
 
 	if (reply == NULL)
 		return fmi2Fatal;
 
 	*value = reply->value().c_str();
 	return fmi2OK;
+}
+
+FmiIpc::IpcBase* FmuProxy::getChannel()
+{
+	return  this->server;
 }

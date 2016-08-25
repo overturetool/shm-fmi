@@ -7,11 +7,12 @@ import org.intocps.fmi.jnifmuapi.NativeLibraryLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SharedMemory {
-	
-	public final static String DEFAULT_MEMORY_NAME="shmFmiTest";
-	
-	private final static String LIBRARY_NAME="sharedmemory";
+public class SharedMemory
+{
+
+	public final static String DEFAULT_MEMORY_NAME = "shmFmiTest";
+
+	private final static String LIBRARY_NAME = "sharedmemory";
 
 	public native boolean setId(String id);
 
@@ -19,8 +20,12 @@ public class SharedMemory {
 
 	public native void send(int type, byte[] data);
 	
+	public static native void setDebug(boolean on);
+
 	final static Logger logger = LoggerFactory.getLogger(SharedMemory.class);
 	
+	static boolean libraryLoaded = false;
+
 	static
 	{
 		String libPath = NativeFmuApi.getPlatformSpecificLibaryPath(LIBRARY_NAME);
@@ -30,15 +35,16 @@ public class SharedMemory {
 		{
 			lib = new NativeLibraryLoader().loadLibrary(libPath);
 			logger.debug("Loaded Library file: " + lib);
+			libraryLoaded = true;
 		} catch (Exception e)
 		{
-			logger.error("Faild to load native Library file: " + libPath,e);
-			throw new UndeclaredThrowableException( e);
+			logger.error("Faild to load native Library file: " + libPath, e);
+			throw new UndeclaredThrowableException(e);
 		}
-		
+
 	}
-	
-	private static  class NativeFmuApi
+
+	static class NativeFmuApi
 	{
 
 		final static String LIB_BASE = "lib";
@@ -69,20 +75,21 @@ public class SharedMemory {
 				libPath += ".dll";
 				//
 				return libPath;
-			}else if(osName.equalsIgnoreCase("linux"))
+			} else if (osName.equalsIgnoreCase("linux"))
 			{
-				//libPath="lib"+libPath+ ".so";
-				libPath=LIB_BASE + "/" + osName + "-"
-				+ System.getProperty("os.arch") + "/lib" + name+".so";
-				
+				// libPath="lib"+libPath+ ".so";
+				libPath = LIB_BASE + "/" + osName + "-"
+						+ System.getProperty("os.arch") + "/lib" + name + ".so";
+
 				return libPath;
-			}else if(osName.equalsIgnoreCase("Mac"))
+			} else if (osName.equalsIgnoreCase("Mac"))
 			{
-				//libPath="lib"+libPath+ ".so";
-				//libPath += ".dylib";
-				libPath=LIB_BASE + "/" + osName + "-"
-						+ System.getProperty("os.arch") + "/lib" + name+".dylib";
-				
+				// libPath="lib"+libPath+ ".so";
+				// libPath += ".dylib";
+				libPath = LIB_BASE + "/" + osName + "-"
+						+ System.getProperty("os.arch") + "/lib" + name
+						+ ".dylib";
+
 				return libPath;
 			}
 			return null;
@@ -90,5 +97,4 @@ public class SharedMemory {
 
 	}
 
-	
 }

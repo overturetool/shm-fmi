@@ -1,5 +1,5 @@
 /*
- * ExternalClientTest.h
+ * FmuProxyTest.h
  *
  *  Created on: Apr 26, 2016
  *      Author: kel
@@ -10,7 +10,7 @@
 
 #include "gtest/gtest.h"
 
-#include "ExternalClient.h"
+#include "FmuProxy.h"
 #include <string>
 #include <iostream>
 #include <thread>
@@ -21,17 +21,18 @@
 void remoteClientThread();
 void remoteClientThreadResume();
 
-class ExternalClientTest: public ::testing::Test
+class FmuProxyTest: public ::testing::Test
 {
 public:
-	ExternalClientTest()
+	FmuProxyTest()
 	{
 		m_client = NULL;
 	}
 
 	void SetUp()
 	{
-		m_client = new ExternalClient(MEM_KEY);
+		m_client = new FmuProxy(0,MEM_KEY);
+		m_client->getChannel()->enableConsoleDebug();
 
 		EXPECT_EQ(true, m_client->initialize());
 
@@ -47,7 +48,7 @@ public:
 		t1->join();
 	}
 
-	~ExternalClientTest()
+	~FmuProxyTest()
 	{
 		// cleanup any pending stuff, but no exceptions allowed
 	}
@@ -58,7 +59,7 @@ public:
 		t1 = new std::thread(remoteClientThreadResume);
 	}
 
-	ExternalClient* m_client;
+	FmuProxy* m_client;
 
 	std::thread* t1;
 

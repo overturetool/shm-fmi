@@ -6,24 +6,34 @@
  */
 
 #include "org_intocps_java_fmi_shm_SharedMemory.h"
-#include "FmiIpc.h"
+#include "IpcClient.h"
 
-FmiIpc::Client* client;
+FmiIpc::IpcClient* g_client;
+bool g_clientDebug = true;
 
-JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setId(
-		JNIEnv *env, jobject obj, jstring id) {
+JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setDebug(JNIEnv *env, jclass clz, jboolean on)
+{
+	g_clientDebug = on;
+}
+
+JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setId(JNIEnv *env, jobject obj, jstring id)
+{
 
 	const char * idString = env->GetStringUTFChars(id, NULL);
-	printf("%s\n",idString);
-	fflush(stdout);
+	if (g_clientDebug)
+	{
+		printf("Native g_client (java) starting g_client with shm key: %s\n", idString);
+		fflush(stdout);
+	}
 	bool success;
 
-	client = new FmiIpc::Client(idString,&success);
+	g_client = new FmiIpc::IpcClient(0,&success,idString);
+//	g_client->debugPrintPtr= g_clientDebug;
 
-	if(!success)
+	if (!success)
 	{
-		delete client;
-		client =NULL;
+		delete g_client;
+		g_client = NULL;
 	}
 
 	env->ReleaseStringUTFChars(id, idString);
@@ -33,23 +43,23 @@ JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setId(
 }
 
 /*
- * Class:     sharedmemoryTestClient_SharedMemory
+ * Class:     sharedmemoryTestg_client_SharedMemory
  * Method:    read
  * Signature: ([B)[B
  */
-JNIEXPORT jbyteArray JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_read(
-		JNIEnv *env, jobject obj, jbyteArray types) {
+JNIEXPORT jbyteArray JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_read(JNIEnv *env, jobject obj, jbyteArray types)
+{
 
-	SharedFmiMessage* msg = client->getMessage(INFINITE);
+	SharedFmiMessage* msg = g_client->getMessage(INFINITE);
 
-	if (msg == NULL) {
+	if (msg == NULL)
+	{
 		return NULL;
 	}
 
 	jbyte *vbody = env->GetByteArrayElements(types, 0);
 
-		vbody[0] = msg->cmd;
-
+	vbody[0] = msg->cmd;
 
 	env->ReleaseByteArrayElements(types, vbody, 0);
 
@@ -57,45 +67,43 @@ JNIEXPORT jbyteArray JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_read(
 
 	jbyteArray result;
 	result = env->NewByteArray(size);
-	if (result == NULL) {
+	if (result == NULL)
+	{
 		return NULL; /* out of memory error thrown */
 	}
 
 	jbyte fill[size];
 
-	//printf("############## Type: %i Size: %i\n",msg->cmd,size);
 
-	//printf("Reading: ");
-	for (int i = 0; i < size; i++) {
+	for (int i = 0; i < size; i++)
+	{
 		fill[i] = msg->protoBufMsg[i];
-		//printf("%u",msg->protoBufMsg[i]);
 	}
-	//printf("\n");
 
 	env->SetByteArrayRegion(result, 0, size, fill);
 
 	return result;
 }
 
-
-
-JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_send(
-		JNIEnv *env, jobject obj, jint type, jbyteArray bytes) {
+JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_send(JNIEnv *env, jobject obj, jint type,
+		jbyteArray bytes)
+{
 
 	size_t size = env->GetArrayLength(bytes);
 	SharedFmiMessage* msg = new SharedFmiMessage();
 
 	msg->protoBufMsgSize = size;
-	msg->cmd =static_cast<fmi2Command>(type);
+	msg->cmd = static_cast<fmi2Command>(type);
 
 	jbyte *vbody = env->GetByteArrayElements(bytes, 0);
-	for (int i = 0; i < size; i++) {
+	for (int i = 0; i < size; i++)
+	{
 		msg->protoBufMsg[i] = vbody[i];
 	}
 
 	env->ReleaseByteArrayElements(bytes, vbody, 0);
 
-	client->sendReply(msg);
+	g_client->sendReply(msg);
 	delete msg;
 
 }

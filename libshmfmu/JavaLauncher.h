@@ -23,6 +23,7 @@
 #include <unistd.h>
 
 #include <errno.h>
+#include <stdarg.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -33,10 +34,15 @@
 
 class JavaLauncher {
 public:
+	typedef int debugPrintType ( void* sender, const char * format, ... );
 	JavaLauncher(const char* workingDir, char** args);
 	virtual ~JavaLauncher();
 	int launch();
 	void terminate();
+
+
+	static bool debug;
+	static debugPrintType *debugPrintPtr;
 private:
 
 	const char* m_workingDir;

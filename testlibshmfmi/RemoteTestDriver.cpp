@@ -4,11 +4,12 @@
  *  Created on: Oct 5, 2015
  *      Author: parallels
  */
-#include "ExternalClient.h"
+#include "FmuProxy.h"
 #include <string>
 #include <iostream>
 #include <thread>
 #include "RemoteTestDriver.h"
+#include "IpcClient.h"
 
 #define TD_SIZE 100
 
@@ -31,7 +32,7 @@ void okReply(SharedFmiMessage* msg)
 	r->SerializeWithCachedSizesToArray(msg->protoBufMsg);
 }
 
-FmiIpc::Client* globalClient = NULL;
+FmiIpc::IpcClient* globalClient = NULL;
 
 void remoteTestDriverSingle(const char * shmKey)
 {
@@ -43,11 +44,11 @@ void remoteTestDriver(const char * shmKey)
 {
 	bool success;
 
-	FmiIpc::Client* client = globalClient;
+	FmiIpc::IpcClient* client = globalClient;
 
 	//if (globalClient == NULL)
 	{
-		client = new FmiIpc::Client(shmKey, &success);
+		client = new FmiIpc::IpcClient(0, &success,shmKey);
 		if (!success)
 		{
 			remoteTestDriver(shmKey);

@@ -7,7 +7,25 @@
 
 #include "JavaLauncher.h"
 
-JavaLauncher::JavaLauncher(const char* workingDir, char** args) {
+bool JavaLauncher::debug = true;
+
+int javaLauncherInternalDebugPrint(void* sender, const char * format, ...)
+{
+	if (!JavaLauncher::debug)
+	{
+		return 0;
+	}
+	va_list args;
+	va_start(args, format);
+	int ret = vfprintf(stdout, format, args);
+	va_end(args);
+	return ret;
+}
+
+JavaLauncher::debugPrintType* JavaLauncher::debugPrintPtr = &javaLauncherInternalDebugPrint;
+
+JavaLauncher::JavaLauncher(const char* workingDir, char** args)
+{
 	this->m_workingDir = workingDir;
 	this->m_launched = false;
 	this->m_args = args;
@@ -19,7 +37,8 @@ JavaLauncher::JavaLauncher(const char* workingDir, char** args) {
 #endif
 }
 
-JavaLauncher::~JavaLauncher() {
+JavaLauncher::~JavaLauncher()
+{
 
 }
 
@@ -74,7 +93,8 @@ std::string GetLastErrorStdStr()
 }
 #endif
 
-int JavaLauncher::launch() {
+int JavaLauncher::launch()
+{
 #ifdef _WIN32
 
 	STARTUPINFO si;
@@ -87,12 +107,10 @@ int JavaLauncher::launch() {
 	std::string cmd = "";
 
 	int i = 0;
-	while (m_args[i] != NULL) {
-
-		//if (i > 0) {
+	while (m_args[i] != NULL)
+	{
 		cmd += m_args[i];
 		cmd += " ";
-		//	}
 		i++;
 	}
 
@@ -101,7 +119,7 @@ int JavaLauncher::launch() {
 	memcpy(buf,cmd.c_str(),cmd.length());
 	buf[kk-1]=0;
 
-	printf("Launching process: '%s' with arguments: '%s' in folder '%s'\n",m_args[0],buf,m_workingDir);
+	debugPrintPtr(this,"Launching process: '%s' with arguments: '%s' in folder '%s'\n",m_args[0],buf,m_workingDir);
 
 	// Start the child process.
 	if (!CreateProcess(NULL,//m_args[0],   // No module name (use command line)
@@ -114,14 +132,15 @@ int JavaLauncher::launch() {
 					m_workingDir,// Use parent's starting directory
 					&si,// Pointer to STARTUPINFO structure
 					&pi)// Pointer to PROCESS_INFORMATION structure
-	) {
+	)
+	{
 		//printf("CreateProcess failed (%d).\n", GetLastError());
-		printf("---CresteProcess failed %s\n",GetLastErrorStdStr().c_str());
+		debugPrintPtr(this,"---CresteProcess failed %s\n",GetLastErrorStdStr().c_str());
 		delete buf;
 		return 1;
 	}
 	delete buf;
-	printf("Process launched continuing main thread.\n");
+	debugPrintPtr(this,"Process launched continuing main thread.\n");
 	this->pid=pi;
 	this->m_launched=true;
 	return 0;
@@ -129,55 +148,47 @@ int JavaLauncher::launch() {
 
 	int status;
 	pid = fork();
-	if (pid == 0) {
-		printf("Fork application %s\n", m_args[0]);
-		// Child process will return 0 from fork()
-
-		//	status = execlp("/bin/ls", "/bin/ls", "-r", "-t", "-l", (char *) 0);//system(m_path.c_str());
-
-		/*printf("Launching:\n");
-		 for(int i =0;i< 5;i++)
-		 {
-		 printf("%s ",m_args[i]);
-		 }
-		 printf("\n");*/
-		if (m_workingDir != NULL) {
-			if (chdir(m_workingDir) == 0) {
-				printf("Changed dir to: %s\n", m_workingDir);
-			} else {
-				printf(
-						"server_create: failed to fork and change dir: %01d %s\n",
-						__LINE__, strerror( errno));
+	if (pid == 0)
+	{
+		debugPrintPtr(this, "Fork application %s\n", m_args[0]);
+		if (m_workingDir != NULL)
+		{
+			if (chdir(m_workingDir) == 0)
+			{
+				debugPrintPtr(this, "Changed dir to: %s\n", m_workingDir);
+			} else
+			{
+				debugPrintPtr(this, "server_create: failed to fork and change dir: %01d %s\n",
+				__LINE__, strerror( errno));
 			}
 
 		}
 		int i = 0;
-		while (m_args[i] != NULL) {
-
-			//if (i > 0) {
-			printf("%s\n", m_args[i]);
+		while (m_args[i] != NULL)
+		{
+			debugPrintPtr(this, "%s\n", m_args[i]);
 			i++;
 		}
 
 		status = execvp(m_args[0], m_args);
 		int errn = errno;
-		printf("server_create: failed to fork and execvp: %01d %s\n", __LINE__,
-				strerror(errn));
+		debugPrintPtr(this, "server_create: failed to fork and execvp: %01d %s\n", __LINE__, strerror(errn));
 //		printf("program %s, arg 1: %s\n",m_args[0],m_args[1]);
-		printf("Execvp status: %d\n", status);
-		printf("Execvp error: %d", errn);
+		debugPrintPtr(this, "Execvp status: %d\n", status);
+		debugPrintPtr(this, "Execvp error: %d", errn);
 		exit(errn);
-	} else if (pid == -1) {
+	} else if (pid == -1)
+	{
 		// Parent process will return a non-zero value from fork()
-		printf("server_create: failed to fork: %01d %s\n", __LINE__,
-				strerror( errno));
+		debugPrintPtr(this, "server_create: failed to fork: %01d %s\n", __LINE__, strerror( errno));
 
 		m_launched = false;
-	} else {
+	} else
+	{
 		m_launched = true;
 	}
 
-	printf("Fork pid %d\n", pid);
+	debugPrintPtr(this, "Fork pid %d\n", pid);
 
 	usleep(0.5 * 1000000);
 
@@ -185,8 +196,10 @@ int JavaLauncher::launch() {
 #endif
 }
 
-void JavaLauncher::terminate() {
-	if (m_launched) {
+void JavaLauncher::terminate()
+{
+	if (m_launched)
+	{
 #ifdef _WIN32
 		UINT uExitCode = 0;
 		TerminateProcess(pid.hProcess, uExitCode);

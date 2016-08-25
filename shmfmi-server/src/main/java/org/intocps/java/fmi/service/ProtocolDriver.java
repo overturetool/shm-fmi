@@ -22,7 +22,6 @@ public class ProtocolDriver implements Runnable {
 		int retries = 10;
 		boolean connected = false;
 		
-		System.out.println("Starting shared memory with key: "+id);
 		logger.debug("Starting shared memory with key: {}",id);
 		while (!(connected=this.mem.setId(id)) && retries>=0) {
 			try {

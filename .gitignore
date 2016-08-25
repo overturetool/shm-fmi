@@ -81,3 +81,6 @@ git-info.txt
 *.cbp
 *.layout
 shmfmi-server/repository
+*.dylib
+*.jar
+libshmipc/libshmipc

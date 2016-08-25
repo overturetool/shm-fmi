@@ -31,6 +31,14 @@ JNIEXPORT jbyteArray JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_read
 JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_send
   (JNIEnv *, jobject, jint, jbyteArray);
 
+/*
+ * Class:     org_intocps_java_fmi_shm_SharedMemory
+ * Method:    setDebug
+ * Signature: (Z)V
+ */
+JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setDebug
+  (JNIEnv *, jclass, jboolean);
+
 #ifdef __cplusplus
 }
 #endif
