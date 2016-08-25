@@ -29,7 +29,7 @@ const char* IpcBase::SIGNAL_NAME = "/sig";
 
 IpcBase::IpcBase(int id, const char* shmName)
 {
-	this->debugPrintPtr = NULL; // &IpcBase::internalDebugPrint;
+	this->debugPrintPtr= &IpcBase::internalDebugPrint;
 
 	this->id = id;
 	this->m_name = new std::string(shmName);
