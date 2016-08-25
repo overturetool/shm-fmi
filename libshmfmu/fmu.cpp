@@ -98,7 +98,7 @@ static void notimplemented(fmi2Component c, fmi2String message)
 	{
 		std::string base("Not implemented: ");
 		std::string m(message);
-		log(fmu->m_functions, NULL, fmu->m_name->c_str(), fmi2Error, "error", (base + m).c_str());
+		log(fmu->m_functions, NULL, fmu->m_name, fmi2Error, "error", (base + m).c_str());
 	}
 }
 
@@ -177,7 +177,7 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 //										r->category().c_str(), r->value().c_str());
 
 				//handle message
-				printf("Received log data from client '%s': '%s'\n", container->m_name->c_str(), r->value().c_str());
+				printf("Received log data from client '%s': '%s'\n", container->m_name, r->value().c_str());
 				fflush(stdout);
 
 				fmi2Status status = fmi2Status::fmi2Error;
@@ -207,7 +207,7 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 					break;
 				}
 
-				container->logger(container->componentEnvironment, container->m_name->c_str(), status,
+				container->logger(container->componentEnvironment, container->m_name, status,
 						r->category().c_str(), r->value().c_str());
 
 				SharedFmiMessage* msgReply = new SharedFmiMessage();
@@ -253,7 +253,7 @@ int fmuInternalDebugPrint(int sender, const char * format, ...)
 		{
 //			printf("fmuInternalDebugPrint called...logg\n");
 //			fflush(stdout);
-			g_clients.at(i)->logger(c->componentEnvironment, c->m_name->c_str(), fmi2OK, "LogAll", format, args);
+			g_clients.at(i)->logger(c->componentEnvironment, c->m_name, fmi2OK, "LogAll", format, args);
 			va_end(args);
 			return 1;
 		}

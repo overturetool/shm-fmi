@@ -7,12 +7,15 @@
 
 #include "FmuContainer.h"
 
-FmuContainer::FmuContainer(int id,FmuProxy *proxy, const char* name, const fmi2CallbackFunctions *functions,
+FmuContainer::FmuContainer(int id, FmuProxy *proxy, const char* name, const fmi2CallbackFunctions *functions,
 		JavaLauncher* launcher)
 {
 	this->m_functions = functions;
 	this->m_proxy = proxy;
-	this->m_name = new std::string(name);
+
+	this->m_name = (char *) calloc(sizeof(char), strlen(name) + 1);
+	strcpy((char*) m_name, name);
+
 	this->m_javaLauncher = launcher;
 	this->active = true;
 	this->componentEnvironment = NULL;

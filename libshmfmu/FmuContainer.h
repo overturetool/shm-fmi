@@ -23,7 +23,7 @@ public:
 public:
 	const fmi2CallbackFunctions *m_functions;
 	FmuProxy* m_proxy;
-	std::string* m_name;
+	const char* m_name;
 	JavaLauncher *m_javaLauncher;
 	bool active;
 
