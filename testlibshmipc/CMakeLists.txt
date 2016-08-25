@@ -29,4 +29,4 @@ target_link_libraries(${PROJECT_NAME} gtest_main)
 target_link_libraries(${PROJECT_NAME} libshmfmi)
 target_link_libraries(${PROJECT_NAME} ${libshmipc_LIBS})
 
-add_test(AllTestsIn-testlibshmipc ${PROJECT_NAME})
+add_test(AllTestsIn-testlibshmipc ${PROJECT_NAME} --gtest_output=xml:gtestresults.xml)
