@@ -130,7 +130,7 @@ protected:
 		SharedFmiMem *m_pBuf;		// Buffer that points to the shared memory
 
 //		int printf(int sender, const char * format, ...);
-	std::string* getMappedName(void* self, const char* baseName, const char* name);
+	std::string getMappedName(void* self, const char* baseName, const char* name);
 
 	SIGNAL_HANDLE createSignal(const char* baseName, bool create=false);
 };

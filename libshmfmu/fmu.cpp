@@ -134,6 +134,8 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 
 	}
 
+	delete shmCallbackKey;
+
 	if (callbackClient != NULL)
 	{
 		while (container->active)
@@ -180,6 +182,7 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 				container->logger(container->componentEnvironment, container->m_name, status, r->category().c_str(),
 						r->value().c_str());
 
+				delete r;
 				SharedFmiMessage* msgReply = new SharedFmiMessage();
 
 				Fmi2Empty request;
@@ -188,6 +191,7 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 				request.SerializeWithCachedSizesToArray(msgReply->protoBufMsg);
 				msgReply->cmd = sharedfmimemory::fmi2Log;
 				callbackClient->sendReply(msgReply);
+				delete msgReply;
 			}
 		}
 	}
@@ -212,20 +216,14 @@ int fmuInternalDebugPrint(int sender, const char * format, ...)
 	va_start(args, format);
 	for (int i = 0; i < g_clients.size(); i++)
 	{
-//		printf("fmuInternalDebugPrint called...3-%d\n", i);
-//		fflush(stdout);
 		FmuContainer* c = g_clients.at(i);
 		if (c && c->m_proxy->getChannel()->getId() == sender)
 		{
-//			printf("fmuInternalDebugPrint called...logg\n");
-//			fflush(stdout);
 			g_clients.at(i)->logger(c->componentEnvironment, c->m_name, fmi2OK, "LogAll", format, args);
 			va_end(args);
 			return 1;
 		}
 	}
-//	printf("fmuInternalDebugPrint called...vsprintf\n");
-//	fflush(stdout);
 	int ret = vfprintf(stdout, format, args);
 	va_end(args);
 	return ret;
@@ -418,6 +416,7 @@ extern "C" void fmi2FreeInstance(fmi2Component c)
 			fmu->callbackThread->join();
 		}
 		fmu->m_javaLauncher->terminate();
+		//delete fmu->m_javaLauncher;
 		intptr_t index = (intptr_t) c;
 		g_clients.at(index) = NULL;
 		delete fmu;

@@ -62,6 +62,7 @@ ConfigFile::ConfigFile(std::string configFile,std::string port)
 
 ConfigFile::~ConfigFile()
 {
-	// TODO Auto-generated destructor stub
+	delete[] this->m_args;
+	this->m_args=NULL;
 }
 

@@ -16,7 +16,9 @@ FmuProxy::FmuProxy(int id, std::string url)
 FmuProxy::~FmuProxy()
 {
 	delete this->m_url;
+	this->m_url = NULL;
 	delete this->server;
+	this->server = NULL;
 }
 
 bool FmuProxy::initialize()
@@ -33,6 +35,7 @@ google::protobuf::Message* FmuProxy::send(sharedfmimemory::fmi2Command type, goo
 	switch (type)
 	{
 
+	case sharedfmimemory::fmi2FreeInstance:
 	case sharedfmimemory::fmi2EnterInitializationMode:
 	case sharedfmimemory::fmi2ExitInitializationMode:
 	case sharedfmimemory::fmi2Terminate:
@@ -159,9 +162,15 @@ google::protobuf::Message* FmuProxy::send(sharedfmimemory::fmi2Command type, goo
 	switch (type)
 	{
 
+	case sharedfmimemory::fmi2FreeInstance:
+	{
+		Fmi2Empty* r = new Fmi2Empty();
+		r->ParseFromArray(reply->protoBufMsg, reply->protoBufMsgSize);
+		return r;
+	}
+
 	case sharedfmimemory::fmi2SetDebugLogging:
 	case sharedfmimemory::fmi2Instantiate:
-//	case sharedfmimemory::fmi2FreeInstance:
 	case sharedfmimemory::fmi2SetupExperiment:
 	case sharedfmimemory::fmi2EnterInitializationMode:
 	case sharedfmimemory::fmi2ExitInitializationMode:
@@ -626,5 +635,5 @@ FmuProxy::fmi2Status FmuProxy::fmi2GetStringStatus(const fmi2StatusKind s, fmi2S
 
 FmiIpc::IpcBase* FmuProxy::getChannel()
 {
-	return  this->server;
+	return this->server;
 }

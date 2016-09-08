@@ -28,9 +28,15 @@ FmuContainer::~FmuContainer()
 {
 	m_javaLauncher->terminate();
 	delete this->m_javaLauncher;
+	this->m_javaLauncher = NULL;
 	delete this->m_name;
+	this->m_name = NULL;
 	delete this->m_proxy;
-	if(this->callbackThread!=NULL)
+	this->m_proxy = NULL;
+	if (this->callbackThread != NULL)
+	{
 		delete this->callbackThread;
+		this->callbackThread = NULL;
+	}
 }
 

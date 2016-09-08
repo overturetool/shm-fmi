@@ -12,6 +12,7 @@ service Fmu
 
 //	rpc fmi2GetVersion(Empty) returns(VersionReply);
 	rpc fmi2Instantiate(Fmi2InstantiateRequest) returns(Fmi2StatusReply);
+	rpc fmi2FreeInstantiate(Fmi2Empty) returns(Fmi2Empty);
 
 	rpc fmi2SetupExperiment(Fmi2SetupExperimentRequest) returns(Fmi2StatusReply);
 	rpc fmi2EnterInitializationMode(Fmi2Empty) returns(Fmi2StatusReply);
@@ -137,6 +138,8 @@ message Fmi2InstantiateRequest{
 	bool logginOn=5;
 	string callbackShmName=6;
 }
+
+
 
 //
 // Other

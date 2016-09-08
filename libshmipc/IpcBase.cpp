@@ -103,22 +103,22 @@ int IpcBase::internalDebugPrint(int sender, const char * format, ...)
 }
 
 /**
- * This function create a semaphor or shared memory name
+ * This function create a semaphore or shared memory name
  */
-std::string* IpcBase::getMappedName(void* self, const char* baseName, const char* name)
+std::string IpcBase::getMappedName(void* self, const char* baseName, const char* name)
 {
-	std::string* nameOfMapping = new std::string(baseName);
-	*nameOfMapping += std::string(name);
-	dprintf("Creating signal name from '%s' and '%s' = '%s'\n", baseName, name, nameOfMapping->c_str());
+	std::string nameOfMapping(baseName);
+	nameOfMapping += std::string(name);
+	dprintf("Creating signal name from '%s' and '%s' = '%s'\n", baseName, name, nameOfMapping.c_str());
 #ifdef __APPLE__
 
-	if (nameOfMapping->length() >= 29) //31 is max incl NULL
+	if (nameOfMapping.length() >= 29) //31 is max incl NULL
 	{
 
-		std::string hash = std::to_string(std::hash<std::string>()(*nameOfMapping));
-		*nameOfMapping = "/";
-		*nameOfMapping += hash;
-		dprintf("New Apple shm key is: %s from baseName %s and name %s\n", nameOfMapping->c_str(), baseName, name);
+		std::string hash = std::to_string(std::hash<std::string>()(nameOfMapping));
+		nameOfMapping = "/";
+		nameOfMapping += hash;
+		dprintf("New Apple shm key is: %s from baseName %s and name %s\n", nameOfMapping.c_str(), baseName, name);
 	}
 
 #endif
@@ -255,13 +255,13 @@ void IpcBase::mapShm(bool*success, HANDLE handle, bool truncate)
  */
 SIGNAL_HANDLE IpcBase::createSignal(const char* baseName, bool create)
 {
-	std::string* signalName = getMappedName(this, baseName, this->m_name->c_str());
+	std::string signalName = getMappedName(this, baseName, this->m_name->c_str());
 	bool success = true;
 	SIGNAL_HANDLE signal = NULL;
 #ifdef _WIN32
 
 	// Create the events
-	signal = CreateEventA(NULL, FALSE, FALSE, signalName->c_str());
+	signal = CreateEventA(NULL, FALSE, FALSE, signalName.c_str());
 
 	if (signal == NULL || signal == INVALID_HANDLE_VALUE)
 	{
@@ -273,14 +273,14 @@ SIGNAL_HANDLE IpcBase::createSignal(const char* baseName, bool create)
 
 	if (create)
 	{
-		dprintf("creating new signal: '%s'\n", signalName->c_str());
-		sem_unlink(signalName->c_str());
-		signal = sem_open(signalName->c_str(), O_CREAT, ALLPERMS, 0);
+		dprintf("creating new signal: '%s'\n", signalName.c_str());
+		sem_unlink(signalName.c_str());
+		signal = sem_open(signalName.c_str(), O_CREAT, ALLPERMS, 0);
 
 	} else
 	{
-		dprintf("creating new signal: '%s'\n", signalName->c_str());
-		signal = sem_open(signalName->c_str(), 0);
+		dprintf("creating new signal: '%s'\n", signalName.c_str());
+		signal = sem_open(signalName.c_str(), 0);
 
 	}
 
@@ -292,7 +292,6 @@ SIGNAL_HANDLE IpcBase::createSignal(const char* baseName, bool create)
 
 #endif
 
-	delete signalName;
 	if (!success)
 	{
 		signal = NULL;

@@ -312,4 +312,10 @@ public class TestResponder implements IServiceProtocol
 			return Fmi2StringStatusReply.newBuilder().setValue("nothing").build();
 	}
 
+	@Override
+	public Fmi2Empty FreeInstantiate(Fmi2Empty parseFrom)
+	{
+		return Fmi2Empty.newBuilder().build();
+	}
+
 }

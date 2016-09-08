@@ -13,24 +13,22 @@ namespace FmiIpc
 IpcServer::IpcServer(int id, const char* name) :
 		FmiIpc::IpcBase(id, name)
 {
-	// TODO Auto-generated constructor stub
 
 }
 
 IpcServer::~IpcServer()
 {
 	this->close();
-
 }
 
 bool IpcServer::create()
 {
 	bool ok = true;
-	std::string* nameOfMapping = getMappedName(this, SHARED_MEM_BASE_NAME, this->m_name->c_str());
-	dprintf("Starting IPC server with key: %s\n", nameOfMapping->c_str());
+	std::string nameOfMapping = getMappedName(this, SHARED_MEM_BASE_NAME, this->m_name->c_str());
+	dprintf("Starting IPC server with key: %s\n", nameOfMapping.c_str());
 	// Create the file mapping
 
-	m_hMapFile = openShm(&ok, nameOfMapping->c_str(), true);
+	m_hMapFile = openShm(&ok, nameOfMapping.c_str(), true);
 	mapShm(&ok, m_hMapFile, true);
 
 	// Create the events

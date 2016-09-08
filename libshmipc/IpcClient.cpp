@@ -94,11 +94,11 @@ void IpcClient::connect(bool* success)
 
 	dprintf("IPC Client key %s\n", this->m_name->c_str());
 
-	std::string* nameOfMapping = getMappedName(this, SHARED_MEM_BASE_NAME, this->m_name->c_str());
-	dprintf("Starting IPC client with key: %s\n", nameOfMapping->c_str());
+	std::string nameOfMapping = getMappedName(this, SHARED_MEM_BASE_NAME, this->m_name->c_str());
+	dprintf("Starting IPC client with key: %s\n", nameOfMapping.c_str());
 	// Open the shared file
 
-	m_hMapFile = openShm(success, nameOfMapping->c_str());
+	m_hMapFile = openShm(success, nameOfMapping.c_str());
 
 	// Map to the file
 
