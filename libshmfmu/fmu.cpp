@@ -28,6 +28,7 @@
 #include <sstream>
 #include "JavaLauncher.h"
 #include "ConfigFile.h"
+#include "uri.h"
 
 static int currentId = 0;
 
@@ -253,13 +254,7 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 
 //	setbuf(stdout, NULL); //fixme remove
 
-	std::string resourceLocationStr(fmuResourceLocation);
-
-#ifdef _WIN32
-	resourceLocationStr = resourceLocationStr.substr(6);
-#elif __APPLE__ ||  __linux
-	resourceLocationStr = resourceLocationStr.substr(5);
-#endif
+	std::string resourceLocationStr(URIToNativePath(fmuResourceLocation));
 
 	if (loggingOn)
 	{
