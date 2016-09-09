@@ -27,7 +27,7 @@ include_directories(includes/fmi)
 include_directories(${libshmfmi_INCLUDE_DIRS})
 
 
-add_library(${PROJECT_NAME} SHARED fmu.cpp FmuContainer.cpp JavaLauncher.cpp ConfigFile.cpp)
+add_library(${PROJECT_NAME} SHARED uri.c fmu.cpp FmuContainer.cpp JavaLauncher.cpp ConfigFile.cpp)
 
 
 target_link_libraries(${PROJECT_NAME} libshmfmi)
