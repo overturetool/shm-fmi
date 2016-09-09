@@ -127,7 +127,7 @@ int JavaLauncher::launch()
 					NULL,// Process handle not inheritable
 					NULL,// Thread handle not inheritable
 					FALSE,// Set handle inheritance to FALSE
-					0,// No creation flags
+					CREATE_NO_WINDOW,// No creation flags
 					NULL,// Use parent's environment block
 					m_workingDir,// Use parent's starting directory
 					&si,// Pointer to STARTUPINFO structure
