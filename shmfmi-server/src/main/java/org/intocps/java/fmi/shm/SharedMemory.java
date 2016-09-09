@@ -21,6 +21,8 @@ public class SharedMemory
 	public native void send(int type, byte[] data);
 	
 	public static native void setDebug(boolean on);
+	
+	public native void stop();
 
 	final static Logger logger = LoggerFactory.getLogger(SharedMemory.class);
 	

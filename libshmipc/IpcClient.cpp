@@ -20,46 +20,9 @@ IpcClient::~IpcClient()
 {
 }
 
-bool IpcClient::waitAvailable(DWORD dwTimeout)
-{
-	// Wait on the available event
-
-#ifdef _WIN32
-	if (WaitForSingleObject(m_hAvail, dwTimeout) != WAIT_OBJECT_0)
-	return false;
-#elif __APPLE__ || __linux__
-
-	if (dwTimeout == 0)
-	{
-		if (sem_wait(this->m_hAvail) == -1)
-		{
-			return false;
-		}
-	} else
-	{
-		struct timespec ts;
-		clock_gettime(CLOCK_REALTIME, &ts);
-
-		ts.tv_sec = ts.tv_sec + (dwTimeout / 1000);
-
-		ts.tv_sec = ts.tv_sec + (dwTimeout / 1000);
-		ts.tv_nsec = ts.tv_nsec + ((dwTimeout % 1000) * 1000000);
-
-		if (sem_timedwait(this->m_hAvail, &ts) == -1)
-		{
-			return false;
-		}
-	}
-#endif
-
-	// Success
-	return true;
-}
-;
-
 SharedFmiMessage* IpcClient::getMessage(DWORD dwTimeout)
 {
-	if (waitAvailable(dwTimeout))
+	if (signalWait(this->m_hAvail,dwTimeout))
 	{
 		dprint("IPC Client received msg\n");
 
@@ -72,13 +35,7 @@ void IpcClient::sendReply(SharedFmiMessage* reply)
 	dprint("IPC Client write msg\n");
 	this->m_pBuf->message = *reply;
 
-#ifdef _WIN32
-	SetEvent(this->m_hSignal);
-#elif __APPLE__ || __linux__
-
-	sem_post(this->m_hSignal);
-
-#endif
+	signalPost(this->m_hSignal);
 	dprint("IPC Client signaled\n");
 }
 
@@ -99,6 +56,7 @@ void IpcClient::connect(bool* success)
 	// Open the shared file
 
 	m_hMapFile = openShm(success, nameOfMapping.c_str());
+	m_hMapFileName = strdup(nameOfMapping.c_str());
 
 	// Map to the file
 

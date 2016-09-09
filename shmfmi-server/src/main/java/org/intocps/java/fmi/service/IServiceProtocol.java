@@ -29,7 +29,7 @@ public interface IServiceProtocol {
 
 	Fmi2StatusReply Instantiate(Fmi2InstantiateRequest parseFrom);
 
-	Fmi2Empty FreeInstantiate(Fmi2Empty parseFrom);
+	void FreeInstantiate(Fmi2Empty parseFrom);
 
 	Fmi2StatusReply Reset(Fmi2Empty parseFrom);
 

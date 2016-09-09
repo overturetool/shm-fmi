@@ -13,6 +13,7 @@
 #include <conio.h>
 #include <tchar.h>
 typedef HANDLE SIGNAL_HANDLE;
+#define strdup _strdup;
 #elif __APPLE__ ||  __linux
 #include <time.h>
 #include <stdio.h>
@@ -43,6 +44,9 @@ typedef sem_t* SIGNAL_HANDLE;
 #include <stdio.h>
 #include <stdarg.h>
 #include <string>
+#include <sys/types.h>
+#include <time.h>
+#include "sem_timedwait.h"
 
 #include "SharedFmiMessage.h"
 using namespace sharedfmimemory;
@@ -67,72 +71,42 @@ public:
 
 	typedef int debugPrintType(int sender, const char * format, ...);
 
-
-
 	static const char* SIGNAL_NAME;
 	static const char* SIGNAL_AVALIABLE_NAME;
 	static const char* SHARED_MEM_BASE_NAME;
-	 debugPrintType *debugPrintPtr;
+	debugPrintType *debugPrintPtr;
 
-	static void close(HANDLE handle)
+	int getId()
 	{
-#ifdef _WIN32
-		CloseHandle(handle);
-#elif __APPLE__ ||  __linux
-//POSIX
-		close(handle);
-#endif
+		return this->id;
 	}
-
-#ifdef __APPLE__
-	static void close(SIGNAL_HANDLE handle)
-	{
-		sem_close(handle);
-	}
-#elif __linux
-	static void close(SIGNAL_HANDLE handle)
-	{
-		sem_close(handle);
-	}
-#endif
-
-	 void unmap(void* ptr, std::string* name)
-	{
-#ifdef _WIN32
-		UnmapViewOfFile(ptr);
-#elif __APPLE__ ||  __linux
-		//POSIX
-		int r = munmap(ptr, sizeof(SharedFmiMem));
-		if (r != 0)
-		{
-			dprint("munmap");
-
-		}
-#endif
-	}
-
-	 int getId(){return this->id;};
-	 void enableConsoleDebug();
+	;
+	void enableConsoleDebug();
 
 private:
 	static int internalDebugPrint(int sender, const char * format, ...);
+	static void signalClose(SIGNAL_HANDLE signal);
+	void unmap(void* ptr, std::string* name);
 protected:
-	void mapShm(bool*success,HANDLE handle, bool truncate);
-	HANDLE openShm(bool*success,const char* name,bool create = false);
+	void mapShm(bool*success, HANDLE handle, bool truncate);
+	HANDLE openShm(bool*success, const char* name, bool create = false);
+	bool signalWait(SIGNAL_HANDLE signal, DWORD dwTimeout);
+	void signalPost(SIGNAL_HANDLE signal);
 
 protected:
 	int id;
-		// Internal variables
-		HANDLE m_hMapFile;		// Handle to the mapped memory file
-		SIGNAL_HANDLE m_hSignal;		// Event used to signal when data exists
-		SIGNAL_HANDLE m_hAvail;		// Event used to signal when some blocks become available
-		std::string* m_name;
-		SharedFmiMem *m_pBuf;		// Buffer that points to the shared memory
+	// Internal variables
+	HANDLE m_hMapFile;		// Handle to the mapped memory file
+	const char* m_hMapFileName;
+	SIGNAL_HANDLE m_hSignal;		// Event used to signal when data exists
+	SIGNAL_HANDLE m_hAvail;		// Event used to signal when some blocks become available
+	std::string* m_name;
+	SharedFmiMem *m_pBuf;		// Buffer that points to the shared memory
 
 //		int printf(int sender, const char * format, ...);
 	std::string getMappedName(void* self, const char* baseName, const char* name);
 
-	SIGNAL_HANDLE createSignal(const char* baseName, bool create=false);
+	SIGNAL_HANDLE createSignal(const char* baseName, bool create = false);
 };
 
 } /* namespace FmiIpc */

@@ -633,6 +633,21 @@ FmuProxy::fmi2Status FmuProxy::fmi2GetStringStatus(const fmi2StatusKind s, fmi2S
 	return fmi2OK;
 }
 
+void FmuProxy::fmi2FreeInstance()
+{
+	Fmi2Empty msg;
+
+	sharedfmimemory::SharedFmiMessage m = sharedfmimemory::SharedFmiMessage();
+	m.cmd = sharedfmimemory::fmi2FreeInstance;
+
+	Fmi2Empty* im = (Fmi2Empty*) &msg;
+	m.protoBufMsgSize = im->ByteSize();
+	im->SerializeWithCachedSizesToArray(m.protoBufMsg);
+
+	//send this message async. No further communication is possible since the semaphores get into an invalid state
+	this->server->send(&m, 1);
+}
+
 FmiIpc::IpcBase* FmuProxy::getChannel()
 {
 	return this->server;

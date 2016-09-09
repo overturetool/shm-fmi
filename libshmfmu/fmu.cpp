@@ -405,17 +405,15 @@ extern "C" void fmi2FreeInstance(fmi2Component c)
 
 	if (fmu != NULL)
 	{
+		fmu->m_proxy->fmi2FreeInstance();
 		fmu->active = false;
 		if (fmu->callbackThread != NULL)
 		{
 			fmu->callbackThread->join();
 		}
-		fmu->m_javaLauncher->terminate();
-		//delete fmu->m_javaLauncher;
 		intptr_t index = (intptr_t) c;
 		g_clients.at(index) = NULL;
 		delete fmu;
-
 	}
 }
 

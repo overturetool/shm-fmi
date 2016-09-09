@@ -29,6 +29,7 @@ bool IpcServer::create()
 	// Create the file mapping
 
 	m_hMapFile = openShm(&ok, nameOfMapping.c_str(), true);
+	m_hMapFileName = strdup(nameOfMapping.c_str());
 	mapShm(&ok, m_hMapFile, true);
 
 	// Create the events
@@ -50,33 +51,15 @@ void IpcServer::close(void)
 }
 SharedFmiMessage* IpcServer::send(SharedFmiMessage* message, DWORD dwTimeout)
 {
-
 	dprint("IPC Server write msg\n");
 	this->m_pBuf->message = *message;
 
-#ifdef _WIN32
-	SetEvent(this->m_hAvail);
-	dprint( "IPC Server signaled\n");
+	signalPost(this->m_hAvail);
 
-	if (WaitForSingleObject(this->m_hSignal, dwTimeout) != WAIT_OBJECT_0)
+	if (!signalWait(this->m_hSignal, dwTimeout))
 	{
 		return NULL;
 	}
-#elif __APPLE__ || __linux
-
-	if (sem_post(this->m_hAvail) == -1)
-	{
-		dprintf("signal: failed: sem_postn signal 'm_hAvail': %s\n", strerror( errno));
-	}
-
-	dprint("IPC Server signaled data ready. Waiting...\n");
-
-	if (sem_wait(this->m_hSignal) == -1)
-	{
-		dprintf("signal: failed: sem_wait signal 'm_hSignal': %s\n", strerror( errno));
-	}
-
-#endif
 
 	dprint("IPC Server received data\n");
 	return &this->m_pBuf->message;

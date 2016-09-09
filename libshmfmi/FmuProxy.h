@@ -67,7 +67,7 @@ public:
 	fmi2Status fmi2ExitInitializationMode();
 	fmi2Status fmi2Terminate();
 	fmi2Status fmi2Reset();
-	//void fmi2FreeInstance(fmi2Component c);
+	void fmi2FreeInstance();
 	fmi2Status fmi2SetDebugLogging(fmi2Boolean loggingOn, size_t nCategories,
 			const fmi2String categories[]);
 	fmi2Status fmi2GetReal(const fmi2ValueReference vr[], size_t nvr,

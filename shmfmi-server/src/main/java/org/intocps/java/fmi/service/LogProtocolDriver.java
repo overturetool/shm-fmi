@@ -13,6 +13,7 @@ public class LogProtocolDriver
 	final static Logger logger = LoggerFactory.getLogger(LogProtocolDriver.class);
 
 	final SharedMemoryServer mem;
+	boolean connected = false;
 
 	public LogProtocolDriver(String id)
 	{
@@ -39,14 +40,28 @@ public class LogProtocolDriver
 		{
 			throw new RuntimeException("Unable to connect");
 		}
-
+		connected = true;
 	}
 
 	public void log(String category, Status status, String message)
 	{
+		if (!connected)
+		{
+			return;
+		}
 		logger.debug("Sending callback log message: {}", message);
 		Fmi2LogReply msg = Fmi2LogReply.newBuilder().setValue(message).setCategory(category).setStatus(status).build();
 		mem.serverSend(Commands.fmi2Log.id, msg.toByteArray());
+	}
+
+	public void close()
+	{
+		if (!connected)
+		{
+			return;
+		}
+		logger.debug("Stopping callback Shared memory server");
+		mem.serverStop();
 	}
 
 }

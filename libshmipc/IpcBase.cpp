@@ -35,6 +35,7 @@ IpcBase::IpcBase(int id, const char* shmName)
 	this->m_name = new std::string(shmName);
 
 	m_hMapFile = 0;
+	m_hMapFileName = NULL;
 	m_hSignal = 0;
 	m_hAvail = 0;
 	m_pBuf = NULL;
@@ -45,37 +46,40 @@ IpcBase::~IpcBase()
 	// Close the event
 	if (m_hSignal)
 	{
-		SIGNAL_HANDLE handle = m_hSignal;
-		m_hSignal = 0;
-		close(handle);
+		dprintf("Closing m_hSignal for: '%s'\n", m_name->c_str());
+		signalClose(m_hSignal);
+		m_hSignal = NULL;
 	}
 
 	// Close the event
 	if (m_hAvail)
 	{
-		SIGNAL_HANDLE handle = m_hAvail;
-		m_hAvail = 0;
-		close(handle);
+		dprintf("Closing m_hAvail for: '%s'\n", m_name->c_str());
+		signalClose(m_hAvail);
+		m_hAvail = NULL;
 	}
 
 	// Unmap the memory
 	if (m_pBuf)
 	{
-		SharedFmiMem *pBuff = m_pBuf;
-		m_pBuf = NULL;
-		//UnmapViewOfFile(pBuff);
+		dprintf("Unmapping m_pBuf for: '%s'\n", m_name->c_str());
 		unmap(m_pBuf, m_name);
+		m_pBuf = NULL;
 	}
 
 	// Close the file handle
 	if (m_hMapFile)
 	{
+		dprintf("Unlink m_hMapFile for: '%s'\n", m_hMapFileName);
 
 #ifdef _WIN32
-		close(m_hMapFile);
+		CloseHandle(m_hMapFile)
 #elif __APPLE__ ||  __linux
-		//POSIX
-		shm_unlink(m_name->c_str());
+		//POSIX close handle
+		close(m_hMapFile);
+
+		//POSIX remove shared memory
+		shm_unlink(m_hMapFileName);
 #endif
 
 		m_hMapFile = (HANDLE) NULL;
@@ -91,7 +95,6 @@ void IpcBase::enableConsoleDebug()
 {
 	this->debugPrintPtr = &IpcBase::internalDebugPrint;
 }
-
 
 int IpcBase::internalDebugPrint(int sender, const char * format, ...)
 {
@@ -299,5 +302,84 @@ SIGNAL_HANDLE IpcBase::createSignal(const char* baseName, bool create)
 
 	return signal;
 }
+
+bool IpcBase::signalWait(SIGNAL_HANDLE signal, DWORD dwTimeout)
+{
+	// Wait on the available event
+
+#ifdef _WIN32
+	if (WaitForSingleObject(signal, dwTimeout) != WAIT_OBJECT_0)
+	return false;
+#elif __APPLE__ || __linux__
+
+	if (dwTimeout == 0)
+	{
+		if (sem_wait(signal) == -1)
+		{
+			return false;
+		}
+	} else
+	{
+		struct timespec ts;
+		clock_gettime(CLOCK_REALTIME, &ts);
+
+		ts.tv_sec = ts.tv_sec + (dwTimeout / 1000);
+
+		ts.tv_sec = ts.tv_sec + (dwTimeout / 1000);
+		ts.tv_nsec = ts.tv_nsec + ((dwTimeout % 1000) * 1000000);
+
+		if (sem_timedwait(signal, &ts) == -1)
+		{
+			return false;
+		}
+	}
+#endif
+
+	// Success
+	return true;
+}
+
+void IpcBase::signalPost(SIGNAL_HANDLE signal)
+{
+#ifdef _WIN32
+	SetEvent(signal);
+#elif __APPLE__ || __linux
+
+	if (sem_post(signal) == -1)
+	{
+		dprintf("signal: failed: sem_postn signal 'm_hAvail': %s\n", strerror( errno));
+	}
+#endif
+}
+
+void IpcBase::signalClose(SIGNAL_HANDLE signal)
+{
+
+#ifdef _WIN32
+	CloseHandle(signal);
+#elif __APPLE__ ||  __linux
+//POSIX
+	sem_close(signal);
+#endif
+
+}
+
+void IpcBase::unmap(void* ptr, std::string* name)
+{
+#ifdef _WIN32
+	UnmapViewOfFile(ptr);
+#elif __APPLE__ ||  __linux
+	//POSIX
+	int r = munmap(ptr, sizeof(SharedFmiMem));
+	if (r != 0)
+	{
+		dprint("munmap");
+
+	}
+#endif
+}
+
+
+
 
 } /* namespace FmiIpc */

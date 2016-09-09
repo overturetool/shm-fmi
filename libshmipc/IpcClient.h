@@ -9,9 +9,7 @@
 #define IPCCLIENT_H_
 
 #include "IpcBase.h"
-#include <sys/types.h>
-#include <time.h>
-#include "sem_timedwait.h"
+
 
 namespace FmiIpc
 {
@@ -25,8 +23,6 @@ public:
 private:
 	void connect(bool* success);
 
-	// Exposed functions
-	bool waitAvailable(DWORD dwTimeout = INFINITE);	// Waits until some blocks become available
 public:
 
 	SharedFmiMessage* getMessage(DWORD dwTimeout = INFINITE);
