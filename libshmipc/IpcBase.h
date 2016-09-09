@@ -13,7 +13,7 @@
 #include <conio.h>
 #include <tchar.h>
 typedef HANDLE SIGNAL_HANDLE;
-#define strdup _strdup;
+#define strdup (const char*)_strdup;
 #elif __APPLE__ ||  __linux
 #include <time.h>
 #include <stdio.h>
