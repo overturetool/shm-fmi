@@ -73,7 +73,7 @@ IpcBase::~IpcBase()
 		dprintf("Unlink m_hMapFile for: '%s'\n", m_hMapFileName);
 
 #ifdef _WIN32
-		CloseHandle(m_hMapFile)
+		CloseHandle(m_hMapFile);
 #elif __APPLE__ ||  __linux
 		//POSIX close handle
 		close(m_hMapFile);
