@@ -77,6 +77,10 @@ void remoteTestDriver(const char * shmKey)
 
 	switch (msg->cmd)
 	{
+	case sharedfmimemory::fmi2FreeInstance:
+		delete client;
+		exit(0);
+		break;
 
 	case sharedfmimemory::fmi2SetDebugLogging:
 	case sharedfmimemory::fmi2Instantiate:

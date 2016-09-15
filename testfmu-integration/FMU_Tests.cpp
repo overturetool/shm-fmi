@@ -394,6 +394,7 @@ TEST_F(FMUTest, freeInstance)
 	fmi2Component comp = instantiated();
 
 	fmu.freeInstance(comp);
+	isInstantiated = false;
 	//we must tell teardown to skip freeinstance
 	FMUTest::comp = NULL;
 }
