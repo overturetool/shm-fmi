@@ -36,14 +36,14 @@ std::vector<FmuContainer*> g_clients;
 
 static FmuContainer* getFmuContainer(fmi2Component c)
 {
-	FmuContainer * fmuPtr = (FmuContainer *)c;
-	if(std::find(g_clients.begin(), g_clients.end(), fmuPtr) != g_clients.end()) {
-	    /* v contains x */
-		return (FmuContainer*)c;
-	} else {
-	    /* v does not contain x */
-		return NULL;
+	for (FmuContainer* container : g_clients)
+	{
+		if (container == c)
+		{
+			return (FmuContainer*) c;
+		}
 	}
+	return NULL;
 }
 
 static fmi2Status convertStatus(FmuProxy::fmi2Status status)
@@ -413,7 +413,7 @@ extern "C" void fmi2FreeInstance(fmi2Component c)
 			fmu->callbackThread->join();
 		}
 		std::vector<FmuContainer*>::iterator it = std::find(g_clients.begin(), g_clients.end(), fmu);
-		if(it != g_clients.end())
+		if (it != g_clients.end())
 		{
 			g_clients.erase(it);
 		}
