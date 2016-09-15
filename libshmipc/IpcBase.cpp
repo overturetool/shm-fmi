@@ -262,8 +262,13 @@ SIGNAL_HANDLE IpcBase::createSignal(const char* baseName, bool create)
 	bool success = true;
 	SIGNAL_HANDLE signal = NULL;
 #ifdef _WIN32
-
-	signal = OpenEventA(NULL,FALSE,signalName.c_str());
+    DWORD security = SYNCHRONIZE;
+    if(create)
+    {
+        security |= DELETE;
+    }
+    
+	signal = OpenEventA(security,FALSE,signalName.c_str());
     if(signal == NULL)
     {
         dprintf("OpenEventA failed. Error: %s\n", GetLastErrorAsString().c_str());
