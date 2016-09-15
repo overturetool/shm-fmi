@@ -112,7 +112,7 @@ std::string IpcBase::getMappedName(void* self, const char* baseName, const char*
 {
 	std::string nameOfMapping(baseName);
 	nameOfMapping += std::string(name);
-	dprintf("Creating signal name from '%s' and '%s' = '%s'\n", baseName, name, nameOfMapping.c_str());
+	dprintf("Creating mapped name from '%s' and '%s' = '%s'\n", baseName, name, nameOfMapping.c_str());
 #ifdef __APPLE__
 
 	if (nameOfMapping.length() >= 29) //31 is max incl NULL
