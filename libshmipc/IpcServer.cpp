@@ -24,7 +24,7 @@ IpcServer::~IpcServer()
 bool IpcServer::create()
 {
 	bool ok = true;
-		enableConsoleDebug();
+	//enableConsoleDebug();
 	std::string nameOfMapping = getMappedName(this, SHARED_MEM_BASE_NAME, this->m_name->c_str());
 	dprintf("Starting IPC server with key: %s\n", nameOfMapping.c_str());
 	// Create the file mapping
