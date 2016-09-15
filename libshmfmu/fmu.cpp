@@ -36,7 +36,7 @@ std::vector<FmuContainer*> g_clients;
 
 static FmuContainer* getFmuContainer(fmi2Component c)
 {
-	for (FmuContainer* container : g_clients)
+	for (auto & container : g_clients)
 	{
 		if (container == c)
 		{
@@ -412,10 +412,13 @@ extern "C" void fmi2FreeInstance(fmi2Component c)
 		{
 			fmu->callbackThread->join();
 		}
-		std::vector<FmuContainer*>::iterator it = std::find(g_clients.begin(), g_clients.end(), fmu);
-		if (it != g_clients.end())
+		for (auto it = begin(g_clients); it != end(g_clients); ++it)
 		{
-			g_clients.erase(it);
+			if (*it == fmu)
+			{
+				g_clients.erase(it);
+				break;
+			}
 		}
 		delete fmu;
 	}
