@@ -266,7 +266,7 @@ SIGNAL_HANDLE IpcBase::createSignal(const char* baseName, bool create)
 	signal = OpenEventA(NULL,FALSE,signalName.c_str());
     if(signal == NULL)
     {
-        dprintf("OpenEventA failed. Error: %s\n", GetLastErrorAsString());
+        dprintf("OpenEventA failed. Error: %s\n", GetLastErrorAsString().c_str());
     }
 	if(create)
 	{
@@ -279,7 +279,7 @@ SIGNAL_HANDLE IpcBase::createSignal(const char* baseName, bool create)
 		signal = CreateEventA(NULL, FALSE, FALSE, signalName.c_str());
         if(signal == NULL)
         {
-            dprintf("CreateEventA failed. Error: %s\n", GetLastErrorAsString());
+            dprintf("CreateEventA failed. Error: %s\n", GetLastErrorAsString().c_str());
         }
 	}
 	if (signal == NULL || signal == INVALID_HANDLE_VALUE)
