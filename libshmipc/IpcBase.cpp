@@ -263,9 +263,19 @@ SIGNAL_HANDLE IpcBase::createSignal(const char* baseName, bool create)
 	SIGNAL_HANDLE signal = NULL;
 #ifdef _WIN32
 
-	// Create the events
-	signal = CreateEventA(NULL, FALSE, FALSE, signalName.c_str());
+	signal = OpenEventA(NULL,FALSE,signalName.c_str());
 
+	if(create)
+	{
+		if(signal != NULL)
+		{
+			CloseHandle(signal);
+		}
+
+		// Create the events
+		signal = CreateEventA(NULL, FALSE, FALSE, signalName.c_str());
+
+	}
 	if (signal == NULL || signal == INVALID_HANDLE_VALUE)
 	{
 		dprintf("signal_create: failed: %01d\n", __LINE__);
@@ -378,8 +388,5 @@ void IpcBase::unmap(void* ptr, std::string* name)
 	}
 #endif
 }
-
-
-
 
 } /* namespace FmiIpc */
