@@ -30,6 +30,7 @@
 
 #elif __APPLE__ ||  __linux
 #include <cstring>
+#include <sys/wait.h>
 #endif
 
 class JavaLauncher {
