@@ -411,7 +411,7 @@ extern "C" void fmi2FreeInstance(fmi2Component c)
 		{
 			fmu->callbackThread->join();
 		}
-		auto it = std::find(g_clients.begin(), g_clients.end(), fmu);
+		std::vector<FmuContainer*>::iterator it = std::find(g_clients.begin(), g_clients.end(), fmu);
 		if(it != g_clients.end())
 		{
 			g_clients.erase(it);
