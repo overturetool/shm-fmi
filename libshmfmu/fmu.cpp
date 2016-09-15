@@ -36,7 +36,8 @@ std::vector<FmuContainer*> g_clients;
 
 static FmuContainer* getFmuContainer(fmi2Component c)
 {
-	if(std::find(g_clients.begin(), g_clients.end(), c) != g_clients.end()) {
+	FmuContainer * fmuPtr = (FmuContainer *)c;
+	if(std::find(g_clients.begin(), g_clients.end(), fmuPtr) != g_clients.end()) {
 	    /* v contains x */
 		return (FmuContainer*)c;
 	} else {
