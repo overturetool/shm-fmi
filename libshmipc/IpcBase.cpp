@@ -262,7 +262,7 @@ SIGNAL_HANDLE IpcBase::createSignal(const char* baseName, bool create)
 	bool success = true;
 	SIGNAL_HANDLE signal = NULL;
 #ifdef _WIN32
-    DWORD security = SYNCHRONIZE;
+    DWORD security = SYNCHRONIZE | EVENT_MODIFY_STATE;
     if(create)
     {
         security |= DELETE;
