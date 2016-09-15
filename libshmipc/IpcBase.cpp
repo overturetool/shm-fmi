@@ -286,7 +286,7 @@ SIGNAL_HANDLE IpcBase::createSignal(const char* baseName, bool create)
 	{
 	    if(signal == INVALID_HANDLE_VALUE)
 	    {
-	        dsprintf("signal_create: invalid handle\n");
+	        dprint("signal_create: invalid handle\n");
 	    }
 		dprintf("signal_create: failed: %01d\n", __LINE__);
 		success = false;;
