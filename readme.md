@@ -45,15 +45,13 @@ Go to Artifactory https://overture.au.dk/artifactory/webapp/browserepo.html?2
 
 Navigate to:
 
-* into-cps
-   * org
-       * fmi
-           * jnifmuapi
-                * X.X.X-SNAPSHOT
-                    * `jnifmuapi-X.X.X.*.jar`   <-- Download this file. It is the latest development version which contains the libraries which is missing in the release
-               * Y.Y.Y
-                    * `jnifmuapi-Y.Y.Y.*.jar`   <-- Download this file. It is the released jar
+* into-cps/org/fmi
+   * fmi-shm-server
+        * X.X.X-SNAPSHOT
+            * `fmi-shm-server-X.X.X.*.jar`   <-- Download this file. It is the latest development version which contains the libraries which is missing in the release
+        * Y.Y.Y
+            * `fmi-shm-server-Y.Y.Y.*.jar`   <-- Download this file. It is the released jar
 
 `X.X.X` is last development version and `Y.Y.Y` is the release of `X.X.X`.
 
-copy the `jnifmuapi-X.X.X.*.jar/lib` into `jnifmuapi-Y.Y.Y.*.jar` and redeploy the release jar to Artifactory.
+copy the `fmi-shm-server-X.X.X.*.jar/lib` into `fmi-shm-server-Y.Y.Y.*.jar` and redeploy the release jar to Artifactory.
