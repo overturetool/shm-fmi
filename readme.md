@@ -48,11 +48,11 @@ Navigate to:
 * into-cps
  * org
    * fmi
-     * jnifmuapi
-       * X.X.X-SNAPSHOT
-          * jnifmuapi-X.X.X.*.jar   <-- Download this file. It is the latest development version which contains the libraries which is missing in the release
-        * Y.Y.Y
-           * jnifmuapi-Y.Y.Y.*.jar   <-- Download this file. It is the released jar
+       * jnifmuapi
+           * X.X.X-SNAPSHOT
+              * jnifmuapi-X.X.X.*.jar   <-- Download this file. It is the latest development version which contains the libraries which is missing in the release
+           * Y.Y.Y
+              * jnifmuapi-Y.Y.Y.*.jar   <-- Download this file. It is the released jar
 
 `X.X.X` is last development version and `Y.Y.Y` is the release of `X.X.X`.
 
