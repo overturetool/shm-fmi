@@ -47,7 +47,7 @@ Navigate to:
 
 * into-cps
  * org
-  * fmi
+   * fmi
    * jnifmuapi
     * X.X.X-SNAPSHOT
      * jnifmuapi-X.X.X.*.jar   <-- Download this file. It is the latest development version which contains the libraries which is missing in the release
