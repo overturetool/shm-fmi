@@ -34,12 +34,36 @@ public class TempDirectory
 			@Override
 			public void run()
 			{
-				delete();
+				delete(path);
 			}
 		});
 	}
 
-	public void delete()
+	private static void deleteOrScheduleOnExit(final Path path)
+	{
+		try
+		{
+			Files.deleteIfExists(path);
+		} catch (IOException e)
+		{
+			Runtime.getRuntime().addShutdownHook(new Thread()
+			{
+				@Override
+				public void run()
+				{
+					try
+					{
+						delete(path);
+					} catch (Exception e)
+					{
+						// we cannot not do anything about this
+					}
+				}
+			});
+		}
+	}
+
+	public static void delete(final Path path)
 	{
 		if (!Files.exists(path))
 		{
@@ -53,7 +77,7 @@ public class TempDirectory
 				public FileVisitResult postVisitDirectory(Path dir,
 						IOException exc) throws IOException
 				{
-					Files.deleteIfExists(dir);
+					deleteOrScheduleOnExit(dir);
 					return super.postVisitDirectory(dir, exc);
 				}
 
@@ -61,7 +85,7 @@ public class TempDirectory
 				public FileVisitResult visitFile(Path file,
 						BasicFileAttributes attrs) throws IOException
 				{
-					Files.deleteIfExists(file);
+					deleteOrScheduleOnExit(file);
 					return super.visitFile(file, attrs);
 				}
 			});
