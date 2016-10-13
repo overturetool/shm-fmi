@@ -262,17 +262,20 @@ SIGNAL_HANDLE IpcBase::createSignal(const char* baseName, bool create)
 	bool success = true;
 	SIGNAL_HANDLE signal = NULL;
 #ifdef _WIN32
-    DWORD security = SYNCHRONIZE | EVENT_MODIFY_STATE;
-    if(create)
-    {
-        security |= DELETE;
-    }
-    
+	DWORD security = SYNCHRONIZE | EVENT_MODIFY_STATE;
+	if(create)
+	{
+		security |= DELETE;
+	}
+
 	signal = OpenEventA(security,FALSE,signalName.c_str());
-    if(signal == NULL)
-    {
-        dprintf("OpenEventA failed. Error: %s\n", GetLastErrorAsString().c_str());
-    }
+	if(signal == NULL)
+	{
+		if(!create)
+		{
+			dprintf("OpenEventA failed. Error: %s\n", GetLastErrorAsString().c_str());
+		}
+	}
 	if(create)
 	{
 		if(signal != NULL)
@@ -282,17 +285,17 @@ SIGNAL_HANDLE IpcBase::createSignal(const char* baseName, bool create)
 
 		// Create the events
 		signal = CreateEventA(NULL, FALSE, FALSE, signalName.c_str());
-        if(signal == NULL)
-        {
-            dprintf("CreateEventA failed. Error: %s\n", GetLastErrorAsString().c_str());
-        }
+		if(signal == NULL)
+		{
+			dprintf("CreateEventA failed. Error: %s\n", GetLastErrorAsString().c_str());
+		}
 	}
 	if (signal == NULL || signal == INVALID_HANDLE_VALUE)
 	{
-	    if(signal == INVALID_HANDLE_VALUE)
-	    {
-	        dprint("signal_create: invalid handle\n");
-	    }
+		if(signal == INVALID_HANDLE_VALUE)
+		{
+			dprint("signal_create: invalid handle\n");
+		}
 		dprintf("signal_create: failed: %01d\n", __LINE__);
 		success = false;;
 	}
@@ -323,6 +326,9 @@ SIGNAL_HANDLE IpcBase::createSignal(const char* baseName, bool create)
 	if (!success)
 	{
 		signal = NULL;
+	}else
+	{
+		dprintf("creating new signal: '%s'. Success.\n", signalName.c_str());
 	}
 
 	return signal;
