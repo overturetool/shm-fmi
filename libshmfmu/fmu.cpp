@@ -136,6 +136,8 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 
 	}
 
+	printf("callbackThreadFunc connected.");fflush(stdout);
+
 	delete shmCallbackKey;
 
 	if (callbackClient != NULL)
@@ -148,7 +150,7 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 			{
 				continue;
 			}
-
+			printf("callbackThreadFunc got message %d, size %d.",msg->cmd,msg->protoBufMsgSize);fflush(stdout);
 			if (msg->cmd == sharedfmimemory::fmi2Log)
 			{
 				Fmi2LogReply* r = new Fmi2LogReply();
