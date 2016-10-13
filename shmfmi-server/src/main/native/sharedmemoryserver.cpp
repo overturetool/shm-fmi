@@ -73,12 +73,13 @@ JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemoryServer_serverSe
 
 	env->ReleaseByteArrayElements(bytes, vbody, 0);
 
-	//printf("Sending type: %i Size: %i\n",m.cmd,m.protoBufMsgSize);
-	SharedFmiMessage* reply = g_server->send(msg, INFINITE);
+	printf("Sending type: %i Size: %i\n",msg->cmd,msg->protoBufMsgSize);
+	SharedFmiMessage* reply = g_server->send(msg, 20);
 	delete msg;
 
 	if (reply == NULL)
 	{
+		printf("Sending type: %i Size: %i. -- TIMEOUT\n",msg->cmd,msg->protoBufMsgSize);
 		return; //timeout
 	}
 
