@@ -38,8 +38,10 @@ public class LogProtocolDriver
 
 		if (!connected)
 		{
+			logger.error("Starting shared memory with key: {}. -- Failed to connect, giving up, now", id);
 			throw new RuntimeException("Unable to connect");
 		}
+		logger.debug("Starting shared memory with key: {}. Completed and connected", id);
 		connected = true;
 	}
 
