@@ -47,6 +47,7 @@ public class LogProtocolDriver
 
 	public void log(String category, Status status, String message)
 	{
+		logger.debug("Calling log. Is connected: {}", connected);
 		if (!connected)
 		{
 			return;
