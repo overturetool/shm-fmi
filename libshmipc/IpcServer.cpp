@@ -24,9 +24,9 @@ IpcServer::~IpcServer()
 bool IpcServer::create()
 {
 	bool ok = true;
-	
+
 	enableConsoleDebug();
-	
+
 	std::string nameOfMapping = getMappedName(this, SHARED_MEM_BASE_NAME, this->m_name->c_str());
 	dprintf("Starting IPC server with key: %s\n", nameOfMapping.c_str());
 	// Create the file mapping
@@ -40,9 +40,20 @@ bool IpcServer::create()
 	this->m_hAvail = this->createSignal(SIGNAL_AVALIABLE_NAME, true);
 	ok = this->m_hSignal != NULL && this->m_hAvail != NULL;
 
-	if (m_pBuf == NULL)
+	if (this->m_pBuf == NULL || this->m_hSignal == NULL || this->m_hAvail == NULL)
 	{
-		dprint("Error in IPC server ctr, buf NULL\n");
+		if (this->m_pBuf == NULL)
+		{
+			dprintf("Error in IPC server create key: %s, buf=NULL\n", nameOfMapping.c_str());
+		}
+		if (this->m_hSignal == NULL)
+		{
+			dprintf("Error in IPC server create key: %s, signal=NULL\n", nameOfMapping.c_str());
+		}
+		if (this->m_hSignal == NULL)
+		{
+			dprintf("Error in IPC server create key: %s, avail=NULL\n", nameOfMapping.c_str());
+		}
 		ok = false;
 	}
 
