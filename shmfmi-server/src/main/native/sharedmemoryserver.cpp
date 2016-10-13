@@ -48,6 +48,7 @@ JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemoryServer_serv
 	env->ReleaseStringUTFChars(id, shmKey);
 	if (g_serverDebug)
 	{
+		printf("Native Server: Create callback g_server with key: %s. Completed\n", shmKey);
 		fflush(stdout);
 	}
 	return success;
