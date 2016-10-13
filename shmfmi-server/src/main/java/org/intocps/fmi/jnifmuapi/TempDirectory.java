@@ -46,20 +46,26 @@ public class TempDirectory
 			Files.deleteIfExists(path);
 		} catch (IOException e)
 		{
-			Runtime.getRuntime().addShutdownHook(new Thread()
+			try
 			{
-				@Override
-				public void run()
+				Runtime.getRuntime().addShutdownHook(new Thread()
 				{
-					try
+					@Override
+					public void run()
 					{
-						delete(path);
-					} catch (Exception e)
-					{
-						// we cannot not do anything about this
+						try
+						{
+							delete(path);
+						} catch (Exception e)
+						{
+							// we cannot not do anything about this
+						}
 					}
-				}
-			});
+				});
+			} catch (IllegalStateException es)
+			{
+				// ignore
+			}
 		}
 	}
 
