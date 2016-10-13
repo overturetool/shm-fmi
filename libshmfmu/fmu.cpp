@@ -181,6 +181,7 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 					break;
 				}
 
+				printf("Log message received; %s\n",r->value().c_str());fflush(stdout);
 				container->logger(container->componentEnvironment, container->m_name, status, r->category().c_str(),
 						r->value().c_str());
 
