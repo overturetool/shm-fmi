@@ -17,8 +17,8 @@ namespace FmiIpc
 
 #ifdef _WIN32
 const char* IpcBase::SHARED_MEM_BASE_NAME = "Local\\";
-const char* IpcBase::SIGNAL_AVALIABLE_NAME = "sigAvail";
-const char* IpcBase::SIGNAL_NAME = "sig";
+const char* IpcBase::SIGNAL_AVALIABLE_NAME = "Local\\sigAvail";
+const char* IpcBase::SIGNAL_NAME = "Local\\sig";
 #elif __APPLE__ ||  __linux
 //Apple must start with / and not have \\ and have a max size incl NULL of 32
 //Linux must start with / and not have any slashes after that
