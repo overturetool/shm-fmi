@@ -148,7 +148,7 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 
 			if (msg == NULL)
 			{
-				printf("callbackThreadFunc got message NULL.");fflush(stdout);
+				printf("callbackThreadFunc got message NULL.\n");fflush(stdout);
 				continue;
 			}
 			printf("callbackThreadFunc got message %d, size %d.",msg->cmd,msg->protoBufMsgSize);fflush(stdout);
