@@ -136,7 +136,7 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 
 	}
 
-	printf("callbackThreadFunc connected.");fflush(stdout);
+//	printf("callbackThreadFunc connected.");fflush(stdout);
 
 	delete shmCallbackKey;
 
@@ -148,10 +148,10 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 
 			if (msg == NULL)
 			{
-				printf("callbackThreadFunc got message NULL.\n");fflush(stdout);
+//				printf("callbackThreadFunc got message NULL.\n");fflush(stdout);
 				continue;
 			}
-			printf("callbackThreadFunc got message %d, size %d.",msg->cmd,msg->protoBufMsgSize);fflush(stdout);
+//			printf("callbackThreadFunc got message %d, size %d.",msg->cmd,msg->protoBufMsgSize);fflush(stdout);
 			if (msg->cmd == sharedfmimemory::fmi2Log)
 			{
 				Fmi2LogReply* r = new Fmi2LogReply();
@@ -184,7 +184,7 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 					break;
 				}
 
-				printf("Log message received; %s\n",r->value().c_str());fflush(stdout);
+//				printf("Log message received; %s\n",r->value().c_str());fflush(stdout);
 				container->logger(container->componentEnvironment, container->m_name, status, r->category().c_str(),
 						r->value().c_str());
 
