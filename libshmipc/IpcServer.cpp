@@ -13,24 +13,26 @@ namespace FmiIpc
 IpcServer::IpcServer(int id, const char* name) :
 		FmiIpc::IpcBase(id, name)
 {
-	// TODO Auto-generated constructor stub
 
 }
 
 IpcServer::~IpcServer()
 {
 	this->close();
-
 }
 
 bool IpcServer::create()
 {
 	bool ok = true;
-	std::string* nameOfMapping = getMappedName(this, SHARED_MEM_BASE_NAME, this->m_name->c_str());
-	dprintf("Starting IPC server with key: %s\n", nameOfMapping->c_str());
+
+//	enableConsoleDebug();
+
+	std::string nameOfMapping = getMappedName(this, SHARED_MEM_BASE_NAME, this->m_name->c_str());
+	dprintf("Starting IPC server with key: %s\n", nameOfMapping.c_str());
 	// Create the file mapping
 
-	m_hMapFile = openShm(&ok, nameOfMapping->c_str(), true);
+	m_hMapFile = openShm(&ok, nameOfMapping.c_str(), true);
+	m_hMapFileName = strdup(nameOfMapping.c_str());
 	mapShm(&ok, m_hMapFile, true);
 
 	// Create the events
@@ -38,9 +40,20 @@ bool IpcServer::create()
 	this->m_hAvail = this->createSignal(SIGNAL_AVALIABLE_NAME, true);
 	ok = this->m_hSignal != NULL && this->m_hAvail != NULL;
 
-	if (m_pBuf == NULL)
+	if (this->m_pBuf == NULL || this->m_hSignal == NULL || this->m_hAvail == NULL)
 	{
-		dprint("Error in IPC server ctr, buf NULL\n");
+		if (this->m_pBuf == NULL)
+		{
+			dprintf("Error in IPC server create key: %s, buf=NULL\n", nameOfMapping.c_str());
+		}
+		if (this->m_hSignal == NULL)
+		{
+			dprintf("Error in IPC server create key: %s, signal=NULL\n", nameOfMapping.c_str());
+		}
+		if (this->m_hSignal == NULL)
+		{
+			dprintf("Error in IPC server create key: %s, avail=NULL\n", nameOfMapping.c_str());
+		}
 		ok = false;
 	}
 
@@ -52,33 +65,15 @@ void IpcServer::close(void)
 }
 SharedFmiMessage* IpcServer::send(SharedFmiMessage* message, DWORD dwTimeout)
 {
-
 	dprint("IPC Server write msg\n");
 	this->m_pBuf->message = *message;
 
-#ifdef _WIN32
-	SetEvent(this->m_hAvail);
-	dprint( "IPC Server signaled\n");
+	signalPost(this->m_hAvail);
 
-	if (WaitForSingleObject(this->m_hSignal, dwTimeout) != WAIT_OBJECT_0)
+	if (!signalWait(this->m_hSignal, dwTimeout))
 	{
 		return NULL;
 	}
-#elif __APPLE__ || __linux
-
-	if (sem_post(this->m_hAvail) == -1)
-	{
-		dprintf("signal: failed: sem_postn signal 'm_hAvail': %s\n", strerror( errno));
-	}
-
-	dprint("IPC Server signaled data ready. Waiting...\n");
-
-	if (sem_wait(this->m_hSignal) == -1)
-	{
-		dprintf("signal: failed: sem_wait signal 'm_hSignal': %s\n", strerror( errno));
-	}
-
-#endif
 
 	dprint("IPC Server received data\n");
 	return &this->m_pBuf->message;

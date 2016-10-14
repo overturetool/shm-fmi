@@ -2,6 +2,7 @@ package org.intocps.java.fmi.service;
 
 import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.lausdahl.examples.Service.Fmi2Empty;
 import com.lausdahl.examples.Service.*;
 
 public interface IServiceProtocol {
@@ -28,6 +29,8 @@ public interface IServiceProtocol {
 
 	Fmi2StatusReply Instantiate(Fmi2InstantiateRequest parseFrom);
 
+	void FreeInstantiate(Fmi2Empty parseFrom);
+
 	Fmi2StatusReply Reset(Fmi2Empty parseFrom);
 
 	Fmi2StatusReply SetBoolean(Fmi2SetBooleanRequest parseFrom);
@@ -49,5 +52,6 @@ public interface IServiceProtocol {
 	Fmi2StringStatusReply GetStringStatus(Fmi2StatusRequest request);
 
 	void error(InvalidProtocolBufferException e);
+
 
 }

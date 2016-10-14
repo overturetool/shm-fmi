@@ -48,7 +48,7 @@ void remoteTestDriver(const char * shmKey)
 
 	//if (globalClient == NULL)
 	{
-		client = new FmiIpc::IpcClient(0, &success,shmKey);
+		client = new FmiIpc::IpcClient(0, &success, shmKey);
 		if (!success)
 		{
 			remoteTestDriver(shmKey);
@@ -63,6 +63,14 @@ void remoteTestDriver(const char * shmKey)
 
 	switch (msg->cmd)
 	{
+
+	case sharedfmimemory::fmi2FreeInstance:
+	{
+		Fmi2Empty* r = new Fmi2Empty();
+		msg->protoBufMsgSize = r->ByteSize();
+		r->SerializeWithCachedSizesToArray(msg->protoBufMsg);
+	}
+		break;
 
 	case sharedfmimemory::fmi2SetDebugLogging:
 	case sharedfmimemory::fmi2Instantiate:

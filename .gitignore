@@ -84,3 +84,7 @@ shmfmi-server/repository
 *.dylib
 *.jar
 libshmipc/libshmipc
+
+
+**/gtestresults.xml
+testlibshmipc/testlibshmipc

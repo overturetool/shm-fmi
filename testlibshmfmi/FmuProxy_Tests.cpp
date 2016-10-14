@@ -18,7 +18,7 @@
 void clientThread()
 {
 	bool success;
-	FmiIpc::IpcClient client(0, &success,MEM_KEY);
+	FmiIpc::IpcClient client(0, &success, MEM_KEY);
 	if (!success)
 	{
 		//recurse until connected
@@ -37,9 +37,9 @@ void clientThread()
 
 TEST(FmiIpc, shmbasetest)
 {
-	FmiIpc::IpcServer server(0,MEM_KEY);
+	FmiIpc::IpcServer server(0, MEM_KEY);
 
-	EXPECT_EQ(true,server.create());
+	EXPECT_EQ(true, server.create());
 
 	std::thread t1(clientThread);
 
@@ -79,8 +79,13 @@ TEST_F(FmuProxyTest, fmi2Instantiate)
 	bool loggingOn = true;
 
 	EXPECT_EQ(true,
-			m_client->fmi2Instantiate(instanceName.c_str(), fmuGUID.c_str(),
-					fmuResourceLocation.c_str(), callbackAddress, visible, loggingOn));
+			m_client->fmi2Instantiate(instanceName.c_str(), fmuGUID.c_str(), fmuResourceLocation.c_str(),
+					callbackAddress, visible, loggingOn));
+}
+
+TEST_F(FmuProxyTest, fmi2FreeInstantiate)
+{
+	m_client->fmi2FreeInstance();
 }
 
 TEST_F(FmuProxyTest, fmi2EnterInitializationMode)
@@ -104,8 +109,7 @@ TEST_F(FmuProxyTest, fmi2SetupExperiment)
 	double stopTime = 1.1;
 
 	EXPECT_EQ(FmuProxy::fmi2OK,
-			m_client->fmi2SetupExperiment(toleranceDefined, tolerance, startTime,
-					stopTimeDefined, stopTime));
+			m_client->fmi2SetupExperiment(toleranceDefined, tolerance, startTime, stopTimeDefined, stopTime));
 }
 
 TEST_F(FmuProxyTest, fmi2Terminate)
@@ -120,8 +124,7 @@ TEST_F(FmuProxyTest, fmi2SetDebugLogging)
 	const char* categories[3] =
 	{ "all", "all+1", "all+2" };
 
-	EXPECT_EQ(FmuProxy::fmi2OK,
-			m_client->fmi2SetDebugLogging(loggingOn, nCategories, categories));
+	EXPECT_EQ(FmuProxy::fmi2OK, m_client->fmi2SetDebugLogging(loggingOn, nCategories, categories));
 }
 
 TEST_F(FmuProxyTest, SetGetReals)
@@ -224,19 +227,16 @@ TEST_F(FmuProxyTest, SetGetStrings)
 TEST_F(FmuProxyTest, fmi2DoStep)
 {
 
-
 	double currentCommunicationPoint = 0.0;
 	double communicationStepSize = 0.1;
 	int noSetFMUStatePriorToCurrentPoint = false;
 
 	EXPECT_EQ(FmuProxy::fmi2OK,
-			m_client->fmi2DoStep(currentCommunicationPoint, communicationStepSize,
-					noSetFMUStatePriorToCurrentPoint));
+			m_client->fmi2DoStep(currentCommunicationPoint, communicationStepSize, noSetFMUStatePriorToCurrentPoint));
 }
 
 TEST_F(FmuProxyTest, fmi2GetStatus)
 {
-
 
 	FmuProxy::fmi2StatusKind s = FmuProxy::fmi2LastSuccessfulTime;
 	FmuProxy::fmi2Status value;
@@ -249,7 +249,6 @@ TEST_F(FmuProxyTest, fmi2GetStatus)
 TEST_F(FmuProxyTest, fmi2GetRealStatus)
 {
 
-
 	FmuProxy::fmi2StatusKind s = FmuProxy::fmi2LastSuccessfulTime;
 	double value;
 
@@ -260,7 +259,6 @@ TEST_F(FmuProxyTest, fmi2GetRealStatus)
 
 TEST_F(FmuProxyTest, fmi2GetIntegerStatus)
 {
-
 
 	FmuProxy::fmi2StatusKind s = FmuProxy::fmi2LastSuccessfulTime;
 	int value;
@@ -273,7 +271,6 @@ TEST_F(FmuProxyTest, fmi2GetIntegerStatus)
 TEST_F(FmuProxyTest, fmi2GetBooleanStatus)
 {
 
-
 	FmuProxy::fmi2StatusKind s = FmuProxy::fmi2Terminated;
 	int value;
 
@@ -284,7 +281,6 @@ TEST_F(FmuProxyTest, fmi2GetBooleanStatus)
 
 TEST_F(FmuProxyTest, fmi2GetStringStatus)
 {
-
 
 	FmuProxy::fmi2StatusKind s = FmuProxy::fmi2DoStepStatus;
 	const char* value;

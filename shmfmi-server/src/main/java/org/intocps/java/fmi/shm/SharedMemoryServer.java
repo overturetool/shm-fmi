@@ -16,6 +16,8 @@ public class SharedMemoryServer
 	private final static String LIBRARY_NAME = "sharedmemory";
 
 	public native boolean serverStart(String id);
+	
+	public native void serverStop();
 
 	public static native void setServerDebug(boolean on);
 

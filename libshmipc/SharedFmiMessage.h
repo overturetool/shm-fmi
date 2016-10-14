@@ -14,8 +14,8 @@ namespace sharedfmimemory
 typedef enum
 	:int
 	{
-		fmi2SetDebugLogging = 0, fmi2Instantiate = 1,
-//	fmi2FreeInstance,
+		fmi2SetDebugLogging = 0,
+	fmi2Instantiate = 1,
 	fmi2SetupExperiment = 2,
 	fmi2EnterInitializationMode = 3,
 	fmi2ExitInitializationMode = 4,
@@ -36,13 +36,14 @@ typedef enum
 	fmi2GetMaxStepSize = 16,
 
 	//status
-	fmi2GetStatus=17,
-	fmi2GetRealStatus=18,
-	fmi2GetIntegerStatus=19,
-	fmi2GetBooleanStatus=20,
-	fmi2GetStringStatus=21,
+	fmi2GetStatus = 17,
+	fmi2GetRealStatus = 18,
+	fmi2GetIntegerStatus = 19,
+	fmi2GetBooleanStatus = 20,
+	fmi2GetStringStatus = 21,
 	//
-	fmi2Log=22
+	fmi2Log = 22,
+	fmi2FreeInstance = 23
 
 } fmi2Command;
 

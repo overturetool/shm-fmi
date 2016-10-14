@@ -28,6 +28,7 @@
 #include <sstream>
 #include "JavaLauncher.h"
 #include "ConfigFile.h"
+#include "uri.h"
 
 static int currentId = 0;
 
@@ -35,11 +36,12 @@ std::vector<FmuContainer*> g_clients;
 
 static FmuContainer* getFmuContainer(fmi2Component c)
 {
-	intptr_t index = (intptr_t) c;
-
-	if (g_clients.size() > index)
+	for (auto & container : g_clients)
 	{
-		return g_clients.at(index);
+		if (container == c)
+		{
+			return (FmuContainer*) c;
+		}
 	}
 	return NULL;
 }
@@ -115,12 +117,8 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 {
 	if (container->logger == NULL)
 	{
-//		printf("######### Callback function stopped\n");
 		return;
 	}
-
-//	printf("######### Callback function with callbackId: '%s'\n", shmCallbackKey);
-//	fflush(stdout);
 
 	FmiIpc::IpcClient* callbackClient = NULL;
 	bool success = false;
@@ -138,47 +136,26 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 
 	}
 
-	printf("callback thread connected\n");
-	fflush(stdout);
+//	printf("callbackThreadFunc connected.");fflush(stdout);
+
+	delete shmCallbackKey;
 
 	if (callbackClient != NULL)
 	{
 		while (container->active)
 		{
-			SharedFmiMessage* msg = callbackClient->getMessage(INFINITE);
-//			printf("callback thread got message\n");fflush(stdout);
+			SharedFmiMessage* msg = callbackClient->getMessage(10);
 
 			if (msg == NULL)
 			{
-				printf("callback thread got message ==null, returning, stopping thread\n");
-				fflush(stdout);
-				delete callbackClient;
-				return;
+//				printf("callbackThreadFunc got message NULL.\n");fflush(stdout);
+				continue;
 			}
-//			printf("callback thread got message !=null\n");fflush(stdout);
-
+//			printf("callbackThreadFunc got message %d, size %d.",msg->cmd,msg->protoBufMsgSize);fflush(stdout);
 			if (msg->cmd == sharedfmimemory::fmi2Log)
 			{
 				Fmi2LogReply* r = new Fmi2LogReply();
-//				printf("protoBufMsgSize %d\n",msg->protoBufMsgSize);
-//				for(int j = 0; j < msg->protoBufMsgSize; j++)
-//				    printf( "%02X", msg->protoBufMsg[j]);
-//				printf("\n");fflush(stdout);
 				r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
-
-				printf("Received log data '%s'\n", r->value().c_str());
-				fflush(stdout);
-
-//				std::cout << *(container->m_name) << std::endl;
-
-//				container->logger(container->componentEnvironment, "some name that I dont have", fmi2OK,
-//												"message %s", "'the message'");
-//				container->logger(container->componentEnvironment, "some name that I dont have", fmi2OK,
-//										r->category().c_str(), r->value().c_str());
-
-				//handle message
-				printf("Received log data from client '%s': '%s'\n", container->m_name, r->value().c_str());
-				fflush(stdout);
 
 				fmi2Status status = fmi2Status::fmi2Error;
 
@@ -207,9 +184,11 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 					break;
 				}
 
-				container->logger(container->componentEnvironment, container->m_name, status,
-						r->category().c_str(), r->value().c_str());
+//				printf("Log message received; %s\n",r->value().c_str());fflush(stdout);
+				container->logger(container->componentEnvironment, container->m_name, status, r->category().c_str(),
+						r->value().c_str());
 
+				delete r;
 				SharedFmiMessage* msgReply = new SharedFmiMessage();
 
 				Fmi2Empty request;
@@ -217,14 +196,11 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 				msgReply->protoBufMsgSize = request.ByteSize();
 				request.SerializeWithCachedSizesToArray(msgReply->protoBufMsg);
 				msgReply->cmd = sharedfmimemory::fmi2Log;
-				printf("sending callback confirm reply\n");
-				fflush(stdout);
 				callbackClient->sendReply(msgReply);
+				delete msgReply;
 			}
 		}
 	}
-	printf("callback thread exit\n");
-	fflush(stdout);
 	delete callbackClient;
 }
 
@@ -246,20 +222,14 @@ int fmuInternalDebugPrint(int sender, const char * format, ...)
 	va_start(args, format);
 	for (int i = 0; i < g_clients.size(); i++)
 	{
-//		printf("fmuInternalDebugPrint called...3-%d\n", i);
-//		fflush(stdout);
 		FmuContainer* c = g_clients.at(i);
 		if (c && c->m_proxy->getChannel()->getId() == sender)
 		{
-//			printf("fmuInternalDebugPrint called...logg\n");
-//			fflush(stdout);
 			g_clients.at(i)->logger(c->componentEnvironment, c->m_name, fmi2OK, "LogAll", format, args);
 			va_end(args);
 			return 1;
 		}
 	}
-//	printf("fmuInternalDebugPrint called...vsprintf\n");
-//	fflush(stdout);
 	int ret = vfprintf(stdout, format, args);
 	va_end(args);
 	return ret;
@@ -289,13 +259,7 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 
 //	setbuf(stdout, NULL); //fixme remove
 
-	std::string resourceLocationStr(fmuResourceLocation);
-
-#ifdef _WIN32
-	resourceLocationStr = resourceLocationStr.substr(6);
-#elif __APPLE__ ||  __linux
-	resourceLocationStr = resourceLocationStr.substr(5);
-#endif
+	std::string resourceLocationStr(URIToNativePath(fmuResourceLocation));
 
 	if (loggingOn)
 	{
@@ -351,30 +315,28 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 
 //	fflush(stdout); //FIXME remove
 
-	container->componentEnvironment = (void*) compid;
+	container->componentEnvironment = (void*) container;
 
 	if (!config.m_skipLaunch)
 	{
 		launcher->launch();
 	}
 
-
-	const char * callbackTag  ="Callback";
-	char *threadCallbackId = (char *) calloc(sizeof(char), strlen(fmuGUID)+strlen(instanceName)+strlen(callbackTag)+1 );
+	const char * callbackTag = "Callback";
+	char *threadCallbackId = (char *) calloc(sizeof(char),
+			strlen(fmuGUID) + strlen(instanceName) + strlen(callbackTag) + 1);
 	strcpy(threadCallbackId, fmuGUID);
-	strcat(threadCallbackId,instanceName);
-	strcat(threadCallbackId,callbackTag);
+	strcat(threadCallbackId, instanceName);
+	strcat(threadCallbackId, callbackTag);
 
-	loggingOn = false;
 	if (client->fmi2Instantiate(instanceName, fmuGUID, fmuResourceLocation, threadCallbackId, visible, loggingOn))
 	{
 		//connected
 		if (functions != NULL && functions->logger != NULL && loggingOn)
 		{
 			//configure callback
-
-			printf("Starting callbackThreadFunc with '%s'\n", threadCallbackId);
 			std::thread* callbackThread = new std::thread(callbackThreadFunc, container, threadCallbackId);
+			container->callbackThread = callbackThread;
 		}
 	}
 
@@ -448,12 +410,21 @@ extern "C" void fmi2FreeInstance(fmi2Component c)
 
 	if (fmu != NULL)
 	{
+		fmu->m_proxy->fmi2FreeInstance();
 		fmu->active = false;
-		fmu->m_javaLauncher->terminate();
-		intptr_t index = (intptr_t) c;
-		g_clients.at(index) = NULL;
+		if (fmu->callbackThread != NULL)
+		{
+			fmu->callbackThread->join();
+		}
+		for (auto it = begin(g_clients); it != end(g_clients); ++it)
+		{
+			if (*it == fmu)
+			{
+				g_clients.erase(it);
+				break;
+			}
+		}
 		delete fmu;
-
 	}
 }
 

@@ -35,7 +35,8 @@ public enum Commands {
 	fmi2GetBooleanStatus(20),
 	fmi2GetStringStatus(21),
 	
-	fmi2Log(22);;
+	fmi2Log(22),
+	fmi2FreeInstance(23);
 	
 	public final byte id;
 	private Commands(int id) {

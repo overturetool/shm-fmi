@@ -27,8 +27,11 @@ JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setId(JNIE
 	}
 	bool success;
 
-	g_client = new FmiIpc::IpcClient(0,&success,idString);
-//	g_client->debugPrintPtr= g_clientDebug;
+	g_client = new FmiIpc::IpcClient(0, &success, idString);
+	if (g_clientDebug)
+	{
+		g_client->enableConsoleDebug();
+	}
 
 	if (!success)
 	{
@@ -74,7 +77,6 @@ JNIEXPORT jbyteArray JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_read(JNI
 
 	jbyte fill[size];
 
-
 	for (int i = 0; i < size; i++)
 	{
 		fill[i] = msg->protoBufMsg[i];
@@ -106,4 +108,10 @@ JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_send(JNIEnv *e
 	g_client->sendReply(msg);
 	delete msg;
 
+}
+
+JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_stop(JNIEnv *env, jobject obj)
+{
+	delete g_client;
+	g_client = NULL;
 }

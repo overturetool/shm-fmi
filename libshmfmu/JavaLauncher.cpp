@@ -147,36 +147,45 @@ int JavaLauncher::launch()
 #elif __APPLE__ ||  __linux
 
 	int status;
+	pid_t pid2;
 	pid = fork();
 	if (pid == 0)
 	{
-		debugPrintPtr(this, "Fork application %s\n", m_args[0]);
-		if (m_workingDir != NULL)
+
+		/* child process B */
+		pid2 = fork();
+		if (pid2 )
 		{
-			if (chdir(m_workingDir) == 0)
+			exit(0);
+		} else if (!pid2)
+		{
+			/* child process C */
+			debugPrintPtr(this, "Fork application %s\n", m_args[0]);
+			if (m_workingDir != NULL)
 			{
-				debugPrintPtr(this, "Changed dir to: %s\n", m_workingDir);
-			} else
+				if (chdir(m_workingDir) == 0)
+				{
+					debugPrintPtr(this, "Changed dir to: %s\n", m_workingDir);
+				} else
+				{
+					debugPrintPtr(this, "server_create: failed to fork and change dir: %01d %s\n",
+					__LINE__, strerror( errno));
+				}
+
+			}
+			int i = 0;
+			while (m_args[i] != NULL)
 			{
-				debugPrintPtr(this, "server_create: failed to fork and change dir: %01d %s\n",
-				__LINE__, strerror( errno));
+				debugPrintPtr(this, "%s\n", m_args[i]);
+				i++;
 			}
 
-		}
-		int i = 0;
-		while (m_args[i] != NULL)
+			status = execvp(m_args[0], m_args);
+		} else
 		{
-			debugPrintPtr(this, "%s\n", m_args[i]);
-			i++;
+			/* error */
 		}
 
-		status = execvp(m_args[0], m_args);
-		int errn = errno;
-		debugPrintPtr(this, "server_create: failed to fork and execvp: %01d %s\n", __LINE__, strerror(errn));
-//		printf("program %s, arg 1: %s\n",m_args[0],m_args[1]);
-		debugPrintPtr(this, "Execvp status: %d\n", status);
-		debugPrintPtr(this, "Execvp error: %d", errn);
-		exit(errn);
 	} else if (pid == -1)
 	{
 		// Parent process will return a non-zero value from fork()
@@ -186,11 +195,11 @@ int JavaLauncher::launch()
 	} else
 	{
 		m_launched = true;
+		/* parent process A */
+		waitpid(pid, &status, 0);
 	}
 
 	debugPrintPtr(this, "Fork pid %d\n", pid);
-
-	usleep(0.5 * 1000000);
 
 	return status;
 #endif
@@ -205,7 +214,7 @@ void JavaLauncher::terminate()
 		TerminateProcess(pid.hProcess, uExitCode);
 
 #elif __APPLE__ ||  __linux
-		kill(pid, SIGKILL);
+		//kill(pid, SIGKILL);
 #endif
 		m_launched = false;
 	}

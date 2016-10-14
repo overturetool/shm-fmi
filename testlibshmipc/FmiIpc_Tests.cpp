@@ -8,6 +8,8 @@
 #include "IpcServer.h"
 #include "IpcClient.h"
 
+static int timeout = 0;
+
 void runServer(const char* key, const char* data, SharedFmiMessage*messageSend, SharedFmiMessage* returnMessage,
 		bool*running)
 {
@@ -29,7 +31,7 @@ void runServer(const char* key, const char* data, SharedFmiMessage*messageSend, 
 
 	*messageSend = *message;
 //	printf("Sending %s, with length %i\n", message->protoBufMsg, message->protoBufMsgSize);
-	SharedFmiMessage* messageR = server->send(message, 0);
+	SharedFmiMessage* messageR = server->send(message, timeout);
 	*returnMessage = *messageR;
 
 	server->close();
@@ -51,7 +53,7 @@ void runClient(const char* key)
 	}
 
 //	printf("Waiting to receive message\n");
-	SharedFmiMessage* message = client->getMessage(0);
+	SharedFmiMessage* message = client->getMessage(timeout);
 
 	if (message == NULL)
 	{
@@ -67,6 +69,38 @@ void runClient(const char* key)
 
 TEST(FmiIpc, singleTest)
 {
+	timeout=0;
+	const char* key = "key";
+	const char data[] =
+	{ 'a', 'b', 'c', 0 };
+	SharedFmiMessage send;
+	SharedFmiMessage recieved;
+	bool running = false;
+	std::thread* callbackThread = new std::thread(runServer, key, data, &send, &recieved, &running);
+	while (!running)
+		for (int i = 0; i < 1000; i++)
+			;
+	runClient(key);
+
+	callbackThread->join();
+
+	SharedFmiMessage s = send;
+	SharedFmiMessage r = recieved;
+
+	EXPECT_EQ(s.protoBufMsgSize, r.protoBufMsgSize);
+
+	EXPECT_STREQ((const char* )s.protoBufMsg, (const char* )r.protoBufMsg);
+
+	for (int i = 0; i < s.protoBufMsgSize; i++)
+	{
+		EXPECT_EQ(s.protoBufMsg[i], r.protoBufMsg[i]);
+	}
+}
+
+
+TEST(FmiIpc, singleTestTimeout10)
+{
+	timeout=10;
 	const char* key = "key";
 	const char data[] =
 	{ 'a', 'b', 'c', 0 };

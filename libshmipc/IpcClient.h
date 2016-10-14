@@ -10,6 +10,7 @@
 
 #include "IpcBase.h"
 
+
 namespace FmiIpc
 {
 
@@ -22,8 +23,6 @@ public:
 private:
 	void connect(bool* success);
 
-	// Exposed functions
-	bool waitAvailable(DWORD dwTimeout = INFINITE);	// Waits until some blocks become available
 public:
 
 	SharedFmiMessage* getMessage(DWORD dwTimeout = INFINITE);

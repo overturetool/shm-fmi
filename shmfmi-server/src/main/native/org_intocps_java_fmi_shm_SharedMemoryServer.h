@@ -17,6 +17,14 @@ JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemoryServer_serv
 
 /*
  * Class:     org_intocps_java_fmi_shm_SharedMemoryServer
+ * Method:    serverStop
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemoryServer_serverStop
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_intocps_java_fmi_shm_SharedMemoryServer
  * Method:    setServerDebug
  * Signature: (Z)V
  */

@@ -34,6 +34,10 @@ public:
 	{
 		if (fmu.dllHandle != NULL && comp != NULL)
 		{
+			if(isInstantiated)
+			{
+				fmu.freeInstance(comp);
+			}
 			fmu.freeInstance(comp);
 		}
 	}
@@ -46,6 +50,7 @@ public:
 	FMU fmu;
 	fmi2Component comp;
 
+	bool isInstantiated = false;
 private:
 	FMU setup()
 	{
@@ -88,6 +93,7 @@ printf("make cwd into uri: %s\n",str);
 				true, true);
 		delete cwd;
 
+		isInstantiated = true;
 		return comp;
 	}
 

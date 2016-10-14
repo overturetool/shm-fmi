@@ -47,7 +47,7 @@ public class TestResponder implements IServiceProtocol
 
 		ProtocolDriver driver = new ProtocolDriver(memoryKey, new TestResponder());
 
-		driver.start();
+		driver.open();
 
 		while (true)
 			Thread.sleep(30000);
@@ -310,6 +310,11 @@ public class TestResponder implements IServiceProtocol
 			return Fmi2StringStatusReply.newBuilder().setValue("waiting").build();
 		else
 			return Fmi2StringStatusReply.newBuilder().setValue("nothing").build();
+	}
+
+	@Override
+	public void FreeInstantiate(Fmi2Empty parseFrom)
+	{
 	}
 
 }
