@@ -9,7 +9,7 @@
 	<groupId>org.intocps.java.fmi</groupId>
 	<artifactId>fmi-shm-server</artifactId>
 	<name>Java SHM-FMI server</name>
-	<version>0.1.3-SNAPSHOT</version>
+	<version>0.1.4</version>
 	<dependencies>
 
 		<dependency>
@@ -176,7 +176,7 @@
     <url>git@gitlab.au.dk:into-cps/shm-fmi.git</url>
     <connection>scm:git:git://gitlab.au.dk:into-cps/shm-fmi.git</connection>
     <developerConnection>scm:git:git@gitlab.au.dk:into-cps/shm-fmi.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>Release/0.1.4</tag>
   </scm>
 
 
