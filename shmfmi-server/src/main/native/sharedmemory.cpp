@@ -53,7 +53,7 @@ JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setId(JNIE
 JNIEXPORT jbyteArray JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_read(JNIEnv *env, jobject obj, jbyteArray types)
 {
 
-	SharedFmiMessage* msg = g_client->getMessage(INFINITE);
+	SharedFmiMessage* msg = g_client->getMessage(5);
 
 	if (msg == NULL)
 	{

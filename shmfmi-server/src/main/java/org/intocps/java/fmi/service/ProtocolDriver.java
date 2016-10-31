@@ -207,8 +207,9 @@ public class ProtocolDriver implements Runnable
 				this.mem.send(type, reply.toByteArray());
 			} else
 			{
-				service.error("deadlocking");
-				logger.error("deadlocked");
+				String errorMsg="deadlocking do not know how to answer: "+cmd;
+				service.error(errorMsg);
+				logger.error(errorMsg);
 			}
 		}
 
