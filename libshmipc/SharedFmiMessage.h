@@ -47,7 +47,7 @@ typedef enum
 
 } fmi2Command;
 
-#define SharedFmiBufferSize 1000
+#define SharedFmiBufferSize 10000
 //#define StringMaxSize 300
 /*
  struct SharedFmiMessageData {
