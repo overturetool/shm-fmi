@@ -204,11 +204,11 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 	delete callbackClient;
 }
 
-#define LOG(functions,comp,name,status,category, message,args...) \
+#define LOG(functions,name,status,category, message,args...) \
 	if(functions!=NULL){ \
 if(functions->logger!=NULL) \
 { \
-	functions->logger((void*)comp , name, status, category, message, args);\
+	functions->logger(functions->componentEnvironment , name, status, category, message, args);\
 }\
 }else {\
 	fprintf (stderr, "Name '%s', Category: '%s'\n",name,category);\
@@ -248,14 +248,17 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 		g_clients.push_back(NULL); //Dummy var
 	}
 
-	intptr_t compid = g_clients.size();
+	currentId++;
+
 	if (loggingOn)
 	{
-		LOG(functions, compid, instanceName, fmi2OK, "logFmiCall",
-				"FMU: Called instantiate with instance %s and GUID %s", instanceName, fmuGUID);
+		LOG(functions, instanceName, fmi2OK, "logFmiCall", "FMU: Called instantiate with instance %s and GUID %s",
+				instanceName, fmuGUID);
 	}
 	std::string shared_memory_key(fmuGUID);
 	shared_memory_key.append(instanceName);
+	//replace key with hash
+	shared_memory_key = std::to_string(std::hash<std::string>()(shared_memory_key));
 
 //	setbuf(stdout, NULL); //fixme remove
 
@@ -263,8 +266,8 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 
 	if (loggingOn)
 	{
-		LOG(functions, compid, instanceName, fmi2OK, "logFmiCall",
-				"FMU: Launching Tool Wrapper memory key: '%s'  and resource location %s", shared_memory_key.c_str(),
+		LOG(functions, instanceName, fmi2OK, "logFmiCall",
+				"FMU: Launching Tool Wrapper memory key: '%s' and resource location %s", shared_memory_key.c_str(),
 				resourceLocationStr.c_str());
 	}
 
@@ -276,20 +279,19 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 
 	if (config.m_skipLaunch)
 	{
-		LOG(functions, compid, instanceName, fmi2OK, "logFmiCall",
+		LOG(functions, instanceName, fmi2OK, "logFmiCall",
 				"FMU: FMU Debug skipping launch of external FMU. SHM is '%s'", shared_memory_key.c_str());
 		shared_memory_key = "shmFmiTest";
 	}
 
 	if (loggingOn)
 	{
-		LOG(functions, compid, instanceName, fmi2OK, "logFmiCall", "FMU: Launching with shared memory key: '%s'",
+		LOG(functions, instanceName, fmi2OK, "logFmiCall", "FMU: Launching with shared memory key: '%s'",
 				shared_memory_key.c_str());
 	}
 
-	FmuProxy *client = new FmuProxy(currentId++, shared_memory_key);
+	FmuProxy *client = new FmuProxy(currentId, shared_memory_key);
 	client->getChannel()->debugPrintPtr = NULL;
-
 	FmuContainer *container = new FmuContainer(currentId, client, instanceName, functions, launcher);
 
 	g_clients.push_back(container);
@@ -301,7 +303,7 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 
 	if (!client->initialize())
 	{
-		LOG(functions, compid, instanceName, fmi2Fatal, "logFmiCall",
+		LOG(functions, instanceName, fmi2Fatal, "logFmiCall",
 				"FMU: FMU Debug FATAL: cannot create and initialize IPC server for FMU. SHM is '%s'\n",
 				shared_memory_key.c_str());
 		return NULL;
@@ -309,13 +311,11 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 
 	if (loggingOn)
 	{
-		LOG(functions, compid, instanceName, fmi2OK, "logFmiCall",
-				"FMU: FMU Server create, hosting SHM with raw key: %s", shared_memory_key.c_str());
+		LOG(functions, instanceName, fmi2OK, "logFmiCall", "FMU: FMU Server create, hosting SHM with raw key: %s",
+				shared_memory_key.c_str());
 	}
 
 //	fflush(stdout); //FIXME remove
-
-	container->componentEnvironment = (void*) container;
 
 	if (!config.m_skipLaunch)
 	{
@@ -342,7 +342,7 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 
 //	delete callbackId;
 
-	return container->componentEnvironment;
+	return (void*) container;
 }
 
 extern "C" fmi2Status fmi2SetupExperiment(fmi2Component c, fmi2Boolean toleranceDefined, fmi2Real tolerance,

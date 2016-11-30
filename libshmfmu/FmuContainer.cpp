@@ -18,7 +18,7 @@ FmuContainer::FmuContainer(int id, FmuProxy *proxy, const char* name, const fmi2
 
 	this->m_javaLauncher = launcher;
 	this->active = true;
-	this->componentEnvironment = NULL;
+	this->componentEnvironment = functions->componentEnvironment;
 	this->logger = NULL;
 	this->id = id;
 	this->callbackThread = NULL;
