@@ -32,8 +32,18 @@ bool IpcServer::create()
 	// Create the file mapping
 
 	m_hMapFile = openShm(&ok, nameOfMapping.c_str(), true);
+	if (!ok)
+	{
+		dprintf("Error in IPC server could not create shared memory key: %s\n", nameOfMapping.c_str());
+		return false;
+	}
 	m_hMapFileName = strdup(nameOfMapping.c_str());
 	mapShm(&ok, m_hMapFile, true);
+	if (!ok)
+	{
+		dprintf("Error in IPC server could not map shared memory key: %s\n", nameOfMapping.c_str());
+		return false;
+	}
 
 	// Create the events
 	this->m_hSignal = this->createSignal(SIGNAL_NAME, true);
