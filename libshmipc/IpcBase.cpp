@@ -206,7 +206,7 @@ HANDLE IpcBase::openShm(bool*success, const char* name, bool create)
  */
 void IpcBase::mapShm(bool*success, HANDLE handle, bool truncate)
 {
-	*success = true;
+
 	//create
 #ifdef _WIN32
 	m_pBuf = (SharedFmiMem*) MapViewOfFile(handle,	// handle to map object
