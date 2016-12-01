@@ -29,6 +29,7 @@
 #include "JavaLauncher.h"
 #include "ConfigFile.h"
 #include "uri.h"
+#include "guid.h"
 
 static int currentId = 0;
 
@@ -252,13 +253,17 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 
 	if (loggingOn)
 	{
-		LOG(functions, instanceName, fmi2OK, "logFmiCall", "FMU: Called instantiate with instance %s and GUID %s",
+		LOG(functions, instanceName, fmi2OK, "logFmiCall", "FMU: Called instantiate with instance '%s' and GUID '%s'",
 				instanceName, fmuGUID);
 	}
-	std::string shared_memory_key(fmuGUID);
-	shared_memory_key.append(instanceName);
+	//std::string shared_memory_key(fmuGUID);
+	//shared_memory_key.append(instanceName);
 	//replace key with hash
-	shared_memory_key = std::to_string(std::hash<std::string>()(shared_memory_key));
+	//shared_memory_key = std::to_string(std::hash<std::string>()(shared_memory_key));
+	GuidGenerator generator;
+	std::ostringstream stream;
+	stream << generator.newGuid();
+	std::string shared_memory_key = stream.str();
 
 //	setbuf(stdout, NULL); //fixme remove
 

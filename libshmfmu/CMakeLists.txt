@@ -21,13 +21,22 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DFMI_COSIMULATION")
 
 if(APPLE)
 include_directories(${CMAKE_SOURCE_DIR}/third_party/osx/include)
+
+
+find_library(CORE_FOUNDATION CoreFoundation)
+if (NOT CORE_FOUNDATION)
+    message(FATAL_ERROR "CoreFoundation not found")
+endif()
+
+
+
 endif(APPLE)
 
 include_directories(includes/fmi)
 include_directories(${libshmfmi_INCLUDE_DIRS})
 
 
-add_library(${PROJECT_NAME} SHARED uri.c fmu.cpp FmuContainer.cpp JavaLauncher.cpp ConfigFile.cpp)
+add_library(${PROJECT_NAME} SHARED uri.c guid.cpp fmu.cpp FmuContainer.cpp JavaLauncher.cpp ConfigFile.cpp)
 
 
 target_link_libraries(${PROJECT_NAME} libshmfmi)
@@ -62,6 +71,15 @@ endif()
 set_target_properties(${PROJECT_NAME}
                       PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
+
+
+if(APPLE)
+
+
+target_link_libraries(${PROJECT_NAME} ${CORE_FOUNDATION})
+
+
+endif(APPLE)
 
 
 # Expose A's public includes (including the ones of A's dependencies
