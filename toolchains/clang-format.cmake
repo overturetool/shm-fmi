@@ -8,7 +8,7 @@
 #	endif ()
 #endforeach ()
 
-file(GLOB ALL_SOURCE_FILES *.c *.cpp *.h)
+file(GLOB ALL_SOURCE_FILES **/*.c **/*.cpp **/*.h)
 
 add_custom_target(
 	clangformat

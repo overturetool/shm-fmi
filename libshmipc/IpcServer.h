@@ -10,20 +10,18 @@
 
 #include "IpcBase.h"
 
-namespace FmiIpc
-{
+namespace FmiIpc {
 
-class IpcServer:public IpcBase
-{
-public:
-	IpcServer(int id, const char* name = "server");
-	virtual ~IpcServer();
+class IpcServer : public IpcBase {
+ public:
+  IpcServer(int id, const char* name = "server");
+  virtual ~IpcServer();
 
-public:
-		// Create and destroy functions
-		bool create();
-		void close(void);
-		SharedFmiMessage* send(SharedFmiMessage* message, DWORD dwTimeout);
+ public:
+  // Create and destroy functions
+  bool create();
+  void close(void);
+  SharedFmiMessage* send(SharedFmiMessage* message, DWORD dwTimeout);
 };
 
 } /* namespace FmiIpc */

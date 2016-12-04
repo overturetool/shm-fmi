@@ -13,8 +13,8 @@
 #include <conio.h>
 #include <tchar.h>
 typedef HANDLE SIGNAL_HANDLE;
-#define strdup (const char*)_strdup;
-#elif __APPLE__ ||  __linux
+#define strdup (const char*) _strdup;
+#elif __APPLE__ || __linux
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,61 +52,59 @@ typedef sem_t* SIGNAL_HANDLE;
 using namespace sharedfmimemory;
 
 // Definitions
-#define IPC_BLOCK_COUNT			512
-#define IPC_BLOCK_SIZE			4096
+#define IPC_BLOCK_COUNT 512
+#define IPC_BLOCK_SIZE 4096
 
-#define IPC_MAX_ADDR			256
+#define IPC_MAX_ADDR 256
 
-namespace FmiIpc
-{
+namespace FmiIpc {
 
-#define dprintf(format,args...) if(this->debugPrintPtr) this->debugPrintPtr(this->id,format,args);
-#define dprint(format) if(this->debugPrintPtr) this->debugPrintPtr(this->id,format);
+#define dprintf(format, args...) \
+  if (this->debugPrintPtr) this->debugPrintPtr(this->id, format, args);
+#define dprint(format) \
+  if (this->debugPrintPtr) this->debugPrintPtr(this->id, format);
 
-class IpcBase
-{
-public:
-	IpcBase(int id, const char* shmName);
-	virtual ~IpcBase();
+class IpcBase {
+ public:
+  IpcBase(int id, const char* shmName);
+  virtual ~IpcBase();
 
-	typedef int debugPrintType(int sender, const char * format, ...);
+  typedef int debugPrintType(int sender, const char* format, ...);
 
-	static const char* SIGNAL_NAME;
-	static const char* SIGNAL_AVALIABLE_NAME;
-	static const char* SHARED_MEM_BASE_NAME;
-	debugPrintType *debugPrintPtr;
+  static const char* SIGNAL_NAME;
+  static const char* SIGNAL_AVALIABLE_NAME;
+  static const char* SHARED_MEM_BASE_NAME;
+  debugPrintType* debugPrintPtr;
 
-	int getId()
-	{
-		return this->id;
-	}
-	;
-	void enableConsoleDebug();
+  int getId() { return this->id; };
+  void enableConsoleDebug();
 
-private:
-	static int internalDebugPrint(int sender, const char * format, ...);
-	static void signalClose(SIGNAL_HANDLE signal);
-	void unmap(void* ptr, std::string* name);
-protected:
-	void mapShm(bool*success, HANDLE handle, bool truncate);
-	HANDLE openShm(bool*success, const char* name, bool create = false);
-	bool signalWait(SIGNAL_HANDLE signal, DWORD dwTimeout);
-	void signalPost(SIGNAL_HANDLE signal);
+ private:
+  static int internalDebugPrint(int sender, const char* format, ...);
+  static void signalClose(SIGNAL_HANDLE signal);
+  void unmap(void* ptr, std::string* name);
 
-protected:
-	int id;
-	// Internal variables
-	HANDLE m_hMapFile;		// Handle to the mapped memory file
-	const char* m_hMapFileName;
-	SIGNAL_HANDLE m_hSignal;		// Event used to signal when data exists
-	SIGNAL_HANDLE m_hAvail;		// Event used to signal when some blocks become available
-	std::string* m_name;
-	SharedFmiMem *m_pBuf;		// Buffer that points to the shared memory
+ protected:
+  void mapShm(bool* success, HANDLE handle, bool truncate);
+  HANDLE openShm(bool* success, const char* name, bool create = false);
+  bool signalWait(SIGNAL_HANDLE signal, DWORD dwTimeout);
+  void signalPost(SIGNAL_HANDLE signal);
 
-//		int printf(int sender, const char * format, ...);
-	std::string getMappedName(void* self, const char* baseName, const char* name);
+ protected:
+  int id;
+  // Internal variables
+  HANDLE m_hMapFile;  // Handle to the mapped memory file
+  const char* m_hMapFileName;
+  SIGNAL_HANDLE m_hSignal;  // Event used to signal when data exists
+  SIGNAL_HANDLE
+  m_hAvail;  // Event used to signal when some blocks become available
+  std::string* m_name;
+  SharedFmiMem* m_pBuf;  // Buffer that points to the shared memory
 
-	SIGNAL_HANDLE createSignal(const char* baseName, bool create = false);
+  //		int printf(int sender, const char * format, ...);
+  std::string getMappedName(void* self, const char* baseName, const char* name);
+
+  SIGNAL_HANDLE createSignal(const char* baseName, bool create = false);
 };
 
 } /* namespace FmiIpc */

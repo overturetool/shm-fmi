@@ -21,53 +21,44 @@
 void remoteClientThread();
 void remoteClientThreadResume();
 
-class FmuProxyTest: public ::testing::Test
-{
-public:
-	FmuProxyTest()
-	{
-		m_client = NULL;
-		t1 = NULL;
-	}
+class FmuProxyTest : public ::testing::Test {
+ public:
+  FmuProxyTest() {
+    m_client = NULL;
+    t1 = NULL;
+  }
 
-	void SetUp()
-	{
-		m_client = new FmuProxy(0, MEM_KEY);
-		m_client->getChannel()->enableConsoleDebug();
+  void SetUp() {
+    m_client = new FmuProxy(0, MEM_KEY);
+    m_client->getChannel()->enableConsoleDebug();
 
-		EXPECT_EQ(true, m_client->initialize());
+    EXPECT_EQ(true, m_client->initialize());
 
-		t1 = new std::thread(remoteClientThread);
-	}
+    t1 = new std::thread(remoteClientThread);
+  }
 
-	void TearDown()
-	{
-		if (m_client != NULL)
-		{
-			delete m_client;
-		}
-		t1->join();
-	}
+  void TearDown() {
+    if (m_client != NULL) {
+      delete m_client;
+    }
+    t1->join();
+  }
 
-	~FmuProxyTest()
-	{
-		// cleanup any pending stuff, but no exceptions allowed
-	}
+  ~FmuProxyTest() {
+    // cleanup any pending stuff, but no exceptions allowed
+  }
 
-	void resetServiceThread()
-	{
-		t1->join();
-		t1 = new std::thread(remoteClientThreadResume);
-	}
+  void resetServiceThread() {
+    t1->join();
+    t1 = new std::thread(remoteClientThreadResume);
+  }
 
-	FmuProxy* m_client;
+  FmuProxy* m_client;
 
-	std::thread* t1;
+  std::thread* t1;
 
-private:
-
-public:
-
+ private:
+ public:
 };
 
 #endif /* EXTERNALCLIENTTEST_H_ */

@@ -10,6 +10,6 @@
 
 #include "fmi2.h"
 
-int loadDll(const char* dllPath, FMU *fmu,HMODULE* h);
+int loadDll(const char* dllPath, FMU* fmu, HMODULE* h);
 
 #endif /* FMU_LOADER_H_ */

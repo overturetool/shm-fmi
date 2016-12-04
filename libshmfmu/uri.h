@@ -9,14 +9,13 @@
 #define URI_H_
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 /* The system include files */
 #include <string.h>
 #include <ctype.h>
-#include  <stdlib.h>
+#include <stdlib.h>
 
 const char* URIToNativePath(const char* uri);
 
