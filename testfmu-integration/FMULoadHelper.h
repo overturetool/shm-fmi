@@ -22,6 +22,12 @@ extern "C"
 #include "fmu-loader.h"
 }
 
+#include "fmi2FunctionTypes.h"
+
+extern "C"{
+void fmuLogger(fmi2ComponentEnvironment, fmi2String, fmi2Status, fmi2String, fmi2String, ...);
+}
+
 
 #define toleranceDefined true
 #define tolerance 0.1
@@ -35,8 +41,17 @@ class FMULoadHelper
 {
 private:
 	FMU fmu;
+	fmi2CallbackFunctions* m_callback=NULL;
+	fmi2Component comp=NULL;
 
 public:
+
+	~FMULoadHelper()
+		{
+			// cleanup any pending stuff, but no exceptions allowed
+			delete m_callback;
+		}
+
 	FMU load()
 	{
 
@@ -72,8 +87,15 @@ strcat (str,cwd);
 		if (cwd == NULL)
 		perror("unable to obtaining cur directory\n");
 
-		fmi2Component comp = fmu.instantiate(name, fmi2CoSimulation,
-				GUID, str, NULL, true, true);
+
+
+		m_callback= (fmi2CallbackFunctions*) malloc(sizeof( fmi2CallbackFunctions));
+				fmi2CallbackFunctions st ={&fmuLogger,NULL,NULL,NULL,&cwd};
+				memcpy(m_callback, &st, sizeof(fmi2CallbackFunctions));
+
+				comp = fmu.instantiate(name, fmi2CoSimulation, GUID, str, m_callback, true, true);
+
+
 		delete cwd;
 
 		return comp;

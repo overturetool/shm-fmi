@@ -16,7 +16,6 @@
 // This test is the last since it unloads the global test fmu
 TEST(FMUDualLoadTest, doubleLoad)
 {
-
 	FMULoadHelper loaderFmu1;
 
 	FMU fmu1= loaderFmu1.load();

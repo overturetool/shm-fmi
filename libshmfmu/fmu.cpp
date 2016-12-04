@@ -30,6 +30,11 @@
 #include "ConfigFile.h"
 #include "uri.h"
 
+extern "C"{
+
+#include "uuid4.h"
+}
+
 static int currentId = 0;
 
 std::vector<FmuContainer*> g_clients;
@@ -83,24 +88,23 @@ static FmuProxy::fmi2StatusKind convertStatusKind(fmi2StatusKind kind)
 
 }
 
-static void log(const fmi2CallbackFunctions *functions, fmi2ComponentEnvironment componentEnvironment,
-		fmi2String instanceName, fmi2Status status, fmi2String category, fmi2String message)
-{
-	if (functions != NULL && functions->logger != NULL)
-	{
-		functions->logger(componentEnvironment, instanceName, status, category, message);
-	}
-}
 
 static void notimplemented(fmi2Component c, fmi2String message)
 {
-	FmuContainer* fmu = getFmuContainer(c);
+	printf("in not implemented: %p\n",c);fflush(stdout);
+	FmuContainer* fmu = (FmuContainer*)c;//getFmuContainer(c);
+	printf("in not implemented casted: %p\n",fmu);fflush(stdout);
 
-	if (fmu != NULL)
+	printf("in not implemented 1: %p\n",fmu);fflush(stdout);
+	printf("in not implemented 2: %p\n",fmu->m_functions);fflush(stdout);
+	printf("in not implemented 3: %p\n",fmu->m_functions->logger);fflush(stdout);
+
+	if (fmu != NULL && fmu->m_functions!=NULL && fmu->m_functions->logger!=NULL)
 	{
 		std::string base("Not implemented: ");
 		std::string m(message);
-		log(fmu->m_functions, NULL, fmu->m_name, fmi2Error, "error", (base + m).c_str());
+		//log(fmu->m_functions, fmu->componentEnvironment, fmu->m_name, fmi2Error, "error", (base + m).c_str());
+		fmu->m_functions->logger(fmu->componentEnvironment, fmu->m_name, fmi2Error, "error", (base + m).c_str());
 	}
 }
 
@@ -115,7 +119,7 @@ void sleepcp(int milliseconds) // cross-platform sleep function
 
 void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 {
-	if (container->logger == NULL)
+	if (container->m_functions == NULL || container->m_functions->logger == NULL)
 	{
 		return;
 	}
@@ -185,7 +189,7 @@ void callbackThreadFunc(FmuContainer *container, const char* shmCallbackKey)
 				}
 
 //				printf("Log message received; %s\n",r->value().c_str());fflush(stdout);
-				container->logger(container->componentEnvironment, container->m_name, status, r->category().c_str(),
+				container->m_functions->logger(container->componentEnvironment, container->m_name, status, r->category().c_str(),
 						r->value().c_str());
 
 				delete r;
@@ -225,7 +229,7 @@ int fmuInternalDebugPrint(int sender, const char * format, ...)
 		FmuContainer* c = g_clients.at(i);
 		if (c && c->m_proxy->getChannel()->getId() == sender)
 		{
-			g_clients.at(i)->logger(c->componentEnvironment, c->m_name, fmi2OK, "LogAll", format, args);
+			g_clients.at(i)->m_functions->logger(c->componentEnvironment, c->m_name, fmi2OK, "LogAll", format, args);
 			va_end(args);
 			return 1;
 		}
@@ -242,6 +246,7 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 		fmi2String fmuResourceLocation, const fmi2CallbackFunctions *functions, fmi2Boolean visible,
 		fmi2Boolean loggingOn)
 {
+
 	//do not return null
 	if (g_clients.size() == 0)
 	{
@@ -255,10 +260,17 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 		LOG(functions, instanceName, fmi2OK, "logFmiCall", "FMU: Called instantiate with instance %s and GUID %s",
 				instanceName, fmuGUID);
 	}
-	std::string shared_memory_key(fmuGUID);
-	shared_memory_key.append(instanceName);
+	//std::string shared_memory_key(fmuGUID);
+	//shared_memory_key.append(instanceName);
 	//replace key with hash
-	shared_memory_key = std::to_string(std::hash<std::string>()(shared_memory_key));
+//	shared_memory_key = std::to_string(std::hash<std::string>()(shared_memory_key));
+	char buf[UUID4_LEN];
+	if(uuid4_generate(buf) != UUID4_ESUCCESS)
+	{
+		LOG(functions, instanceName, fmi2Fatal, "logFmiCall", "FMU: Could not generate UUID4 for shared memory%s","");
+	}
+	std::string shared_memory_key(buf);
+
 
 //	setbuf(stdout, NULL); //fixme remove
 
@@ -296,10 +308,6 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 
 	g_clients.push_back(container);
 
-	if (functions != NULL && functions->logger != NULL)
-	{
-		container->logger = functions->logger;
-	}
 
 	if (!client->initialize())
 	{
@@ -340,7 +348,6 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName, fmi2Type fmuTy
 		}
 	}
 
-//	delete callbackId;
 
 	return (void*) container;
 }

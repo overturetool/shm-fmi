@@ -28,7 +28,7 @@ public:
 	bool active;
 
 	//FMI
-	fmi2CallbackLogger logger;
+
 	fmi2ComponentEnvironment componentEnvironment;
 
 	int id;

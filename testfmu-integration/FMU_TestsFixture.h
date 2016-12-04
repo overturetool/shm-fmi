@@ -17,12 +17,19 @@
 //current dir
 #include <unistd.h>
 
+#include "fmi2FunctionTypes.h"
+
+extern "C"{
+void fmuLogger(fmi2ComponentEnvironment, fmi2String, fmi2Status, fmi2String, fmi2String, ...);
+}
+
 class FMUTest: public ::testing::Test
 {
 public:
 	FMUTest()
 	{
 		comp = NULL;
+		m_callback = NULL;
 	}
 
 	void SetUp()
@@ -32,9 +39,9 @@ public:
 
 	void TearDown()
 	{
-		if (fmu.dllHandle != NULL && comp != NULL)
+		if ( fmu.dllHandle != NULL && comp != NULL)
 		{
-			if(isInstantiated)
+			if (isInstantiated)
 			{
 				fmu.freeInstance(comp);
 			}
@@ -45,10 +52,13 @@ public:
 	~FMUTest()
 	{
 		// cleanup any pending stuff, but no exceptions allowed
+		if(this->m_callback!=NULL)
+		delete m_callback;
 	}
 
 	FMU fmu;
 	fmi2Component comp;
+	fmi2CallbackFunctions* m_callback;
 
 	bool isInstantiated = false;
 private:
@@ -73,24 +83,30 @@ private:
 		return fmu;
 	}
 
+
+
 public:
 
 	fmi2Component instantiated()
 	{
 
-char str[200];
+		char str[200];
 
 		char * cwd = getcwd(NULL, 0);
 
-strcpy (str,"file:");
-strcat (str,cwd);
+		strcpy(str, "file:");
+		strcat(str, cwd);
 
 		if (cwd == NULL)
 			perror("unable to obtaining cur directory\n");
 
-printf("make cwd into uri: %s\n",str);
-		comp = fmu.instantiate(INSTANCE_NAME, fmi2CoSimulation, GUID, str, NULL,
-				true, true);
+		printf("make cwd into uri: %s\n", str);
+
+		m_callback= (fmi2CallbackFunctions*) malloc(sizeof( fmi2CallbackFunctions));
+		fmi2CallbackFunctions st ={&fmuLogger,NULL,NULL,NULL,&cwd};
+		memcpy(m_callback, &st, sizeof(fmi2CallbackFunctions));
+
+		comp = fmu.instantiate(INSTANCE_NAME, fmi2CoSimulation, GUID, str, m_callback, true, true);
 		delete cwd;
 
 		isInstantiated = true;
@@ -101,8 +117,8 @@ printf("make cwd into uri: %s\n",str);
 	{
 		fmi2Component comp = instantiated();
 
-		fmi2Status status = fmu.setupExperiment(comp, toleranceDefined,
-				tolerance, startTime, stopTimeDefined, stopTime);
+		fmi2Status status = fmu.setupExperiment(comp, toleranceDefined, tolerance, startTime, stopTimeDefined,
+				stopTime);
 
 		EXPECT_EQ(fmi2OK, status);
 		return comp;
