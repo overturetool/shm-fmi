@@ -92,7 +92,7 @@ const char* URIToNativePath(const char* uri) {
   //	if (g_fmiCallbackFunctions.allocateMemory != NULL)
   //	{
   //		path = (char*) g_fmiCallbackFunctions.allocateMemory(path_len +
-  //2,
+  // 2,
   // sizeof(char));
   //	}
   //%ENDIF%
@@ -101,7 +101,7 @@ const char* URIToNativePath(const char* uri) {
   //!= NULL))
   //	{
   //		path = (char*) g_fmiCallbackFunctions->allocateMemory(path_len +
-  //2,
+  // 2,
   // sizeof(char));
   //	}
   //%ENDIF%
