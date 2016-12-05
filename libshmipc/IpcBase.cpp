@@ -184,7 +184,7 @@ HANDLE IpcBase::openShm(bool* success, const char* name, bool create) {
 
 #ifdef _WIN32
   if (handle == NULL || handle == INVALID_HANDLE_VALUE) {
-    dprintf("\tIPC %s %d: Failed to create/open shm: %s\n", m_log_name, m_id,
+    dprintf("\tIPC %s %d: Failed to create/open shm: %s\n", m_log_name_id, m_id,
             GetLastErrorAsString().c_str());
     *success = false;
   }
@@ -209,7 +209,7 @@ void IpcBase::mapShm(bool* success, HANDLE handle, bool truncate) {
       FILE_MAP_ALL_ACCESS,  // read/write permission
       0, 0, sizeof(SharedFmiMem));
   if (m_pBuf == NULL) {
-    dprintf("\tIPC %s %d: MapViewOfFile: failed: %01d\n", m_log_name, m_id,
+    dprintf("\tIPC %s %d: MapViewOfFile: failed: %01d\n", m_log_name_id, m_id,
             __LINE__);
     *success = false;
     return;
@@ -263,7 +263,7 @@ SIGNAL_HANDLE IpcBase::createSignal(bool* success, const char* baseName,
   signal = OpenEventA(security, FALSE, signalName.c_str());
   if (signal == NULL) {
     if (!create) {
-      dprintf("\tIPC %s %d: OpenEventA failed. Error: %s\n", m_log_name, m_id,
+      dprintf("\tIPC %s %d: OpenEventA failed. Error: %s\n", m_log_name_id, m_id,
               GetLastErrorAsString().c_str());
     }
   }
@@ -275,14 +275,14 @@ SIGNAL_HANDLE IpcBase::createSignal(bool* success, const char* baseName,
     // Create the events
     signal = CreateEventA(NULL, FALSE, FALSE, signalName.c_str());
     if (signal == NULL) {
-      dprintf("\tIPC %s %d: CreateEventA failed. Error: %s\n", m_log_name, m_id,
+      dprintf("\tIPC %s %d: CreateEventA failed. Error: %s\n", m_log_name_id, m_id,
               GetLastErrorAsString().c_str());
       *success = false;
     }
   }
   if (signal == NULL || signal == INVALID_HANDLE_VALUE) {
     if (signal == INVALID_HANDLE_VALUE) {
-      dprintf("\tIPC %s %d: signal_create: invalid handle\n", m_log_name, m_id);
+      dprintf("\tIPC %s %d: signal_create: invalid handle\n", m_log_name_id, m_id);
     }
     dprintf("signal_create: failed: %01d\n", __LINE__);
     *success = false;
