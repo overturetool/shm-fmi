@@ -42,7 +42,8 @@ void remoteTestDriver(const char* shmKey) {
 
   // if (globalClient == NULL)
   {
-    client = new FmiIpc::IpcClient(0, &success, shmKey);
+    client = new FmiIpc::IpcClient(0, shmKey);
+    client->connect(&success);
     if (!success) {
       remoteTestDriver(shmKey);
       return;

@@ -109,9 +109,10 @@ void callbackThreadFunc(FmuContainer* container, const char* shmCallbackKey) {
   FmiIpc::IpcClient* callbackClient = NULL;
   bool success = false;
   while (container->active && !success) {
-    callbackClient =
-        new FmiIpc::IpcClient(container->id, &success, shmCallbackKey);
+    callbackClient = new FmiIpc::IpcClient(container->id, shmCallbackKey);
 
+    printf("Trying to connect callback client\n");
+    callbackClient->connect(&success);
     if (!success) {
       delete callbackClient;
       callbackClient = NULL;
@@ -281,7 +282,8 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
   }
 
   FmuProxy* client = new FmuProxy(currentId, shared_memory_key);
-  client->getChannel()->debugPrintPtr = NULL;
+  //  client->getChannel()->debugPrintPtr = NULL;
+  client->getChannel()->enableConsoleDebug();
   FmuContainer* container =
       new FmuContainer(currentId, client, instanceName, functions, launcher);
 

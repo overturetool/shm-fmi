@@ -19,7 +19,8 @@
 
 void clientThread() {
   bool success;
-  FmiIpc::IpcClient client(0, &success, MEM_KEY);
+  FmiIpc::IpcClient client(0, MEM_KEY);
+  client.connect(&success);
   if (!success) {
     // recurse until connected
     clientThread();

@@ -60,9 +60,9 @@ using namespace sharedfmimemory;
 namespace FmiIpc {
 
 #define dprintf(format, args...) \
-  if (this->debugPrintPtr) this->debugPrintPtr(this->id, format, args);
+  if (this->debugPrintPtr) this->debugPrintPtr(this->m_id, format, args);
 #define dprint(format) \
-  if (this->debugPrintPtr) this->debugPrintPtr(this->id, format);
+  if (this->debugPrintPtr) this->debugPrintPtr(this->m_id, format);
 
 class IpcBase {
  public:
@@ -76,7 +76,7 @@ class IpcBase {
   static const char* SHARED_MEM_BASE_NAME;
   debugPrintType* debugPrintPtr;
 
-  int getId() { return this->id; };
+  int getId() { return this->m_id; };
   void enableConsoleDebug();
 
  private:
@@ -89,9 +89,11 @@ class IpcBase {
   HANDLE openShm(bool* success, const char* name, bool create = false);
   bool signalWait(SIGNAL_HANDLE signal, DWORD dwTimeout);
   void signalPost(SIGNAL_HANDLE signal);
+  SIGNAL_HANDLE createSignal(bool* success, const char* baseName,
+                             bool create = false);
 
  protected:
-  int id;
+  int m_id;
   // Internal variables
   HANDLE m_hMapFile;  // Handle to the mapped memory file
   const char* m_hMapFileName;
@@ -101,10 +103,10 @@ class IpcBase {
   std::string* m_name;
   SharedFmiMem* m_pBuf;  // Buffer that points to the shared memory
 
+  const char* m_log_name_id;
+
   //		int printf(int sender, const char * format, ...);
   std::string getMappedName(void* self, const char* baseName, const char* name);
-
-  SIGNAL_HANDLE createSignal(const char* baseName, bool create = false);
 };
 
 } /* namespace FmiIpc */

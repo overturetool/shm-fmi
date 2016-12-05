@@ -34,6 +34,7 @@ void okReply(SharedFmiMessage* msg) {
 }
 
 static FmiIpc::IpcClient* globalClient = NULL;
+static bool g_client_connected = false;
 
 void remoteTestDriverSingle(const char* shmKey) {
   globalClient = NULL;
@@ -46,42 +47,32 @@ void remoteTestDriver(const char* shmKey) {
   bools[boolIdGet] = true;
   strings[stringIdGet] = std::string("undefined");
 
-  bool success;
-
-  FmiIpc::IpcClient* client = globalClient;
-
   if (globalClient == NULL) {
-    //	printf("Trying to connect client: ");
-    while (!success || client == NULL) {
-      //	printf(".");
-      client = new FmiIpc::IpcClient(0, &success, shmKey);
+    while (!g_client_connected || globalClient == NULL) {
+      g_client_connected = true;
+      globalClient = new FmiIpc::IpcClient(88, shmKey);
+      globalClient->enableConsoleDebug();
+      globalClient->connect(&g_client_connected);
+      if (!g_client_connected) printf("Client failed to connect\n");
     }
-    //	printf("\n Connected.\n");
   }
 
-  SharedFmiMessage* msg = client->getMessage(0);
-
-  //	printf("Client got message\n");
+  SharedFmiMessage* msg = globalClient->getMessage(0);
 
   switch (msg->cmd) {
     case sharedfmimemory::fmi2FreeInstance:
-      delete client;
+      delete globalClient;
       exit(0);
       break;
 
     case sharedfmimemory::fmi2SetDebugLogging:
     case sharedfmimemory::fmi2Instantiate:
-    //	case sharedfmimemory::fmi2FreeInstance:
     case sharedfmimemory::fmi2SetupExperiment:
     case sharedfmimemory::fmi2EnterInitializationMode:
     case sharedfmimemory::fmi2ExitInitializationMode:
     case sharedfmimemory::fmi2Terminate:
     case sharedfmimemory::fmi2Reset:
     case sharedfmimemory::fmi2DoStep:
-    // case sharedfmimemory::fmi2SetReal:
-    // case sharedfmimemory::fmi2SetInteger:
-    // case sharedfmimemory::fmi2SetBoolean:
-    // case sharedfmimemory::fmi2SetString:
     case sharedfmimemory::fmi2GetStatus: {
       okReply(msg);
 
@@ -248,7 +239,7 @@ void remoteTestDriver(const char* shmKey) {
 
       break;
   }
-  client->sendReply(msg);
+  globalClient->sendReply(msg);
 
   return;
 }

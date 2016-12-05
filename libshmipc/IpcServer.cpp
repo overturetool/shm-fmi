@@ -9,7 +9,9 @@
 
 namespace FmiIpc {
 
-IpcServer::IpcServer(int id, const char* name) : FmiIpc::IpcBase(id, name) {}
+IpcServer::IpcServer(int id, const char* name) : FmiIpc::IpcBase(id, name) {
+  m_log_name_id = "server";
+}
 
 IpcServer::~IpcServer() { this->close(); }
 
@@ -20,50 +22,45 @@ bool IpcServer::create() {
 
   std::string nameOfMapping =
       getMappedName(this, SHARED_MEM_BASE_NAME, this->m_name->c_str());
-  dprintf("Starting IPC server with key: %s\n", nameOfMapping.c_str());
+  dprintf("\tIPC %s %d: Starting with key: %s\n", m_log_name_id, m_id,
+          nameOfMapping.c_str());
   // Create the file mapping
 
   m_hMapFile = openShm(&ok, nameOfMapping.c_str(), true);
   if (!ok) {
-    dprintf("Error in IPC server could not create shared memory key: %s\n",
-            nameOfMapping.c_str());
+    dprintf("\tIPC %s %d: Error could not create shared memory key: %s\n",
+            m_log_name_id, m_id, nameOfMapping.c_str());
     return false;
   }
   m_hMapFileName = strdup(nameOfMapping.c_str());
   mapShm(&ok, m_hMapFile, true);
   if (!ok) {
-    dprintf("Error in IPC server could not map shared memory key: %s\n",
-            nameOfMapping.c_str());
+    dprintf("\tIPC %s %d: Error could not map shared memory key: %s\n",
+            m_log_name_id, m_id, nameOfMapping.c_str());
     return false;
   }
 
   // Create the events
-  this->m_hSignal = this->createSignal(SIGNAL_NAME, true);
-  this->m_hAvail = this->createSignal(SIGNAL_AVALIABLE_NAME, true);
-  ok = this->m_hSignal != NULL && this->m_hAvail != NULL;
+  this->m_hSignal = this->createSignal(&ok, SIGNAL_NAME, true);
+  if (!ok) {
+    dprintf("\tIPC %s %d: Error create key: %s, signal=NULL\n", m_log_name_id,
+            m_id, nameOfMapping.c_str());
+    return ok;
+  }
 
-  if (this->m_pBuf == NULL || this->m_hSignal == NULL ||
-      this->m_hAvail == NULL) {
-    if (this->m_pBuf == NULL) {
-      dprintf("Error in IPC server create key: %s, buf=NULL\n",
-              nameOfMapping.c_str());
-    }
-    if (this->m_hSignal == NULL) {
-      dprintf("Error in IPC server create key: %s, signal=NULL\n",
-              nameOfMapping.c_str());
-    }
-    if (this->m_hSignal == NULL) {
-      dprintf("Error in IPC server create key: %s, avail=NULL\n",
-              nameOfMapping.c_str());
-    }
-    ok = false;
+  this->m_hAvail = this->createSignal(&ok, SIGNAL_AVALIABLE_NAME, true);
+  if (!ok) {
+    dprintf("\tIPC %s %d: Error create key: %s, avail=NULL\n", m_log_name_id,
+            m_id, nameOfMapping.c_str());
+    return ok;
   }
 
   return ok;
 }
 void IpcServer::close(void) {}
 SharedFmiMessage* IpcServer::send(SharedFmiMessage* message, DWORD dwTimeout) {
-  dprint("IPC Server write msg\n");
+  dprintf("\tIPC %s %d: Writing msg. Type: %d, Size: %d\n", m_log_name_id, m_id,
+          message->cmd, message->protoBufMsgSize);
   this->m_pBuf->message = *message;
 
   signalPost(this->m_hAvail);
@@ -72,7 +69,9 @@ SharedFmiMessage* IpcServer::send(SharedFmiMessage* message, DWORD dwTimeout) {
     return NULL;
   }
 
-  dprint("IPC Server received data\n");
+  dprintf("\tIPC %s %d: Received msg. Type: %d, Size: %d\n", m_log_name_id,
+          m_id, this->m_pBuf->message.cmd,
+          this->m_pBuf->message.protoBufMsgSize);
   return &this->m_pBuf->message;
 }
 

@@ -29,7 +29,7 @@ const char* IpcBase::SIGNAL_NAME = "/sig";
 IpcBase::IpcBase(int id, const char* shmName) {
   this->debugPrintPtr = NULL;  // &IpcBase::internalDebugPrint;
 
-  this->id = id;
+  this->m_id = id;
   this->m_name = new std::string(shmName);
 
   m_hMapFile = 0;
@@ -37,33 +37,38 @@ IpcBase::IpcBase(int id, const char* shmName) {
   m_hSignal = 0;
   m_hAvail = 0;
   m_pBuf = NULL;
+  m_log_name_id = NULL;
 }
 
 IpcBase::~IpcBase() {
   // Close the event
   if (m_hSignal) {
-    dprintf("Closing m_hSignal for: '%s'\n", m_name->c_str());
+    dprintf("\tIPC %s %d: Closing m_hSignal for: '%s'\n", m_log_name_id, m_id,
+            m_name->c_str());
     signalClose(m_hSignal);
     m_hSignal = NULL;
   }
 
   // Close the event
   if (m_hAvail) {
-    dprintf("Closing m_hAvail for: '%s'\n", m_name->c_str());
+    dprintf("\tIPC %s %d: Closing m_hAvail for: '%s'\n", m_log_name_id, m_id,
+            m_name->c_str());
     signalClose(m_hAvail);
     m_hAvail = NULL;
   }
 
   // Unmap the memory
   if (m_pBuf) {
-    dprintf("Unmapping m_pBuf for: '%s'\n", m_name->c_str());
+    dprintf("\tIPC %s %d: Unmapping m_pBuf for: '%s'\n", m_log_name_id, m_id,
+            m_name->c_str());
     unmap(m_pBuf, m_name);
     m_pBuf = NULL;
   }
 
   // Close the file handle
   if (m_hMapFile) {
-    dprintf("Unlink m_hMapFile for: '%s'\n", m_hMapFileName);
+    dprintf("\tIPC %s %d: Unlink m_hMapFile for: '%s'\n", m_log_name_id, m_id,
+            m_hMapFileName);
 
 #ifdef _WIN32
     CloseHandle(m_hMapFile);
@@ -102,8 +107,9 @@ std::string IpcBase::getMappedName(void* self, const char* baseName,
                                    const char* name) {
   std::string nameOfMapping(baseName);
   nameOfMapping += std::string(name);
-  dprintf("Creating mapped name from '%s' and '%s' = '%s'\n", baseName, name,
-          nameOfMapping.c_str());
+//  dprintf("\tIPC %s: Creating mapped name from '%s' and '%s' =
+//  '%s'\n",m_log_name_id, baseName, name,
+//          nameOfMapping.c_str());
 #ifdef __APPLE__
 
   if (nameOfMapping.length() >= 29)  // 31 is max incl NULL
@@ -111,8 +117,9 @@ std::string IpcBase::getMappedName(void* self, const char* baseName,
     std::string hash = std::to_string(std::hash<std::string>()(nameOfMapping));
     nameOfMapping = "/";
     nameOfMapping += hash;
-    dprintf("New Apple shm key is: %s from baseName %s and name %s\n",
-            nameOfMapping.c_str(), baseName, name);
+    //    dprintf("\tIPC %s: New Apple shm key is: %s from baseName %s and name
+    //    %s\n",m_log_name_id,
+    //            nameOfMapping.c_str(), baseName, name);
   }
 
 #endif
@@ -177,12 +184,14 @@ HANDLE IpcBase::openShm(bool* success, const char* name, bool create) {
 
 #ifdef _WIN32
   if (handle == NULL || handle == INVALID_HANDLE_VALUE) {
-    dprintf("Failed to create/open shm: %s\n", GetLastErrorAsString().c_str());
+    dprintf("\tIPC %s %d: Failed to create/open shm: %s\n", m_log_name, m_id,
+            GetLastErrorAsString().c_str());
     *success = false;
   }
 #else
   if (handle == -1) {
-    dprintf("server_create: failed: %01d %s\n", __LINE__, strerror(errno));
+    dprintf("\tIPC %s %d: server_create: failed: %01d %s\n", m_log_name_id,
+            m_id, __LINE__, strerror(errno));
     *success = false;
   }
 #endif
@@ -200,7 +209,8 @@ void IpcBase::mapShm(bool* success, HANDLE handle, bool truncate) {
       FILE_MAP_ALL_ACCESS,  // read/write permission
       0, 0, sizeof(SharedFmiMem));
   if (m_pBuf == NULL) {
-    dprintf("MapViewOfFile: failed: %01d\n", __LINE__);
+    dprintf("\tIPC %s %d: MapViewOfFile: failed: %01d\n", m_log_name, m_id,
+            __LINE__);
     *success = false;
     return;
   }
@@ -214,7 +224,8 @@ void IpcBase::mapShm(bool* success, HANDLE handle, bool truncate) {
 #elif __APPLE__ || __linux
   if (truncate) {
     if (ftruncate(handle, sizeof(SharedFmiMem)) != 0) {
-      dprintf("ftruncate: failed: unable to truncate. %s\n", strerror(errno));
+      dprintf("\tIPC %s %d: ftruncate: failed: unable to truncate. %s\n",
+              m_log_name_id, m_id, strerror(errno));
       *success = false;
       return;
     }
@@ -223,7 +234,8 @@ void IpcBase::mapShm(bool* success, HANDLE handle, bool truncate) {
   void* ptr = mmap(NULL, sizeof(SharedFmiMem), PROT_READ | PROT_WRITE,
                    MAP_SHARED, handle, 0);
   if (ptr == MAP_FAILED) {
-    dprintf("mmap: failed: mmap: %s\n", strerror(errno));
+    dprintf("\tIPC %s %d: mmap: failed: mmap: %s\n", m_log_name_id, m_id,
+            strerror(errno));
     *success = false;
     return;
   }
@@ -238,9 +250,9 @@ void IpcBase::mapShm(bool* success, HANDLE handle, bool truncate) {
  * This function creates or opens a named semaphore
  *
  */
-SIGNAL_HANDLE IpcBase::createSignal(const char* baseName, bool create) {
+SIGNAL_HANDLE IpcBase::createSignal(bool* success, const char* baseName,
+                                    bool create) {
   std::string signalName = getMappedName(this, baseName, this->m_name->c_str());
-  bool success = true;
   SIGNAL_HANDLE signal = NULL;
 #ifdef _WIN32
   DWORD security = SYNCHRONIZE | EVENT_MODIFY_STATE;
@@ -251,7 +263,8 @@ SIGNAL_HANDLE IpcBase::createSignal(const char* baseName, bool create) {
   signal = OpenEventA(security, FALSE, signalName.c_str());
   if (signal == NULL) {
     if (!create) {
-      dprintf("OpenEventA failed. Error: %s\n", GetLastErrorAsString().c_str());
+      dprintf("\tIPC %s %d: OpenEventA failed. Error: %s\n", m_log_name, m_id,
+              GetLastErrorAsString().c_str());
     }
   }
   if (create) {
@@ -262,42 +275,43 @@ SIGNAL_HANDLE IpcBase::createSignal(const char* baseName, bool create) {
     // Create the events
     signal = CreateEventA(NULL, FALSE, FALSE, signalName.c_str());
     if (signal == NULL) {
-      dprintf("CreateEventA failed. Error: %s\n",
+      dprintf("\tIPC %s %d: CreateEventA failed. Error: %s\n", m_log_name, m_id,
               GetLastErrorAsString().c_str());
+      *success = false;
     }
   }
   if (signal == NULL || signal == INVALID_HANDLE_VALUE) {
     if (signal == INVALID_HANDLE_VALUE) {
-      dprint("signal_create: invalid handle\n");
+      dprintf("\tIPC %s %d: signal_create: invalid handle\n", m_log_name, m_id);
     }
     dprintf("signal_create: failed: %01d\n", __LINE__);
-    success = false;
-    ;
+    *success = false;
   }
 
 #elif __APPLE__ || __linux__
 
   if (create) {
-    dprintf("creating new signal: '%s'\n", signalName.c_str());
+    dprintf("\tIPC %s %d: creating new signal: '%s'\n", m_log_name_id, m_id,
+            signalName.c_str());
     sem_unlink(signalName.c_str());
     signal = sem_open(signalName.c_str(), O_CREAT, ALLPERMS, 0);
 
   } else {
-    dprintf("creating new signal: '%s'\n", signalName.c_str());
+    dprintf("\tIPC %s %d: creating new signal: '%s'\n", m_log_name_id, m_id,
+            signalName.c_str());
     signal = sem_open(signalName.c_str(), 0);
   }
 
   if (signal == SEM_FAILED) {
-    dprintf("signal_create: failed: sem_open signal: %s\n", strerror(errno));
-    success = false;
+    dprintf("\tIPC %s %d: signal_create: failed: sem_open signal: %s\n",
+            m_log_name_id, m_id, strerror(errno));
+    *success = false;
   }
 
 #endif
 
   if (!success) {
     signal = NULL;
-  } else {
-    dprintf("creating new signal: '%s'. Success.\n", signalName.c_str());
   }
 
   return signal;
@@ -339,8 +353,8 @@ void IpcBase::signalPost(SIGNAL_HANDLE signal) {
 #elif __APPLE__ || __linux
 
   if (sem_post(signal) == -1) {
-    dprintf("signal: failed: sem_postn signal 'm_hAvail': %s\n",
-            strerror(errno));
+    dprintf("\tIPC %s %d: signal: failed: sem_postn signal 'm_hAvail': %s\n",
+            m_log_name_id, m_id, strerror(errno));
   }
 #endif
 }
@@ -361,7 +375,7 @@ void IpcBase::unmap(void* ptr, std::string* name) {
   // POSIX
   int r = munmap(ptr, sizeof(SharedFmiMem));
   if (r != 0) {
-    dprint("munmap");
+    dprintf("\tIPC %s %d: munmap", m_log_name_id, m_id);
   }
 #endif
 }

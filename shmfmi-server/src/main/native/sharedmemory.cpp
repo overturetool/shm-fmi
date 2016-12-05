@@ -27,11 +27,13 @@ JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setId(JNIE
 	}
 	bool success;
 
-	g_client = new FmiIpc::IpcClient(0, &success, idString);
+	g_client = new FmiIpc::IpcClient(0,  idString);
 	if (g_clientDebug)
 	{
 		g_client->enableConsoleDebug();
 	}
+
+g_client->connect(&success);
 
 	if (!success)
 	{

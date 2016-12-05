@@ -14,10 +14,9 @@ namespace FmiIpc {
 
 class IpcClient : public IpcBase {
  public:
-  IpcClient(int id, bool* success, const char* name = "server");
+  IpcClient(int id, const char* name = "server");
   virtual ~IpcClient();
 
- private:
   void connect(bool* success);
 
  public:

@@ -50,7 +50,8 @@ int main(int argc, char* argv[]) {
 
     while (!success) {
       printf("Trying to connect and answer. Key: %s\n", key);
-      client = new FmiIpc::IpcClient(1, &success, key);
+      client = new FmiIpc::IpcClient(1, key);
+      client->connect(&success);
     }
 
     printf("Connected.\n");

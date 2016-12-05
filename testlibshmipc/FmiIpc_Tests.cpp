@@ -44,7 +44,8 @@ void runClient(const char* key) {
 
   while (!success) {
     //		printf("Trying to connect and answer. Key: %s\n", key);
-    client = new FmiIpc::IpcClient(1, &success, key);
+    client = new FmiIpc::IpcClient(1, key);
+    client->connect(&success);
     if (!success) delete client;
   }
 
