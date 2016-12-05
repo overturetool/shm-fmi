@@ -1,6 +1,12 @@
 package org.intocps.java.fmi.service;
 
-import java.util.Date;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.intocps.java.fmi.shm.SharedMemory;
 import org.slf4j.Logger;
@@ -76,24 +82,30 @@ public class ProtocolDriver implements Runnable
 				@Override
 				public void run()
 				{
-					Date date = new Date();
 					while (true)
 					{
-						// no need to re-check all the time
-						try
-						{
-							Thread.sleep(5000);
-						} catch (InterruptedException e)
-						{
-						}
-						SharedMemory.waitForWatchDogEvent(); // replies should be 200ms apart
-						Date now = new Date();
-						long seconds = (now.getTime() - date.getTime()) / 1000;
-						if(seconds > REQUIRED_ALIVE_INTERVAL)
-						{
-							logger.warn("No alive signal from FMU since: "+seconds+" seconds. Freeing instance!");
+						ExecutorService executor = Executors.newCachedThreadPool();
+						Callable<Object> task = new Callable<Object>() {
+						   public Object call() {
+						       SharedMemory.waitForWatchDogEvent();
+						       return false;
+						   }
+						};
+						Future<Object> future = executor.submit(task);
+						try {
+						   future.get(300, TimeUnit.MICROSECONDS); 
+						} catch (TimeoutException ex) {
+						   // handle the timeout
+							System.err.println("No alive signal from FMU withing 300 ms period. Freeing instance!");
+							logger.warn("No alive signal from FMU withing 300 ms period. Freeing instance!");
 							service.FreeInstantiate( Fmi2Empty.newBuilder().build());
 							return;
+						} catch (InterruptedException e) {
+						   // handle the interrupts
+						} catch (ExecutionException e) {
+						   // handle other exceptions
+						} finally {
+						   future.cancel(true); // may or may not desire this
 						}
 					}
 				}
