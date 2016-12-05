@@ -35,6 +35,17 @@ extern "C" {
 #include "uuid4.h"
 }
 
+#ifdef _WIN32
+#include <io.h>
+#define access _access_s
+#else
+#include <unistd.h>
+#endif
+
+bool FileExists(const std::string& Filename) {
+  return access(Filename.c_str(), 0) == 0;
+}
+
 static int currentId = 0;
 
 std::vector<FmuContainer*> g_clients;
@@ -111,7 +122,6 @@ void callbackThreadFunc(FmuContainer* container, const char* shmCallbackKey) {
   while (container->active && !success) {
     callbackClient = new FmiIpc::IpcClient(container->id, shmCallbackKey);
 
-    printf("Trying to connect callback client\n");
     callbackClient->connect(&success);
     if (!success) {
       delete callbackClient;
@@ -281,9 +291,17 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
         shared_memory_key.c_str());
   }
 
+  std::string debugFlagFile(resourceLocationStr);
+  debugFlagFile.append("/DEBUG");
+
+  bool DEBUG = FileExists(debugFlagFile);
+
   FmuProxy* client = new FmuProxy(currentId, shared_memory_key);
-  //  client->getChannel()->debugPrintPtr = NULL;
-  client->getChannel()->enableConsoleDebug();
+  if (!DEBUG) {
+    client->getChannel()->debugPrintPtr = NULL;
+  } else {
+    client->getChannel()->enableConsoleDebug();
+  }
   FmuContainer* container =
       new FmuContainer(currentId, client, instanceName, functions, launcher);
 

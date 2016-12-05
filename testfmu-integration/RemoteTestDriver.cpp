@@ -26,6 +26,17 @@ static int ints[TD_SIZE] = {0};
 
 static std::string strings[TD_SIZE];
 
+#ifdef _WIN32
+#include <io.h>
+#define access _access_s
+#else
+#include <unistd.h>
+#endif
+
+bool FileExists(const std::string& Filename) {
+  return access(Filename.c_str(), 0) == 0;
+}
+
 void okReply(SharedFmiMessage* msg) {
   Fmi2StatusReply* r = new Fmi2StatusReply();
   r->set_status(Fmi2StatusReply_Status_Ok);
@@ -51,7 +62,13 @@ void remoteTestDriver(const char* shmKey) {
     while (!g_client_connected || globalClient == NULL) {
       g_client_connected = true;
       globalClient = new FmiIpc::IpcClient(88, shmKey);
-      globalClient->enableConsoleDebug();
+
+      std::string debugFlagFile("DEBUG");
+
+      bool DEBUG = FileExists(debugFlagFile);
+      if (DEBUG) {
+        globalClient->enableConsoleDebug();
+      }
       globalClient->connect(&g_client_connected);
       if (!g_client_connected) printf("Client failed to connect\n");
     }
