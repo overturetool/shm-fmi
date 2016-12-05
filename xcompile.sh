@@ -95,6 +95,7 @@ function compileLinux64
              -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/linux64/usr/protobuf/lib/libprotobuf.a
 
 		make -C $B -j$threads
+		make -C $B test
 }
 
 function compileLinux32
@@ -142,9 +143,9 @@ function xcompile
 {
 		D=$1
 		echo Compiling using CMake and make
-		compileDarwin64 $D
 		compileLinux64 $D
 		compileLinux32 $D
+		compileDarwin64 $D
 		compileWin64 $D
 		compileWin32 $D
 }
