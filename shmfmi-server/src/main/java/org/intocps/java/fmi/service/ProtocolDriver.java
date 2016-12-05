@@ -1,5 +1,7 @@
 package org.intocps.java.fmi.service;
 
+import java.util.Date;
+
 import org.intocps.java.fmi.shm.SharedMemory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +25,7 @@ public class ProtocolDriver implements Runnable
 
 	final static Logger logger = LoggerFactory.getLogger(ProtocolDriver.class);
 	final IServiceProtocol service;
+	final static int REQUIRED_ALIVE_INTERVAL = 3*1000;
 	final Thread thread;
 	final SharedMemory mem;
 	final String id;
@@ -66,6 +69,37 @@ public class ProtocolDriver implements Runnable
 
 			connected = true;
 			thread.start();
+
+			Thread watchDog = new Thread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					Date date = new Date();
+					while (true)
+					{
+						// no need to re-check all the time
+						try
+						{
+							Thread.sleep(5000);
+						} catch (InterruptedException e)
+						{
+						}
+						SharedMemory.waitForWatchDogEvent(); // replies should be 200ms apart
+						Date now = new Date();
+						long seconds = (now.getTime() - date.getTime()) / 1000;
+						if(seconds > REQUIRED_ALIVE_INTERVAL)
+						{
+							logger.warn("No alive signal from FMU since: "+seconds+" seconds. Freeing instance!");
+							service.FreeInstantiate( Fmi2Empty.newBuilder().build());
+							return;
+						}
+					}
+				}
+			});
+			watchDog.setDaemon(true);
+			watchDog.start();
 		}
 	}
 
@@ -141,7 +175,7 @@ public class ProtocolDriver implements Runnable
 						break;
 					case fmi2FreeInstance:
 						service.FreeInstantiate(Fmi2Empty.parseFrom(bytes));
-						reply = null; //no reply
+						reply = null; // no reply
 						break;
 					case fmi2Reset:
 						reply = service.Reset(Fmi2Empty.parseFrom(bytes));
@@ -207,7 +241,8 @@ public class ProtocolDriver implements Runnable
 				this.mem.send(type, reply.toByteArray());
 			} else
 			{
-				String errorMsg="deadlocking do not know how to answer: "+cmd;
+				String errorMsg = "deadlocking do not know how to answer: "
+						+ cmd;
 				service.error(errorMsg);
 				logger.error(errorMsg);
 			}

@@ -41,6 +41,14 @@ JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setDebug
 
 /*
  * Class:     org_intocps_java_fmi_shm_SharedMemory
+ * Method:    waitForWatchDogEvent
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_waitForWatchDogEvent
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     org_intocps_java_fmi_shm_SharedMemory
  * Method:    stop
  * Signature: ()V
  */

@@ -86,4 +86,8 @@ void IpcClient::connect(bool* success) {
           m_log_name_id, m_id, this->m_name->c_str(), *success);
 }
 
+void IpcClient::waitForWatchDogEvent(DWORD dwTimeout) {
+  signalWait(this->m_hConnWatchDogSignal, dwTimeout);
+}
+
 } /* namespace FmiIpc */

@@ -15,6 +15,7 @@
 typedef HANDLE SIGNAL_HANDLE;
 #define strdup (const char*) _strdup;
 #elif __APPLE__ || __linux
+#include <unistd.h>
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -74,6 +75,7 @@ class IpcBase {
   static const char* SIGNAL_NAME;
   static const char* SIGNAL_AVALIABLE_NAME;
   static const char* SHARED_MEM_BASE_NAME;
+  static const char* SIGNAL_CONN_WATCH_DOG_NAME;
   debugPrintType* debugPrintPtr;
 
   int getId() { return this->m_id; };
@@ -92,6 +94,8 @@ class IpcBase {
   SIGNAL_HANDLE createSignal(bool* success, const char* baseName,
                              bool create = false);
 
+  void sleep(int milliseconds);
+
  protected:
   int m_id;
   // Internal variables
@@ -100,6 +104,7 @@ class IpcBase {
   SIGNAL_HANDLE m_hSignal;  // Event used to signal when data exists
   SIGNAL_HANDLE
   m_hAvail;  // Event used to signal when some blocks become available
+  SIGNAL_HANDLE m_hConnWatchDogSignal;  // Event used to signal alive
   std::string* m_name;
   SharedFmiMem* m_pBuf;  // Buffer that points to the shared memory
 

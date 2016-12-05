@@ -18,12 +18,15 @@ namespace FmiIpc {
 const char* IpcBase::SHARED_MEM_BASE_NAME = "Local\\";
 const char* IpcBase::SIGNAL_AVALIABLE_NAME = "Local\\sigAvail";
 const char* IpcBase::SIGNAL_NAME = "Local\\sig";
+const char* IpcBase::SIGNAL_CONN_WATCH_DOG_NAME = "Local\\connWatchDog";
+
 #elif __APPLE__ || __linux
 // Apple must start with / and not have \\ and have a max size incl NULL of 32
 // Linux must start with / and not have any slashes after that
 const char* IpcBase::SHARED_MEM_BASE_NAME = "/Local";
 const char* IpcBase::SIGNAL_AVALIABLE_NAME = "/sigAvail";
 const char* IpcBase::SIGNAL_NAME = "/sig";
+const char* IpcBase::SIGNAL_CONN_WATCH_DOG_NAME = "/connWatchDog";
 #endif
 
 IpcBase::IpcBase(int id, const char* shmName) {
@@ -38,6 +41,7 @@ IpcBase::IpcBase(int id, const char* shmName) {
   m_hAvail = 0;
   m_pBuf = NULL;
   m_log_name_id = NULL;
+  m_hConnWatchDogSignal = NULL;
 }
 
 IpcBase::~IpcBase() {
@@ -55,6 +59,14 @@ IpcBase::~IpcBase() {
             m_name->c_str());
     signalClose(m_hAvail);
     m_hAvail = NULL;
+  }
+
+  // Close the event
+  if (m_hConnWatchDogSignal) {
+    dprintf("\tIPC %s %d: Closing m_hConnWatchDogSignal for: '%s'\n",
+            m_log_name_id, m_id, m_name->c_str());
+    signalClose(m_hConnWatchDogSignal);
+    m_hConnWatchDogSignal = NULL;
   }
 
   // Unmap the memory
@@ -263,8 +275,8 @@ SIGNAL_HANDLE IpcBase::createSignal(bool* success, const char* baseName,
   signal = OpenEventA(security, FALSE, signalName.c_str());
   if (signal == NULL) {
     if (!create) {
-      dprintf("\tIPC %s %d: OpenEventA failed. Error: %s\n", m_log_name_id, m_id,
-              GetLastErrorAsString().c_str());
+      dprintf("\tIPC %s %d: OpenEventA failed. Error: %s\n", m_log_name_id,
+              m_id, GetLastErrorAsString().c_str());
     }
   }
   if (create) {
@@ -275,14 +287,15 @@ SIGNAL_HANDLE IpcBase::createSignal(bool* success, const char* baseName,
     // Create the events
     signal = CreateEventA(NULL, FALSE, FALSE, signalName.c_str());
     if (signal == NULL) {
-      dprintf("\tIPC %s %d: CreateEventA failed. Error: %s\n", m_log_name_id, m_id,
-              GetLastErrorAsString().c_str());
+      dprintf("\tIPC %s %d: CreateEventA failed. Error: %s\n", m_log_name_id,
+              m_id, GetLastErrorAsString().c_str());
       *success = false;
     }
   }
   if (signal == NULL || signal == INVALID_HANDLE_VALUE) {
     if (signal == INVALID_HANDLE_VALUE) {
-      dprintf("\tIPC %s %d: signal_create: invalid handle\n", m_log_name_id, m_id);
+      dprintf("\tIPC %s %d: signal_create: invalid handle\n", m_log_name_id,
+              m_id);
     }
     dprintf("signal_create: failed: %01d\n", __LINE__);
     *success = false;
@@ -378,6 +391,15 @@ void IpcBase::unmap(void* ptr, std::string* name) {
     dprintf("\tIPC %s %d: munmap", m_log_name_id, m_id);
   }
 #endif
+}
+
+void IpcBase::sleep(int milliseconds)  // cross-platform sleep function
+{
+#ifdef WIN32
+  Sleep(milliseconds);
+#else
+  usleep(milliseconds * 1000);
+#endif  // win32
 }
 
 } /* namespace FmiIpc */

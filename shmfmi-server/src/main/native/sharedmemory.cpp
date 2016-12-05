@@ -27,13 +27,13 @@ JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setId(JNIE
 	}
 	bool success;
 
-	g_client = new FmiIpc::IpcClient(0,  idString);
+	g_client = new FmiIpc::IpcClient(0, idString);
 	if (g_clientDebug)
 	{
 		g_client->enableConsoleDebug();
 	}
 
-g_client->connect(&success);
+	g_client->connect(&success);
 
 	if (!success)
 	{
@@ -44,6 +44,16 @@ g_client->connect(&success);
 	env->ReleaseStringUTFChars(id, idString);
 
 	return success;
+
+}
+
+JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_waitForWatchDogEvent(JNIEnv *env, jclass cls)
+{
+
+	if (g_client != NULL)
+	{
+		g_client->waitForWatchDogEvent();
+	}
 
 }
 

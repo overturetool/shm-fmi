@@ -22,6 +22,7 @@ class IpcClient : public IpcBase {
  public:
   SharedFmiMessage* getMessage(DWORD dwTimeout = INFINITE);
   void sendReply(SharedFmiMessage* reply);
+  void waitForWatchDogEvent(DWORD dwTimeout = INFINITE);
 
   // Functions
   BOOL IsOk(void) {

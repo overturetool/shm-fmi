@@ -9,6 +9,7 @@
 #define IPCSERVER_H_
 
 #include "IpcBase.h"
+#include <thread>
 
 namespace FmiIpc {
 
@@ -22,6 +23,11 @@ class IpcServer : public IpcBase {
   bool create();
   void close(void);
   SharedFmiMessage* send(SharedFmiMessage* message, DWORD dwTimeout);
+
+ private:
+  void connWatchDog();
+  bool m_connected;
+  std::thread* m_connWatchDogThread;
 };
 
 } /* namespace FmiIpc */

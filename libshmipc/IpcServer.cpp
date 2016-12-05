@@ -11,12 +11,26 @@ namespace FmiIpc {
 
 IpcServer::IpcServer(int id, const char* name) : FmiIpc::IpcBase(id, name) {
   m_log_name_id = "server";
+  m_connected = false;
+  m_connWatchDogThread = NULL;
 }
 
-IpcServer::~IpcServer() { this->close(); }
+IpcServer::~IpcServer() {
+  this->close();
+  this->m_connected = false;
+  this->m_connWatchDogThread->join();
+  delete m_connWatchDogThread;
+}
+
+void IpcServer::connWatchDog() {
+  while (m_connected) {
+    signalPost(m_hConnWatchDogSignal);
+    this->sleep(200);
+  }
+}
 
 bool IpcServer::create() {
-  bool ok = true;
+  bool success = true;
 
   //	enableConsoleDebug();
 
@@ -26,36 +40,49 @@ bool IpcServer::create() {
           nameOfMapping.c_str());
   // Create the file mapping
 
-  m_hMapFile = openShm(&ok, nameOfMapping.c_str(), true);
-  if (!ok) {
+  m_hMapFile = openShm(&success, nameOfMapping.c_str(), true);
+  if (!success) {
     dprintf("\tIPC %s %d: Error could not create shared memory key: %s\n",
             m_log_name_id, m_id, nameOfMapping.c_str());
     return false;
   }
   m_hMapFileName = strdup(nameOfMapping.c_str());
-  mapShm(&ok, m_hMapFile, true);
-  if (!ok) {
+  mapShm(&success, m_hMapFile, true);
+  if (!success) {
     dprintf("\tIPC %s %d: Error could not map shared memory key: %s\n",
             m_log_name_id, m_id, nameOfMapping.c_str());
     return false;
   }
 
   // Create the events
-  this->m_hSignal = this->createSignal(&ok, SIGNAL_NAME, true);
-  if (!ok) {
+  this->m_hSignal = this->createSignal(&success, SIGNAL_NAME, true);
+  if (!success) {
     dprintf("\tIPC %s %d: Error create key: %s, signal=NULL\n", m_log_name_id,
             m_id, nameOfMapping.c_str());
-    return ok;
+    return success;
   }
 
-  this->m_hAvail = this->createSignal(&ok, SIGNAL_AVALIABLE_NAME, true);
-  if (!ok) {
+  this->m_hAvail = this->createSignal(&success, SIGNAL_AVALIABLE_NAME, true);
+  if (!success) {
     dprintf("\tIPC %s %d: Error create key: %s, avail=NULL\n", m_log_name_id,
             m_id, nameOfMapping.c_str());
-    return ok;
+
+    return success;
   }
 
-  return ok;
+  this->m_hConnWatchDogSignal =
+      this->createSignal(&success, SIGNAL_CONN_WATCH_DOG_NAME, true);
+  if (!success) {
+    dprintf("\tIPC %s %d: Error create key: %s, conn watch dog=NULL\n",
+            m_log_name_id, m_id, nameOfMapping.c_str());
+
+    return success;
+  }
+
+  this->m_connected = true;
+  this->m_connWatchDogThread = new std::thread(&IpcServer::connWatchDog, this);
+
+  return success;
 }
 void IpcServer::close(void) {}
 SharedFmiMessage* IpcServer::send(SharedFmiMessage* message, DWORD dwTimeout) {

@@ -22,6 +22,8 @@ public class SharedMemory
 	
 	public static native void setDebug(boolean on);
 	
+	public static native void waitForWatchDogEvent();
+	
 	public native void stop();
 
 	final static Logger logger = LoggerFactory.getLogger(SharedMemory.class);
