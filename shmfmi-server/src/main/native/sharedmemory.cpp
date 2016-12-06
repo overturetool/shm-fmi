@@ -11,7 +11,8 @@
 FmiIpc::IpcClient* g_client;
 bool g_clientDebug = true;
 
-JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setDebug(JNIEnv *env, jclass clz, jboolean on)
+
+JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setDebug(JNIEnv *env, jobject obj, jboolean on)
 {
 	g_clientDebug = on;
 }
@@ -47,7 +48,8 @@ JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setId(JNIE
 
 }
 
-JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_waitForWatchDogEvent(JNIEnv *env, jclass cls)
+
+JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_waitForWatchDogEvent(JNIEnv *env, jobject obj)
 {
 
 	if (g_client != NULL)

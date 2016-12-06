@@ -8,6 +8,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.intocps.java.fmi.shm.ISharedMemory;
 import org.intocps.java.fmi.shm.SharedMemory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,17 +32,20 @@ public class ProtocolDriver implements Runnable
 
 	final static Logger logger = LoggerFactory.getLogger(ProtocolDriver.class);
 	final IServiceProtocol service;
-	final static int REQUIRED_ALIVE_INTERVAL = 3*1000;
 	final Thread thread;
-	final SharedMemory mem;
+	final ISharedMemory mem;
 	final String id;
 	boolean running = true;
 	boolean connected = false;
 
 	public ProtocolDriver(String id, IServiceProtocol service)
 	{
+		this(id, service, new SharedMemory());
+	}
 
-		this.mem = new SharedMemory();
+	public ProtocolDriver(String id, IServiceProtocol service, ISharedMemory mem)
+	{
+		this.mem = mem;
 		this.service = service;
 		this.id = id;
 		thread = new Thread(this);
@@ -74,7 +78,6 @@ public class ProtocolDriver implements Runnable
 			}
 
 			connected = true;
-			thread.start();
 
 			Thread watchDog = new Thread(new Runnable()
 			{
@@ -82,36 +85,55 @@ public class ProtocolDriver implements Runnable
 				@Override
 				public void run()
 				{
-					while (true)
-					{
-						ExecutorService executor = Executors.newCachedThreadPool();
-						Callable<Object> task = new Callable<Object>() {
-						   public Object call() {
-						       SharedMemory.waitForWatchDogEvent();
-						       return false;
-						   }
-						};
-						Future<Object> future = executor.submit(task);
-						try {
-						   future.get(300, TimeUnit.MICROSECONDS); 
-						} catch (TimeoutException ex) {
-						   // handle the timeout
-							System.err.println("No alive signal from FMU withing 300 ms period. Freeing instance!");
-							logger.warn("No alive signal from FMU withing 300 ms period. Freeing instance!");
-							service.FreeInstantiate( Fmi2Empty.newBuilder().build());
-							return;
-						} catch (InterruptedException e) {
-						   // handle the interrupts
-						} catch (ExecutionException e) {
-						   // handle other exceptions
-						} finally {
-						   future.cancel(true); // may or may not desire this
-						}
-					}
+					setWatchDog();
 				}
 			});
 			watchDog.setDaemon(true);
 			watchDog.start();
+			thread.start();
+		}
+	}
+
+
+
+	private void setWatchDog()
+	{
+		final ExecutorService executor = Executors.newCachedThreadPool();
+		final Callable<Object> task = new Callable<Object>()
+		{
+			public Object call()
+			{
+				mem.waitForWatchDogEvent();
+				return false;
+			}
+		};
+
+		final String timeOutMessage = "No alive signal from FMU withing %d ms period. Freeing instance!";
+
+		while (true)
+		{
+			Future<Object> future = executor.submit(task);
+			try
+			{
+				future.get(mem.getAliveInterval(), TimeUnit.MILLISECONDS);
+			} catch (TimeoutException ex)
+			{
+				// handle the timeout
+				String msg = String.format(timeOutMessage,mem.getAliveInterval());
+				System.err.println(msg);
+				logger.warn(msg);
+				service.FreeInstantiate(Fmi2Empty.newBuilder().build());
+				return;
+			} catch (InterruptedException e)
+			{
+				// handle the interrupts
+			} catch (ExecutionException e)
+			{
+				// handle other exceptions
+			} finally
+			{
+				future.cancel(true); // may or may not desire this
+			}
 		}
 	}
 
