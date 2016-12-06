@@ -35,7 +35,6 @@ public class ProtocolDriver implements Runnable
 	final Thread thread;
 	final ISharedMemory mem;
 	final String id;
-	boolean running = true;
 	boolean connected = false;
 
 	public ProtocolDriver(String id, IServiceProtocol service)
@@ -101,7 +100,7 @@ public class ProtocolDriver implements Runnable
 		String msg = String.format(timeOutMessage,mem.getAliveInterval());
 		System.err.println(msg);
 		logger.warn(msg);
-		running=false;
+		connected=false;
 		service.FreeInstantiate(Fmi2Empty.newBuilder().build());
 	}
 
@@ -119,7 +118,7 @@ public class ProtocolDriver implements Runnable
 		};
 
 
-		while (true)
+		while (connected)
 		{
 			Future<Boolean> future = executor.submit(task);
 			try
@@ -154,6 +153,7 @@ public class ProtocolDriver implements Runnable
 			return;
 		}
 		logger.debug("Stopping Shared memory client");
+		connected = false;
 		mem.stop();
 	}
 
@@ -163,7 +163,7 @@ public class ProtocolDriver implements Runnable
 
 		byte[] typeArr = new byte[1];
 
-		while (running)
+		while (connected)
 		{
 
 			byte[] bytes = this.mem.read(typeArr);
