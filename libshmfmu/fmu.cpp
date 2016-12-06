@@ -344,10 +344,9 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
           new std::thread(callbackThreadFunc, container, threadCallbackId);
       container->callbackThread = callbackThread;
     }
-  }else
-  {
-	  //initialization failed
-	  return NULL;
+  } else {
+    // initialization failed
+    return NULL;
   }
 
   return (void*)container;
