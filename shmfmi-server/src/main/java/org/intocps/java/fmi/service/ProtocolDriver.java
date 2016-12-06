@@ -171,7 +171,7 @@ public class ProtocolDriver implements Runnable
 			{
 				try
 				{
-					Thread.sleep(10);
+					Thread.sleep(100);
 				} catch (InterruptedException e)
 				{
 				}
