@@ -122,6 +122,7 @@ public class ProtocolDriver implements Runnable
 				String msg = String.format(timeOutMessage,mem.getAliveInterval());
 				System.err.println(msg);
 				logger.warn(msg);
+				running=false;
 				service.FreeInstantiate(Fmi2Empty.newBuilder().build());
 				return;
 			} catch (InterruptedException e)
@@ -159,7 +160,13 @@ public class ProtocolDriver implements Runnable
 			byte[] bytes = this.mem.read(typeArr);
 			if (bytes == null)
 			{
-				continue;// timout
+				try
+				{
+					Thread.sleep(10);
+				} catch (InterruptedException e)
+				{
+				}
+				continue;
 			}
 
 			byte type = typeArr[0];
