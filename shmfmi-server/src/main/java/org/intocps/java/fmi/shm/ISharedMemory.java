@@ -11,7 +11,7 @@ public interface ISharedMemory
 
 	public abstract void setDebug(boolean on);
 
-	public abstract void waitForWatchDogEvent();
+	public abstract boolean waitForWatchDogEvent();
 
 	public abstract void stop();
 

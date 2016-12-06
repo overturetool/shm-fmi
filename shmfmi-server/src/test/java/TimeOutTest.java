@@ -42,21 +42,20 @@ import com.lausdahl.examples.Service.Fmi2Empty;
 
 	void timeOutTest(int expected, final int actual) throws InterruptedException
 	{
-
 		ISharedMemory mem = mock(ISharedMemory.class);
 		when(mem.setId(anyString())).thenReturn(true);
 		when(mem.read(Matchers.<byte[]>any())).thenReturn(waitForNull());
 		when(mem.getAliveInterval()).thenReturn(expected);
-		doNothing().when(mem).waitForWatchDogEvent();
-		doAnswer(new Answer<Void>()
+//		when(mem.waitForWatchDogEvent()).thenReturn(true);
+		doAnswer(new Answer<Boolean>()
 		{
 
-			@Override public Void answer(InvocationOnMock invocation)
+			@Override public Boolean answer(InvocationOnMock invocation)
 					throws Throwable
 			{
 				cycles++;
 				Thread.sleep(actual);
-				return null;
+				return true;
 			}
 		}).when(mem).waitForWatchDogEvent();
 

@@ -49,14 +49,15 @@ JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setId(JNIE
 }
 
 
-JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_waitForWatchDogEvent(JNIEnv *env, jobject obj)
+JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_waitForWatchDogEvent(JNIEnv *env, jobject obj)
 {
 
 	if (g_client != NULL)
 	{
 		g_client->waitForWatchDogEvent();
+		return true;
 	}
-
+	return false;
 }
 
 /*

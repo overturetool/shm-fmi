@@ -93,37 +93,46 @@ public class ProtocolDriver implements Runnable
 			thread.start();
 		}
 	}
+	
+	
+	private void handleTimeout()
+	{
+		final String timeOutMessage = "No alive signal from FMU withing %d ms period. Freeing instance!";
+		String msg = String.format(timeOutMessage,mem.getAliveInterval());
+		System.err.println(msg);
+		logger.warn(msg);
+		running=false;
+		service.FreeInstantiate(Fmi2Empty.newBuilder().build());
+	}
 
 
 
 	private void setWatchDog()
 	{
 		final ExecutorService executor = Executors.newCachedThreadPool();
-		final Callable<Object> task = new Callable<Object>()
+		final Callable<Boolean> task = new Callable<Boolean>()
 		{
-			public Object call()
+			public Boolean call()
 			{
-				mem.waitForWatchDogEvent();
-				return false;
+				return mem.waitForWatchDogEvent();
 			}
 		};
 
-		final String timeOutMessage = "No alive signal from FMU withing %d ms period. Freeing instance!";
 
 		while (true)
 		{
-			Future<Object> future = executor.submit(task);
+			Future<Boolean> future = executor.submit(task);
 			try
 			{
-				future.get(mem.getAliveInterval(), TimeUnit.MILLISECONDS);
+				if(!future.get(mem.getAliveInterval(), TimeUnit.MILLISECONDS))
+				{
+					handleTimeout();
+					return;
+				}
 			} catch (TimeoutException ex)
 			{
 				// handle the timeout
-				String msg = String.format(timeOutMessage,mem.getAliveInterval());
-				System.err.println(msg);
-				logger.warn(msg);
-				running=false;
-				service.FreeInstantiate(Fmi2Empty.newBuilder().build());
+				handleTimeout();
 				return;
 			} catch (InterruptedException e)
 			{

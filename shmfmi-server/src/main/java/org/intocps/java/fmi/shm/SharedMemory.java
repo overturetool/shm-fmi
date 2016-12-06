@@ -45,7 +45,7 @@ public class SharedMemory implements ISharedMemory
 	 * @see org.intocps.java.fmi.shm.ISharedMemory#waitForWatchDogEvent()
 	 */
 	@Override
-	public native void waitForWatchDogEvent();
+	public native boolean waitForWatchDogEvent();
 	
 	/* (non-Javadoc)
 	 * @see org.intocps.java.fmi.shm.ISharedMemory#stop()
