@@ -82,6 +82,14 @@ void IpcClient::connect(bool* success) {
     return;
   }
 
+  m_hConnWatchDogSignal =
+      this->createSignal(success, SIGNAL_CONN_WATCH_DOG_NAME);
+  if (!*success) {
+    dprintf("\tIPC %s %d: Failed to create 'm_hConnWatchDogSignal' signal\n",
+            m_log_name_id, m_id, this->m_name->c_str(), *success);
+    return;
+  }
+
   dprintf("\tIPC %s %d: Connected to shared memory %s, status %d\n",
           m_log_name_id, m_id, this->m_name->c_str(), *success);
 }
