@@ -36,7 +36,7 @@
 class JavaLauncher {
  public:
   typedef int debugPrintType(void* sender, const char* format, ...);
-  JavaLauncher(const char* workingDir, char** args);
+  JavaLauncher(bool visible, const char* workingDir, char** args);
   virtual ~JavaLauncher();
   int launch();
   void terminate();
@@ -48,6 +48,7 @@ class JavaLauncher {
   const char* m_workingDir;
   char** m_args;
   bool m_launched;
+  bool m_visible;
 
 #ifdef _WIN32
   PROCESS_INFORMATION pid;

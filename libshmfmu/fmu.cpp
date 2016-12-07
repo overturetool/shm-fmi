@@ -276,7 +276,7 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 
   JavaLauncher::debug = false;
   JavaLauncher* launcher =
-      new JavaLauncher(resourceLocationStr.c_str(), config.m_args);
+      new JavaLauncher(visible, resourceLocationStr.c_str(), config.m_args);
 
   if (config.m_skipLaunch) {
     LOG(functions, instanceName, fmi2OK, "logFmiCall",

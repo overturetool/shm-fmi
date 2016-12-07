@@ -23,10 +23,11 @@ int javaLauncherInternalDebugPrint(void* sender, const char* format, ...) {
 JavaLauncher::debugPrintType* JavaLauncher::debugPrintPtr =
     &javaLauncherInternalDebugPrint;
 
-JavaLauncher::JavaLauncher(const char* workingDir, char** args) {
+JavaLauncher::JavaLauncher(bool visible, const char* workingDir, char** args) {
   this->m_workingDir = workingDir;
   this->m_launched = false;
   this->m_args = args;
+  this->m_visible = visible;
 
 #ifdef _WIN32
 
@@ -117,8 +118,8 @@ int JavaLauncher::launch() {
                      buf,   // Command line
                      NULL,  // Process handle not inheritable
                      NULL,  // Thread handle not inheritable
-                     FALSE,         // Set handle inheritance to FALSE
-                     0,             // No creation flags
+                     FALSE,  // Set handle inheritance to FALSE
+                     (m_visible ? CREATE_NO_WINDOW : 0),  // No creation flags
                      NULL,          // Use parent's environment block
                      m_workingDir,  // Use parent's starting directory
                      &si,           // Pointer to STARTUPINFO structure
