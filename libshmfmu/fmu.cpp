@@ -346,6 +346,7 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
     }
   } else {
     // initialization failed
+    ::fmi2FreeInstance((fmi2Component)container);
     return NULL;
   }
 
