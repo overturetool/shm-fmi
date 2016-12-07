@@ -28,6 +28,7 @@ class IpcServer : public IpcBase {
   void connWatchDog();
   bool m_connected;
   std::thread* m_connWatchDogThread;
+  static const int ALIVE_DELAY;
 };
 
 } /* namespace FmiIpc */

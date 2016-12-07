@@ -9,6 +9,8 @@
 
 namespace FmiIpc {
 
+const int IpcServer::ALIVE_DELAY = 200;
+
 IpcServer::IpcServer(int id, const char* name) : FmiIpc::IpcBase(id, name) {
   m_log_name_id = "server";
   m_connected = false;
@@ -25,7 +27,7 @@ IpcServer::~IpcServer() {
 void IpcServer::connWatchDog() {
   while (m_connected) {
     signalPost(m_hConnWatchDogSignal);
-    this->sleep(200);
+    this->sleep(ALIVE_DELAY);
   }
 }
 
@@ -84,7 +86,8 @@ bool IpcServer::create() {
 
   return success;
 }
-void IpcServer::close(void) {}
+void IpcServer::close(void) { this->m_connected = false; }
+
 SharedFmiMessage* IpcServer::send(SharedFmiMessage* message, DWORD dwTimeout) {
   dprintf("\tIPC %s %d: Writing msg. Type: %d, Size: %d\n", m_log_name_id, m_id,
           message->cmd, message->protoBufMsgSize);
