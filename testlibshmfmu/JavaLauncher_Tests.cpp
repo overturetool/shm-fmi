@@ -17,7 +17,7 @@ TEST(JavaLauncher, launchfail) {
 
   ConfigFile config(configFile, port);
 
-  JavaLauncher *launcher = new JavaLauncher("/", config.m_args);
+  JavaLauncher *launcher = new JavaLauncher(false, "/", config.m_args);
 
   launcher->launch();
   launcher->terminate();
@@ -34,7 +34,7 @@ TEST(JavaLauncher, launch) {
 
   ConfigFile config(configFile, port);
 
-  JavaLauncher *launcher = new JavaLauncher("/", config.m_args);
+  JavaLauncher *launcher = new JavaLauncher(false, "/", config.m_args);
 
   launcher->launch();
   launcher->terminate();
