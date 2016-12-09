@@ -14,53 +14,59 @@ public class SharedMemory implements ISharedMemory
 
 	private final static String LIBRARY_NAME = "sharedmemory";
 
+	public final static int ALIVE_INTERVAL = 200;
 
-
-
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.intocps.java.fmi.shm.ISharedMemory#setId(java.lang.String)
 	 */
 	@Override
 	public native boolean setId(String id);
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.intocps.java.fmi.shm.ISharedMemory#read(byte[])
 	 */
 	@Override
 	public native byte[] read(byte[] type);
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.intocps.java.fmi.shm.ISharedMemory#send(int, byte[])
 	 */
 	@Override
 	public native void send(int type, byte[] data);
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
 	 * @see org.intocps.java.fmi.shm.ISharedMemory#setDebug(boolean)
 	 */
 	@Override
 	public native void setDebug(boolean on);
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
 	 * @see org.intocps.java.fmi.shm.ISharedMemory#waitForWatchDogEvent()
 	 */
 	@Override
 	public native boolean waitForWatchDogEvent();
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
 	 * @see org.intocps.java.fmi.shm.ISharedMemory#stop()
 	 */
 	@Override
 	public native void stop();
 
-	@Override public int getAliveInterval()
+	@Override
+	public int getAliveInterval()
 	{
-		//native cycle is set to 200 ms
-		return 300;
+		// native cycle is set to 200 ms
+		return ALIVE_INTERVAL * 4; // allow for missing events
 	}
 
 	final static Logger logger = LoggerFactory.getLogger(SharedMemory.class);
-	
+
 	static boolean libraryLoaded = false;
 
 	static
