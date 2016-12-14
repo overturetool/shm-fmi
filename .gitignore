@@ -88,3 +88,7 @@ libshmipc/libshmipc
 
 **/gtestresults.xml
 testlibshmipc/testlibshmipc
+
+
+.idea
+*.iml
