@@ -41,7 +41,7 @@ This will build the new (java) release and upload it to artifactory. However, it
 
 ## Patch the release with the platform specific libraries
 
-Go to Artifactory https://overture.au.dk/artifactory/webapp/browserepo.html?2
+Go to Artifactory http://overture.au.dk/artifactory/simple/into-cps/org/intocps/java/fmi/fmi-shm-server/
 
 Navigate to:
 
