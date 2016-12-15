@@ -7,6 +7,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#undef org_intocps_java_fmi_shm_SharedMemory_ALIVE_INTERVAL
+#define org_intocps_java_fmi_shm_SharedMemory_ALIVE_INTERVAL 200L
 /*
  * Class:     org_intocps_java_fmi_shm_SharedMemory
  * Method:    setId
@@ -42,7 +44,7 @@ JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setDebug
 /*
  * Class:     org_intocps_java_fmi_shm_SharedMemory
  * Method:    waitForWatchDogEvent
- * Signature: ()V
+ * Signature: ()Z
  */
 JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_waitForWatchDogEvent
   (JNIEnv *, jobject);
