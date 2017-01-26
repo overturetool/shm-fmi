@@ -1,4 +1,29 @@
 #!/bin/bash
+
+FORCE="0"
+PLATFORM="linux64"
+
+for i in "$@"
+do
+		case $i in
+				-p=*|--platform=*)
+						PLATFORM="${i#*=}"
+						shift # past argument=value
+						;;
+				-f=*|--force=*)
+						FORCE=1
+						shift # past argument=value
+						;;
+				--default)
+						DEFAULT=YES
+						shift # past argument with no value
+						;;
+				*)
+            # unknown option
+						;;
+		esac
+done
+
 set -e
 
 REQUIRED_PACKAGES=("gcc-multilib" "g++-multilib" "curl" "autoconf" "libtool" "automake" "build-essential" "make" "wget")
@@ -36,18 +61,23 @@ function buildProtobuf
 		mkdir -p "${ROOT}/usr/protobuf"
 		PROTOBUF_INSTALL=`readlink -f "${ROOT}/usr/protobuf"`
 		
-		read -n 1 -p "Remove old build if pressend at $ROOT? (y/n)? " answer
-		case ${answer:0:1} in
-				y|Y )
-						echo Yes
-						echo Removing old folder
-						rm -rf $ROOT
-						;;
-				* )
-						echo No
-						;;
-		esac
+		if [ "$FORCE" = "1" ]
+		then
+				rm -rf $ROOT
+		else
 
+				read -n 1 -p "Remove old build if pressend at $ROOT? (y/n)? " answer
+				case ${answer:0:1} in
+						y|Y )
+								echo Yes
+								echo Removing old folder
+								rm -rf $ROOT
+								;;
+						* )
+								echo No
+								;;
+				esac
+		fi
 
 		mkdir -p $ROOT
 		cd $ROOT
@@ -112,4 +142,14 @@ function buildProtobuf
 		echo Protobuf is installed to: $PROTOBUF_INSTALL
 }
 check
-buildProtobuf $1
+
+if [ "$PLATFORM" = "all" ]
+then
+		buildProtobuf linux64
+		buildProtobuf linux32
+		buildProtobuf darwin64
+		buildProtobuf win32
+		buildProtobuf win64
+else
+		buildProtobuf $platform
+fi
