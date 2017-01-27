@@ -1,5 +1,6 @@
 #!/bin/bash
 
+HERE=`readlink -f .`
 FORCE="0"
 PLATFORM="linux64"
 
@@ -147,6 +148,7 @@ function buildProtobuf
 		make install
 
 		echo Protobuf is installed to: $PROTOBUF_INSTALL
+		cd $HERE
 }
 check
 
