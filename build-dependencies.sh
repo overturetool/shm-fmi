@@ -58,6 +58,7 @@ function buildProtobuf
 {
 
 		ROOT=$1
+		echo "###  Building with root: $ROOT ###"
 		mkdir -p "${ROOT}/usr/protobuf"
 		PROTOBUF_INSTALL=`readlink -f "${ROOT}/usr/protobuf"`
 		
@@ -84,6 +85,12 @@ function buildProtobuf
 		git clone https://github.com/google/protobuf.git protobuf
 		cd protobuf
 		git checkout 5d4a856
+
+		# fix for missing download
+		wget https://github.com/google/googletest/archive/release-1.7.0.zip
+		unzip -q release-1.7.0.zip
+		mv googletest-release-1.7.0 gtest
+		# end fix
 		./autogen.sh
 
 		if [ "$ROOT" == "darwin64" ]; then
@@ -145,11 +152,11 @@ check
 
 if [ "$PLATFORM" = "all" ]
 then
-		buildProtobuf linux64
-		buildProtobuf linux32
-		buildProtobuf darwin64
-		buildProtobuf win32
-		buildProtobuf win64
+		buildProtobuf "linux64"
+		buildProtobuf "linux32"
+		buildProtobuf "darwin64"
+		buildProtobuf "win32"
+		buildProtobuf "win64"
 else
-		buildProtobuf $platform
+		buildProtobuf $PLATFORM
 fi
