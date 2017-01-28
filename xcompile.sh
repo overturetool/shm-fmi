@@ -27,6 +27,8 @@ function compileDarwin64
 						 -DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/osx-gcc.cmake` \
 						 -DOSXCROSS_ROOT=$OSXCROSS_ROOT \
 						 -DPROTOBUF_PROTOC_EXECUTABLE=/usr/bin/protoc \
+						 -DPYTHON_EXECUTABLE=/usr/bin/python \
+						 -DPROTOBUF_INCLUDE_DIR=$SHM_DEPENDENCIES_ROOT/darwin64/usr/protobuf/include/ \
 						 -DPROTOBUF_INCLUDE_DIRS=$SHM_DEPENDENCIES_ROOT/darwin64/usr/protobuf/include/ \
 						 -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/darwin64/usr/protobuf/lib/libprotobuf.a
 
@@ -48,6 +50,8 @@ function compileWin32
 						 -H$1 \
 						 -DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/cmake-toolchains/Toolchain-Ubuntu-mingw32.cmake` \
 						 -DPROTOBUF_INCLUDE_DIRS=$SHM_DEPENDENCIES_ROOT/win32/usr/protobuf/include/ \
+						 -DPYTHON_EXECUTABLE=/usr/bin/python \
+						 -DPROTOBUF_INCLUDE_DIR=$SHM_DEPENDENCIES_ROOT/win32/usr/protobuf/include/ \
              -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/win32/usr/protobuf/lib/libprotobuf.a
 
 		# Do to a bug in gtest when compiling with MinGW we have to avoid building test code
@@ -71,7 +75,9 @@ function compileWin64
 						 -H$1 \
 						 -DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/cmake-toolchains/Toolchain-Ubuntu-mingw64.cmake` \
 						 -DPROTOBUF_INCLUDE_DIRS=$SHM_DEPENDENCIES_ROOT/win64/usr/protobuf/include/ \
-             -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/win64/usr/protobuf/lib/libprotobuf.a 
+						 -DPYTHON_EXECUTABLE=/usr/bin/python \
+						 -DPROTOBUF_INCLUDE_DIR=$SHM_DEPENDENCIES_ROOT/win64/usr/protobuf/include/ \
+						 -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/win64/usr/protobuf/lib/libprotobuf.a
 
 		# Do to a bug in gtest when compiling with MinGW we have to avoid building test code
 		#		make -C $B -j$threads
@@ -110,6 +116,7 @@ function compileLinux32
 			-B$B \
 			-H$1 \
 			-DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/linux32-gcc.cmake` \
+			-DPROTOBUF_INCLUDE_DIR=$SHM_DEPENDENCIES_ROOT/linux32/usr/protobuf/include/ \
 			-DPROTOBUF_INCLUDE_DIRS=$SHM_DEPENDENCIES_ROOT/linux32/usr/protobuf/include/ \
       -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/linux32/usr/protobuf/lib/libprotobuf.a
 
