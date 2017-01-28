@@ -11,6 +11,11 @@
 #include "IpcBase.h"
 #include <thread>
 
+#ifdef __MINGW32__
+//Mingw 5.3.1 > has a different implementation of <thread> than the Mingw  4.8.2 has so this fixes this
+#include "mingw.thread.h"
+#endif
+
 namespace FmiIpc {
 
 class IpcServer : public IpcBase {
