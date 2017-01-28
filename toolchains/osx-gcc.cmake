@@ -15,8 +15,8 @@ message(STATUS Compiler.. ${CMAKE_C_COMPILER_ID} ${CMAKE_CXX_COMPILER_ID})
 
 
 # which compilers to use for C and C++
-cmake_force_c_compiler(${OSXCROSS_ROOT}/bin/x86_64-apple-darwin15-gcc GNU)
-cmake_force_cxx_compiler(${OSXCROSS_ROOT}/bin/x86_64-apple-darwin15-g++ GNU)
+cmake_force_c_compiler(${OSXCROSS_ROOT}/bin/o64-gcc GNU)
+cmake_force_cxx_compiler(${OSXCROSS_ROOT}/bin/o64-g++ GNU)
 SET(CMAKE_AR ${OSXCROSS_ROOT}/bin/x86_64-apple-darwin15-ar CACHE FILEPATH "Archiver")
 SET(PKG_CONFIG_EXECUTABLE ${OSXCROSS_ROOT}/bin/x86_64h-apple-darwin15-pkg-config)
 
@@ -24,8 +24,8 @@ SET(CMAKE_OSX_SYSROOT ${OSXCROSS_ROOT}/SDK/MacOSX10.11.sdk)
 
 # here is the target environment located
 #SET(CMAKE_FIND_ROOT_PATH ${CMAKE_OSX_SYSROOT} ${CMAKE_OSX_SYSROOT}/usr/bin)
-SET(CMAKE_FIND_ROOT_PATH ${OSXCROSS_ROOT}/macports/pkgs/opt/local ${CMAKE_OSX_SYSROOT} ${CMAKE_OSX_SYSROOT}/usr/bin ${CMAKE_OSX_SYSROOT}/usr/lib ${CMAKE_OSX_SYSROOT}/usr)
-
+#SET(CMAKE_FIND_ROOT_PATH ${OSXCROSS_ROOT}/macports/pkgs/opt/local ${CMAKE_OSX_SYSROOT} ${OSXCROSS_ROOT} ${OSXCROSS_ROOT}/lib/system)
+SET(CMAKE_FIND_ROOT_PATH ${OSXCROSS_ROOT})
 # adjust the default behaviour of the FIND_XXX() commands:
 # search headers and libraries in the target environment, search
 # programs in the host environment
