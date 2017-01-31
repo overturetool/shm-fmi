@@ -14,13 +14,11 @@
 #include <iostream>
 #include <fstream>
 
-// current dir
-#include <unistd.h>
+#include "resource_location.h"
 
 extern "C" {
 #include "fmu-loader.h"
 }
-
 #include "fmi2FunctionTypes.h"
 
 extern "C" {
@@ -68,21 +66,14 @@ class FMULoadHelper {
   }
 
   fmi2Component instantiate(const char* name) {
-    char str[200];
-
-    char* cwd = getcwd(NULL, 0);
-
-    strcpy(str, "file:");
-    strcat(str, cwd);
-
-    if (cwd == NULL) perror("unable to obtaining cur directory\n");
+    std::string* cwd = getResourceLocation();
 
     m_callback = (fmi2CallbackFunctions*)malloc(sizeof(fmi2CallbackFunctions));
     fmi2CallbackFunctions st = {&fmuLogger, NULL, NULL, NULL, &cwd};
     memcpy(m_callback, &st, sizeof(fmi2CallbackFunctions));
 
-    comp = fmu.instantiate(name, fmi2CoSimulation, GUID, str, m_callback, true,
-                           true);
+    comp = fmu.instantiate(name, fmi2CoSimulation, GUID, cwd->c_str(),
+                           m_callback, true, true);
 
     delete cwd;
 

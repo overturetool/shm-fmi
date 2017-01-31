@@ -75,22 +75,13 @@ class FMUTest : public ::testing::Test {
 
  public:
   fmi2Component instantiated() {
-    char str[200];
-
-    char* cwd = getcwd(NULL, 0);
-
-    strcpy(str, "file:");
-    strcat(str, cwd);
-
-    if (cwd == NULL) perror("unable to obtaining cur directory\n");
-
-    printf("make cwd into uri: %s\n", str);
+    std::string* cwd = getResourceLocation();
 
     m_callback = (fmi2CallbackFunctions*)malloc(sizeof(fmi2CallbackFunctions));
-    fmi2CallbackFunctions st = {&fmuLogger, NULL, NULL, NULL, &cwd};
+    fmi2CallbackFunctions st = {&fmuLogger, NULL, NULL, NULL, cwd->c_str()};
     memcpy(m_callback, &st, sizeof(fmi2CallbackFunctions));
 
-    comp = fmu.instantiate(INSTANCE_NAME, fmi2CoSimulation, GUID, str,
+    comp = fmu.instantiate(INSTANCE_NAME, fmi2CoSimulation, GUID, cwd->c_str(),
                            m_callback, true, true);
     delete cwd;
 
