@@ -57,7 +57,7 @@ function compileWin32
 		# Do to a bug in gtest when compiling with MinGW we have to avoid building test code
 		#               make -C $B -j$threads
 		make -j$threads -C $B
-
+		make -C $B test
 }
 
 function compileWin64
@@ -81,7 +81,7 @@ function compileWin64
 		# Do to a bug in gtest when compiling with MinGW we have to avoid building test code
 		#		make -C $B -j$threads
 		make -j$threads -C $B
-
+		make -C $B test
 
 }
 
