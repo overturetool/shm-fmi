@@ -29,4 +29,9 @@ target_link_libraries(${PROJECT_NAME} gtest_main)
 target_link_libraries(${PROJECT_NAME} libshmfmi)
 target_link_libraries(${PROJECT_NAME} ${libshmfmi_LIBS})
 
+if (WIN32)
+        #windows        
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+endif() 
+
 add_test(AllTestsIn-testlibshmfmi ${PROJECT_NAME} --gtest_output=xml:gtestresults.xml)

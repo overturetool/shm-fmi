@@ -52,6 +52,11 @@ if (UNIX)
 	endif()
 endif()
 
+if (WIN32)
+        #windows        
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+endif() 
+
 
 add_test(AllTestsIn-${PROJECT_NAME} ${PROJECT_NAME} --gtest_output=xml:gtestresults.xml)
 
