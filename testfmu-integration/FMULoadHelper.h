@@ -69,7 +69,7 @@ class FMULoadHelper {
     std::string* cwd = getResourceLocation();
 
     m_callback = (fmi2CallbackFunctions*)malloc(sizeof(fmi2CallbackFunctions));
-    fmi2CallbackFunctions st = {&fmuLogger, NULL, NULL, NULL, &cwd};
+    fmi2CallbackFunctions st = {&fmuLogger, NULL, NULL, NULL, cwd};
     memcpy(m_callback, &st, sizeof(fmi2CallbackFunctions));
 
     comp = fmu.instantiate(name, fmi2CoSimulation, GUID, cwd->c_str(),

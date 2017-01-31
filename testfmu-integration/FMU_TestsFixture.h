@@ -14,6 +14,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "resource_location.h"
+
 // current dir
 #include <unistd.h>
 
@@ -78,7 +80,7 @@ class FMUTest : public ::testing::Test {
     std::string* cwd = getResourceLocation();
 
     m_callback = (fmi2CallbackFunctions*)malloc(sizeof(fmi2CallbackFunctions));
-    fmi2CallbackFunctions st = {&fmuLogger, NULL, NULL, NULL, cwd->c_str()};
+    fmi2CallbackFunctions st = {&fmuLogger, NULL, NULL, NULL, cwd};
     memcpy(m_callback, &st, sizeof(fmi2CallbackFunctions));
 
     comp = fmu.instantiate(INSTANCE_NAME, fmi2CoSimulation, GUID, cwd->c_str(),
