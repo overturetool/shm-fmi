@@ -334,6 +334,9 @@ bool IpcBase::signalWait(SIGNAL_HANDLE signal, DWORD dwTimeout) {
 // Wait on the available event
 
 #ifdef _WIN32
+	 if (dwTimeout == 0) {
+		 dwTimeout = INFINITE;
+	 }
   if (WaitForSingleObject(signal, dwTimeout) != WAIT_OBJECT_0) return false;
 #elif __APPLE__ || __linux__
 
