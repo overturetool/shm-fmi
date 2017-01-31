@@ -20,6 +20,8 @@ if (WIN32)
   set(CMAKE_SHARED_LIBRARY_PREFIX "")
 endif ()
 
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
 # When done tweaking common stuff, configure the components (subprojects).
 # NOTE: The order matters! The most independent ones should go first.
 add_subdirectory(libshmipc)

@@ -29,7 +29,7 @@ include_directories(${libshmfmu_INCLUDE_DIRS})
 include_directories(${gtest_SOURCE_DIR}/include)
 
 target_link_libraries(${PROJECT_NAME} gtest_main)
-target_link_libraries(${PROJECT_NAME} libshmfmu)
+target_link_libraries(${PROJECT_NAME} libshmfmu_static)
 target_link_libraries(${PROJECT_NAME} ${libshmfmu_LIBS})
 
 add_test(AllTestsIn-${PROJECT_NAME} ${PROJECT_NAME} --gtest_output=xml:gtestresults.xml)

@@ -30,6 +30,8 @@ include_directories(${libshmfmi_INCLUDE_DIRS})
 
 add_library(${PROJECT_NAME} SHARED ${CMAKE_SOURCE_DIR}/third_party/uuid4/src/uuid4.c uri.c fmu.cpp FmuContainer.cpp JavaLauncher.cpp ConfigFile.cpp)
 
+add_library(${PROJECT_NAME}_static ${CMAKE_SOURCE_DIR}/third_party/uuid4/src/uuid4.c uri.c fmu.cpp FmuContainer.cpp JavaLauncher.cpp ConfigFile.cpp)
+
 
 target_link_libraries(${PROJECT_NAME} libshmfmi)
 target_link_libraries(${PROJECT_NAME} ${libshmfmi_LIBS})
