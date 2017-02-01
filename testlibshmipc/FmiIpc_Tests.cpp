@@ -38,7 +38,7 @@ void runServer(const char* key, const char* data, SharedFmiMessage* messageSend,
 }
 
 void runClient(const char* key) {
-  bool success;
+  bool success = false;
 
   FmiIpc::IpcClient* client = NULL;
 

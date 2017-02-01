@@ -119,6 +119,7 @@ function compileLinux32
       -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/linux32/usr/protobuf/lib/libprotobuf.a
 
 		make -C $B -j$threads
+		make -C $B test
 }
 
 function generateJava
