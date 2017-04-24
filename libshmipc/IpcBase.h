@@ -52,11 +52,6 @@ typedef sem_t* SIGNAL_HANDLE;
 #include "SharedFmiMessage.h"
 using namespace sharedfmimemory;
 
-// Definitions
-#define IPC_BLOCK_COUNT 512
-#define IPC_BLOCK_SIZE 4096
-
-#define IPC_MAX_ADDR 256
 
 namespace FmiIpc {
 
