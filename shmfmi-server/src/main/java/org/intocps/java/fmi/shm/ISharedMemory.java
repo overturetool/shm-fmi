@@ -16,5 +16,7 @@ public interface ISharedMemory
 	public abstract void stop();
 
 	public int getAliveInterval();
+	
+	public abstract int getBufferSize();
 
 }

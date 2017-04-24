@@ -39,6 +39,14 @@ JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemoryServer_setServe
 JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemoryServer_serverSend
   (JNIEnv *, jobject, jint, jbyteArray);
 
+/*
+ * Class:     org_intocps_java_fmi_shm_SharedMemoryServer
+ * Method:    getServerBufferSize
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_intocps_java_fmi_shm_SharedMemoryServer_getServerBufferSize
+  (JNIEnv *, jobject);
+
 #ifdef __cplusplus
 }
 #endif

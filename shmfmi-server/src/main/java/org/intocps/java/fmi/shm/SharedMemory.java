@@ -57,6 +57,9 @@ public class SharedMemory implements ISharedMemory
 	 */
 	@Override
 	public native void stop();
+	
+	@Override
+	public native int getBufferSize();
 
 	@Override
 	public int getAliveInterval()
@@ -139,5 +142,7 @@ public class SharedMemory implements ISharedMemory
 		}
 
 	}
+
+	
 
 }

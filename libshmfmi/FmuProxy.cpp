@@ -21,6 +21,13 @@ FmuProxy::~FmuProxy() {
 
 bool FmuProxy::initialize() { return this->server->create(); }
 
+#define OVERFLOW_CHECK_RETURN_NULL \
+	if(m.protoBufMsgSize > SharedFmiBufferSize)\
+	{\
+		std::cerr << "Shared memory buffer overflow. Prorobuf message too big" << std::endl;\
+		return NULL;\
+	}
+
 google::protobuf::Message* FmuProxy::send(sharedfmimemory::fmi2Command type,
                                           google::protobuf::Message* msg) {
   sharedfmimemory::SharedFmiMessage m = sharedfmimemory::SharedFmiMessage();
@@ -35,19 +42,21 @@ google::protobuf::Message* FmuProxy::send(sharedfmimemory::fmi2Command type,
     case sharedfmimemory::fmi2GetMaxStepSize: {
       Fmi2Empty* im = (Fmi2Empty*)msg;
       m.protoBufMsgSize = im->ByteSize();
+      OVERFLOW_CHECK_RETURN_NULL;
       im->SerializeWithCachedSizesToArray(m.protoBufMsg);
-
     } break;
 
     case sharedfmimemory::fmi2SetDebugLogging: {
       Fmi2SetDebugLoggingRequest* im = (Fmi2SetDebugLoggingRequest*)msg;
       m.protoBufMsgSize = im->ByteSize();
+      OVERFLOW_CHECK_RETURN_NULL;
       im->SerializeWithCachedSizesToArray(m.protoBufMsg);
 
     } break;
     case sharedfmimemory::fmi2Instantiate: {
       Fmi2InstantiateRequest* im = (Fmi2InstantiateRequest*)msg;
       m.protoBufMsgSize = im->ByteSize();
+      OVERFLOW_CHECK_RETURN_NULL;
       im->SerializeWithCachedSizesToArray(m.protoBufMsg);
 
     } break;
@@ -55,8 +64,8 @@ google::protobuf::Message* FmuProxy::send(sharedfmimemory::fmi2Command type,
     case sharedfmimemory::fmi2SetupExperiment: {
       Fmi2SetupExperimentRequest* im = (Fmi2SetupExperimentRequest*)msg;
       m.protoBufMsgSize = im->ByteSize();
+      OVERFLOW_CHECK_RETURN_NULL;
       im->SerializeWithCachedSizesToArray(m.protoBufMsg);
-
     }
 
     break;
@@ -64,6 +73,7 @@ google::protobuf::Message* FmuProxy::send(sharedfmimemory::fmi2Command type,
     case sharedfmimemory::fmi2DoStep: {
       Fmi2DoStepRequest* im = (Fmi2DoStepRequest*)msg;
       m.protoBufMsgSize = im->ByteSize();
+      OVERFLOW_CHECK_RETURN_NULL;
       im->SerializeWithCachedSizesToArray(m.protoBufMsg);
 
     } break;
@@ -74,6 +84,7 @@ google::protobuf::Message* FmuProxy::send(sharedfmimemory::fmi2Command type,
     case sharedfmimemory::fmi2GetString: {
       Fmi2GetRequest* im = (Fmi2GetRequest*)msg;
       m.protoBufMsgSize = im->ByteSize();
+      OVERFLOW_CHECK_RETURN_NULL;
       im->SerializeWithCachedSizesToArray(m.protoBufMsg);
 
     } break;
@@ -81,18 +92,21 @@ google::protobuf::Message* FmuProxy::send(sharedfmimemory::fmi2Command type,
     case sharedfmimemory::fmi2SetReal: {
       Fmi2SetRealRequest* im = (Fmi2SetRealRequest*)msg;
       m.protoBufMsgSize = im->ByteSize();
+      OVERFLOW_CHECK_RETURN_NULL;
       im->SerializeWithCachedSizesToArray(m.protoBufMsg);
 
     } break;
     case sharedfmimemory::fmi2SetInteger: {
       Fmi2SetIntegerRequest* im = (Fmi2SetIntegerRequest*)msg;
       m.protoBufMsgSize = im->ByteSize();
+      OVERFLOW_CHECK_RETURN_NULL;
       im->SerializeWithCachedSizesToArray(m.protoBufMsg);
 
     } break;
     case sharedfmimemory::fmi2SetBoolean: {
       Fmi2SetBooleanRequest* im = (Fmi2SetBooleanRequest*)msg;
       m.protoBufMsgSize = im->ByteSize();
+      OVERFLOW_CHECK_RETURN_NULL;
       im->SerializeWithCachedSizesToArray(m.protoBufMsg);
 
     } break;
@@ -100,6 +114,7 @@ google::protobuf::Message* FmuProxy::send(sharedfmimemory::fmi2Command type,
     case sharedfmimemory::fmi2SetString: {
       Fmi2SetStringRequest* im = (Fmi2SetStringRequest*)msg;
       m.protoBufMsgSize = im->ByteSize();
+      OVERFLOW_CHECK_RETURN_NULL;
       im->SerializeWithCachedSizesToArray(m.protoBufMsg);
 
     } break;
@@ -110,6 +125,7 @@ google::protobuf::Message* FmuProxy::send(sharedfmimemory::fmi2Command type,
     case sharedfmimemory::fmi2GetStringStatus: {
       Fmi2StatusRequest* im = (Fmi2StatusRequest*)msg;
       m.protoBufMsgSize = im->ByteSize();
+      OVERFLOW_CHECK_RETURN_NULL;
       im->SerializeWithCachedSizesToArray(m.protoBufMsg);
 
     } break;
@@ -117,6 +133,7 @@ google::protobuf::Message* FmuProxy::send(sharedfmimemory::fmi2Command type,
     case sharedfmimemory::fmi2Log: {
       Fmi2LogReply* im = (Fmi2LogReply*)msg;
       m.protoBufMsgSize = im->ByteSize();
+      OVERFLOW_CHECK_RETURN_NULL;
       im->SerializeWithCachedSizesToArray(m.protoBufMsg);
     } break;
   }
@@ -373,7 +390,7 @@ FmuProxy::fmi2Status FmuProxy::fmi2GetString(const fmi2ValueReference vr[],
   Fmi2GetStringReply* reply =
       (Fmi2GetStringReply*)send(sharedfmimemory::fmi2GetString, &request);
 
-  if (reply == NULL) return fmi2Fatal;
+  if (reply == NULL|| !reply->valid()) return fmi2Fatal;
 
   for (int i = 0; i < reply->values_size(); ++i) {
     value[i] = reply->values(i).c_str();

@@ -90,6 +90,7 @@ message Fmi2GetBooleanReply{
 
 message Fmi2GetStringReply{
 	repeated string values=1;
+  bool valid=2;
 }
 
 //

@@ -130,3 +130,8 @@ JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_stop(JNIEnv *e
 	delete g_client;
 	g_client = NULL;
 }
+
+JNIEXPORT jint JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_getBufferSize
+  (JNIEnv *env, jobject obj){
+	return SharedFmiBufferSize;
+}

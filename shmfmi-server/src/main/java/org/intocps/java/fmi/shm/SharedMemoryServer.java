@@ -22,6 +22,8 @@ public class SharedMemoryServer
 	public static native void setServerDebug(boolean on);
 
 	public native void serverSend(int type, byte[] data);
+	
+	public native int getServerBufferSize();
 
 	final static Logger logger = LoggerFactory.getLogger(SharedMemoryServer.class);
 

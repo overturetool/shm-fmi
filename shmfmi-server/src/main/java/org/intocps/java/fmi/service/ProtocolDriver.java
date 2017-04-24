@@ -17,6 +17,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.lausdahl.examples.Service.Fmi2DoStepRequest;
 import com.lausdahl.examples.Service.Fmi2Empty;
 import com.lausdahl.examples.Service.Fmi2GetRequest;
+import com.lausdahl.examples.Service.Fmi2GetStringReply;
 import com.lausdahl.examples.Service.Fmi2InstantiateRequest;
 import com.lausdahl.examples.Service.Fmi2SetBooleanRequest;
 import com.lausdahl.examples.Service.Fmi2SetDebugLoggingRequest;
@@ -92,19 +93,16 @@ public class ProtocolDriver implements Runnable
 			thread.start();
 		}
 	}
-	
-	
+
 	private void handleTimeout()
 	{
 		final String timeOutMessage = "No alive signal from FMU withing %d ms period. Freeing instance!";
-		String msg = String.format(timeOutMessage,mem.getAliveInterval());
+		String msg = String.format(timeOutMessage, mem.getAliveInterval());
 		System.err.println(msg);
 		logger.warn(msg);
-		connected=false;
+		connected = false;
 		service.FreeInstantiate(Fmi2Empty.newBuilder().build());
 	}
-
-
 
 	private void setWatchDog()
 	{
@@ -117,13 +115,12 @@ public class ProtocolDriver implements Runnable
 			}
 		};
 
-
 		while (connected)
 		{
 			Future<Boolean> future = executor.submit(task);
 			try
 			{
-				if(!future.get(mem.getAliveInterval(), TimeUnit.MILLISECONDS))
+				if (!future.get(mem.getAliveInterval(), TimeUnit.MILLISECONDS))
 				{
 					handleTimeout();
 					return;
@@ -160,6 +157,7 @@ public class ProtocolDriver implements Runnable
 	@Override
 	public void run()
 	{
+		final int maxBufferSize = mem.getBufferSize();
 
 		byte[] typeArr = new byte[1];
 
@@ -219,6 +217,12 @@ public class ProtocolDriver implements Runnable
 						break;
 					case fmi2GetString:
 						reply = service.GetString(Fmi2GetRequest.parseFrom(bytes));
+						if(reply.getSerializedSize() > maxBufferSize)
+						{
+							service.error("Buffer overflow. Protobuf message too big. Actual: "+reply.getSerializedSize()+" max allowed: "+maxBufferSize);
+							logger.error("Buffer overflow. Protobuf message too big. Actual: "+reply.getSerializedSize()+" max allowed: "+maxBufferSize);
+							reply = Fmi2GetStringReply.newBuilder().setValid(false).build();
+						}
 						break;
 					case fmi2Instantiate:
 						reply = service.Instantiate(Fmi2InstantiateRequest.parseFrom(bytes));
@@ -288,7 +292,20 @@ public class ProtocolDriver implements Runnable
 			if (reply != null)
 			{
 				logger.debug("Sending message type {}", type);
+
+				bytes = reply.toByteArray();
+				if (bytes.length > maxBufferSize)
+				{
+					InvalidProtocolBufferException e =new InvalidProtocolBufferException("Buffer overflow. Protobuf message too big. Actual: "+bytes.length+" max allowed: "+maxBufferSize); 
+					service.error(e);
+					logger.error(e.getMessage()+" Returning FATAL", e);
+					// This may be the wrong reply but better than nothing
+					//reply = Fmi2StatusReply.newBuilder().setStatus(Fmi2StatusReply.Status.Fatal).build();
+					this.mem.send(type, new byte[]{});
+				} else{
+
 				this.mem.send(type, reply.toByteArray());
+				}
 			} else
 			{
 				String errorMsg = "deadlocking do not know how to answer: "

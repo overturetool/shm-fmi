@@ -57,6 +57,14 @@ JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_waitForWat
 JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_stop
   (JNIEnv *, jobject);
 
+/*
+ * Class:     org_intocps_java_fmi_shm_SharedMemory
+ * Method:    getBufferSize
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_getBufferSize
+  (JNIEnv *, jobject);
+
 #ifdef __cplusplus
 }
 #endif

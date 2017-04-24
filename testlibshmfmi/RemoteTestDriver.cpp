@@ -169,6 +169,7 @@ void remoteTestDriver(const char* shmKey) {
       r->ParseFromArray(msg->protoBufMsg, msg->protoBufMsgSize);
 
       Fmi2GetStringReply* reply = new Fmi2GetStringReply();
+      reply->set_valid(true);
 
       for (int i = 0; i < r->valuereference_size(); i++) {
         int id = r->valuereference(i);
