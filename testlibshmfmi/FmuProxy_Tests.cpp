@@ -195,13 +195,16 @@ TEST_F(FmuProxyTest, SetGetStrings) {
 TEST_F(FmuProxyTest, SetGetStringsOverflow) {
   unsigned int vr[] = {1, 2, 3};
 
-  std::string vals[] = {"Test string: a", "Test string: b", "Test string: c"};
 
   int size = 1;
 
   const char* svals[size];
 
-    svals[0] = std::string(SharedFmiBufferSize,'a').c_str();
+   char s[SharedFmiBufferSize+1];
+    svals[0] = s;
+
+    std::size_t length = std::string(SharedFmiBufferSize,'a').copy(s,SharedFmiBufferSize);
+      s[length]='\0';
 
   EXPECT_EQ(FmuProxy::fmi2Fatal, m_client->fmi2SetString(vr, size, svals));
 
