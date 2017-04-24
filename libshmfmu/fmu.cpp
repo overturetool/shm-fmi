@@ -246,7 +246,7 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 
   if (loggingOn) {
     LOG(functions, instanceName, fmi2OK, "logFmiCall",
-        "FMU: Called instantiate with instance %s and GUID %s", instanceName,
+        "FMU: Called instantiate with instance '%s' and GUID '%s'", instanceName,
         fmuGUID);
   }
   // std::string shared_memory_key(fmuGUID);
@@ -267,7 +267,7 @@ extern "C" fmi2Component fmi2Instantiate(fmi2String instanceName,
 
   if (loggingOn) {
     LOG(functions, instanceName, fmi2OK, "logFmiCall",
-        "FMU: Launching Tool Wrapper memory key: '%s' and resource location %s",
+        "FMU: Launching Tool Wrapper memory key: '%s' and resource location '%s'",
         shared_memory_key.c_str(), resourceLocationStr.c_str());
   }
 
