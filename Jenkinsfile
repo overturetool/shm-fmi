@@ -61,7 +61,7 @@ stage('Compile native code X') {
 				sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -darwin"
 			}
 			sh "./list-dependencies.sh"
-			stash includes: '**/*.dylib, git-info.txt, **/gtestresults.xml', name: 'jni-fmi-native-api-darwin' 
+			stash includes: '**/*.dylib, git-info.txt, **/gtestresults.xml', name: 'shm-api-darwin' 
 		}
 	},linux32: {
 		node('Xcompile') {
@@ -71,7 +71,7 @@ stage('Compile native code X') {
 				sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -linux32"
 			}
 			sh "./list-dependencies.sh"
-			stash includes: '**/*.so, git-info.txt, **/gtestresults.xml', name: 'jni-fmi-native-api-linux32' 
+			stash includes: '**/*.so, git-info.txt, **/gtestresults.xml', name: 'shm-api-linux32' 
 		}
 	},linux64: {
 		node('Xcompile') {
@@ -81,7 +81,7 @@ stage('Compile native code X') {
 				sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -linux64"
 			}
 			sh "./list-dependencies.sh"
-			stash includes: '**/*.so, git-info.txt, shmfmi-server/target/generated-protoc/**/*.java, **/gtestresults.xml', name: 'jni-fmi-native-api-linux64'  
+			stash includes: '**/*.so, git-info.txt, shmfmi-server/target/generated-protoc/**/*.java, **/gtestresults.xml', name: 'shm-api-linux64'  
 		}
 	},win32: {
 		node('Xcompile') {
@@ -91,7 +91,7 @@ stage('Compile native code X') {
 				sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -win32"
 			}
 			sh "./list-dependencies.sh"
-			stash includes: '**/*.dll, git-info.txt, **/gtestresults.xml', name: 'jni-fmi-native-api-win32' 
+			stash includes: '**/*.dll, git-info.txt, **/gtestresults.xml', name: 'shm-api-win32' 
 		}
 	},win64: {
 		node('Xcompile') {
@@ -101,7 +101,7 @@ stage('Compile native code X') {
 				sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -win64"
 			}
 			sh "./list-dependencies.sh"
-			stash includes: '**/*.dll, git-info.txt, **/gtestresults.xml', name: 'jni-fmi-native-api-win64'
+			stash includes: '**/*.dll, git-info.txt, **/gtestresults.xml', name: 'shm-api-win64'
 		}
 	}
 }
@@ -121,14 +121,14 @@ node {
 			sh "mvn clean -f shmfmi-server/pom.xml"
 				
 		}
-		sh "rm -r jnifmuapi/src/main/native/build"
+
 
 		//copy back all native libraries
-		unstash 'jni-fmi-native-api-darwin' 
-		unstash 'jni-fmi-native-api-linux32'
-		unstash 'jni-fmi-native-api-linux64'
-		unstash 'jni-fmi-native-api-win32'
-		unstash 'jni-fmi-native-api-win64'
+		unstash 'shm-api-darwin' 
+		unstash 'shm-api-linux32'
+		unstash 'shm-api-linux64'
+		unstash 'shm-api-win32'
+		unstash 'shm-api-win64'
 							
 		sh copyStashInPlace
 
