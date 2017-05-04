@@ -159,6 +159,42 @@ function xcompile
 
 createGitInfo
 
-xcompile .
+#xcompile .
+
+D=.
+
+while [ "$1" != "" ]; do
+		case $1 in
+				-darwin)
+						compileDarwin64 $D
+						;;
+
+				-linux32)
+						compileLinux32 $D
+						;;
+
+				-linux64)
+						compileLinux64 $D
+						;;
+
+				-win32)
+						compileWin32 $D
+						;;
+
+				-win64)
+						compileWin64 $D
+						;;
+
+				-all)
+						xcompile $D
+						;;
+
+				*)               # Default case: If no more options then break out of the loop.
+						break
+		esac
+		shift
+done
+
+
 
 generateJava
