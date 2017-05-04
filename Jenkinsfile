@@ -57,7 +57,9 @@ stage('Compile native code X') {
 		node('Xcompile') {
 			checkout scm
 			sh 'git submodule update --init'
-			sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -darwin"
+			lock('SHM-FMI-TEST'){
+				sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -darwin"
+			}
 			sh "./list-dependencies.sh"
 			stash includes: '**/*.dylib, git-info.txt, **/gtestresults.xml', name: 'jni-fmi-native-api-darwin' 
 		}
@@ -65,7 +67,9 @@ stage('Compile native code X') {
 		node('Xcompile') {
 			checkout scm
 			sh 'git submodule update --init'
-			sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -linux32"
+			lock('SHM-FMI-TEST'){
+				sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -linux32"
+			}
 			sh "./list-dependencies.sh"
 			stash includes: '**/*.so, git-info.txt, **/gtestresults.xml', name: 'jni-fmi-native-api-linux32' 
 		}
@@ -73,7 +77,9 @@ stage('Compile native code X') {
 		node('Xcompile') {
 			checkout scm
 			sh 'git submodule update --init'
-			sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -linux64"
+			lock('SHM-FMI-TEST'){
+				sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -linux64"
+			}
 			sh "./list-dependencies.sh"
 			stash includes: '**/*.so, git-info.txt, shmfmi-server/target/generated-protoc/**/*.java, **/gtestresults.xml', name: 'jni-fmi-native-api-linux64'  
 		}
@@ -81,7 +87,9 @@ stage('Compile native code X') {
 		node('Xcompile') {
 			checkout scm
 			sh 'git submodule update --init'
-			sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -win32"
+			lock('SHM-FMI-TEST'){
+				sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -win32"
+			}
 			sh "./list-dependencies.sh"
 			stash includes: '**/*.dll, git-info.txt, **/gtestresults.xml', name: 'jni-fmi-native-api-win32' 
 		}
@@ -89,7 +97,9 @@ stage('Compile native code X') {
 		node('Xcompile') {
 			checkout scm
 			sh 'git submodule update --init'
-			sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -win64"
+			lock('SHM-FMI-TEST'){
+				sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -win64"
+			}
 			sh "./list-dependencies.sh"
 			stash includes: '**/*.dll, git-info.txt, **/gtestresults.xml', name: 'jni-fmi-native-api-win64'
 		}
@@ -156,9 +166,9 @@ node {
 			server.publishBuildInfo buildInfo
 		}
 	}
-		stage('Build COE') {
-			build 'overture-fmu-pipe/development'
-		}
+	stage('Build COE') {
+		build 'overture-fmu-pipe/development'
+	}
 }
 
 
