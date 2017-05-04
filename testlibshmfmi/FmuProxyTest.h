@@ -16,7 +16,16 @@
 #include <thread>
 #include "RemoteTestDriver.h"
 
-#define MEM_KEY "shmFmiTest"
+#ifdef _WIN32
+#define MEM_KEY "shmFmiTestWin"
+#elif __APPLE__
+    // POSIX
+#define MEM_KEY "shmFmiTestApple"
+#elif __linux
+#define MEM_KEY "shmFmiTestLinux"
+#endif
+
+
 
 void remoteClientThread();
 void remoteClientThreadResume();
