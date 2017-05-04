@@ -166,8 +166,8 @@ node {
 			server.publishBuildInfo buildInfo
 		}
 	}
-	stage('Build COE') {
-		build 'overture-fmu-pipe/development'
+	stage('Build Overture-FMU') {
+		build '../overture-fmu-pipe/development'
 	}
 }
 
