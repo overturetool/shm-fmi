@@ -157,7 +157,7 @@ node {
 			rtMaven.opts = "-Xmx1024m -XX:MaxPermSize=256M"
 			rtMaven.deployer releaseRepo:'into-cps', snapshotRepo:'into-cps', server: server
 				
-			rtMaven.run pom: 'shmfmi-server/pom.xml', goals: 'install', buildInfo: buildInfo
+			rtMaven.run pom: 'shmfmi-server/pom.xml', goals: 'install -P!protoc', buildInfo: buildInfo
 
 			//get rid of old snapshots only keep then for a short amount of time
 			buildInfo.retention maxBuilds: 5, maxDays: 7, deleteBuildArtifacts: true
