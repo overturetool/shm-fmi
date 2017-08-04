@@ -4,6 +4,8 @@ echo Copy native libraries in place
 
 LIB=shmfmi-server/target/classes/lib
 
+rm -rf $LIB
+
 mkdir -p $LIB/Mac-x86_64
 mkdir -p $LIB/Linux-amd64
 mkdir -p $LIB/Linux-i386
