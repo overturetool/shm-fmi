@@ -6,7 +6,7 @@ LIB=shmfmi-server/target/classes/lib
 
 mkdir -p $LIB/Mac-x86_64
 mkdir -p $LIB/Linux-amd64
-mkdir -p $LIB/Linux-x86
+mkdir -p $LIB/Linux-i386
 mkdir -p $LIB/Windows-amd64
 mkdir -p $LIB/Windows-x86
 
@@ -15,7 +15,7 @@ echo Copying server libs
 cp git-info.txt $LIB/
 cp build/darwin64/shmfmi-server/libsharedmemory.dylib $LIB/Mac-x86_64/
 cp build/linux64/shmfmi-server/libsharedmemory.so $LIB/Linux-amd64/
-cp build/linux32/shmfmi-server/libsharedmemory.so $LIB/Linux-x86/
+cp build/linux32/shmfmi-server/libsharedmemory.so $LIB/Linux-i386/
 cp build/win64/shmfmi-server/sharedmemory.dll $LIB/Windows-amd64/
 cp build/win32/shmfmi-server/sharedmemory.dll $LIB/Windows-x86/
 
