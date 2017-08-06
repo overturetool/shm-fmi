@@ -90,3 +90,8 @@ JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemoryServer_serverSt
 	delete g_server;
 	g_server = NULL;
 }
+
+JNIEXPORT jint JNICALL Java_org_intocps_java_fmi_shm_SharedMemoryServer_getServerBufferSize
+  (JNIEnv *env, jobject obj){
+	return SharedFmiBufferSize;
+}

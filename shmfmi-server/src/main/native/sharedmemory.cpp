@@ -11,7 +11,8 @@
 FmiIpc::IpcClient* g_client;
 bool g_clientDebug = true;
 
-JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setDebug(JNIEnv *env, jclass clz, jboolean on)
+
+JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setDebug(JNIEnv *env, jobject obj, jboolean on)
 {
 	g_clientDebug = on;
 }
@@ -27,11 +28,13 @@ JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setId(JNIE
 	}
 	bool success;
 
-	g_client = new FmiIpc::IpcClient(0, &success, idString);
+	g_client = new FmiIpc::IpcClient(0, idString);
 	if (g_clientDebug)
 	{
 		g_client->enableConsoleDebug();
 	}
+
+	g_client->connect(&success);
 
 	if (!success)
 	{
@@ -43,6 +46,18 @@ JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setId(JNIE
 
 	return success;
 
+}
+
+
+JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_waitForWatchDogEvent(JNIEnv *env, jobject obj)
+{
+
+	if (g_client != NULL)
+	{
+		g_client->waitForWatchDogEvent();
+		return true;
+	}
+	return false;
 }
 
 /*
@@ -114,4 +129,9 @@ JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_stop(JNIEnv *e
 {
 	delete g_client;
 	g_client = NULL;
+}
+
+JNIEXPORT jint JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_getBufferSize
+  (JNIEnv *env, jobject obj){
+	return SharedFmiBufferSize;
 }

@@ -7,6 +7,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#undef org_intocps_java_fmi_shm_SharedMemory_ALIVE_INTERVAL
+#define org_intocps_java_fmi_shm_SharedMemory_ALIVE_INTERVAL 200L
 /*
  * Class:     org_intocps_java_fmi_shm_SharedMemory
  * Method:    setId
@@ -37,7 +39,15 @@ JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_send
  * Signature: (Z)V
  */
 JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setDebug
-  (JNIEnv *, jclass, jboolean);
+  (JNIEnv *, jobject, jboolean);
+
+/*
+ * Class:     org_intocps_java_fmi_shm_SharedMemory
+ * Method:    waitForWatchDogEvent
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_waitForWatchDogEvent
+  (JNIEnv *, jobject);
 
 /*
  * Class:     org_intocps_java_fmi_shm_SharedMemory
@@ -45,6 +55,14 @@ JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_setDebug
  * Signature: ()V
  */
 JNIEXPORT void JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_stop
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_intocps_java_fmi_shm_SharedMemory
+ * Method:    getBufferSize
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_intocps_java_fmi_shm_SharedMemory_getBufferSize
   (JNIEnv *, jobject);
 
 #ifdef __cplusplus

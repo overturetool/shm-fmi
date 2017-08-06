@@ -1,5 +1,14 @@
 package org.intocps.java.fmi.service;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import org.intocps.java.fmi.shm.ISharedMemory;
 import org.intocps.java.fmi.shm.SharedMemory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +17,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.lausdahl.examples.Service.Fmi2DoStepRequest;
 import com.lausdahl.examples.Service.Fmi2Empty;
 import com.lausdahl.examples.Service.Fmi2GetRequest;
+import com.lausdahl.examples.Service.Fmi2GetStringReply;
 import com.lausdahl.examples.Service.Fmi2InstantiateRequest;
 import com.lausdahl.examples.Service.Fmi2SetBooleanRequest;
 import com.lausdahl.examples.Service.Fmi2SetDebugLoggingRequest;
@@ -24,15 +34,18 @@ public class ProtocolDriver implements Runnable
 	final static Logger logger = LoggerFactory.getLogger(ProtocolDriver.class);
 	final IServiceProtocol service;
 	final Thread thread;
-	final SharedMemory mem;
+	final ISharedMemory mem;
 	final String id;
-	boolean running = true;
 	boolean connected = false;
 
 	public ProtocolDriver(String id, IServiceProtocol service)
 	{
+		this(id, service, new SharedMemory());
+	}
 
-		this.mem = new SharedMemory();
+	public ProtocolDriver(String id, IServiceProtocol service, ISharedMemory mem)
+	{
+		this.mem = mem;
 		this.service = service;
 		this.id = id;
 		thread = new Thread(this);
@@ -65,7 +78,68 @@ public class ProtocolDriver implements Runnable
 			}
 
 			connected = true;
+
+			Thread watchDog = new Thread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					setWatchDog();
+				}
+			});
+			watchDog.setDaemon(true);
+			watchDog.start();
 			thread.start();
+		}
+	}
+
+	private void handleTimeout()
+	{
+		final String timeOutMessage = "No alive signal from FMU withing %d ms period. Freeing instance!";
+		String msg = String.format(timeOutMessage, mem.getAliveInterval());
+		System.err.println(msg);
+		logger.warn(msg);
+		connected = false;
+		service.FreeInstantiate(Fmi2Empty.newBuilder().build());
+	}
+
+	private void setWatchDog()
+	{
+		final ExecutorService executor = Executors.newCachedThreadPool();
+		final Callable<Boolean> task = new Callable<Boolean>()
+		{
+			public Boolean call()
+			{
+				return mem.waitForWatchDogEvent();
+			}
+		};
+
+		while (connected)
+		{
+			Future<Boolean> future = executor.submit(task);
+			try
+			{
+				if (!future.get(mem.getAliveInterval(), TimeUnit.MILLISECONDS))
+				{
+					handleTimeout();
+					return;
+				}
+			} catch (TimeoutException ex)
+			{
+				// handle the timeout
+				handleTimeout();
+				return;
+			} catch (InterruptedException e)
+			{
+				// handle the interrupts
+			} catch (ExecutionException e)
+			{
+				// handle other exceptions
+			} finally
+			{
+				future.cancel(true); // may or may not desire this
+			}
 		}
 	}
 
@@ -76,22 +150,30 @@ public class ProtocolDriver implements Runnable
 			return;
 		}
 		logger.debug("Stopping Shared memory client");
+		connected = false;
 		mem.stop();
 	}
 
 	@Override
 	public void run()
 	{
+		final int maxBufferSize = mem.getBufferSize();
 
 		byte[] typeArr = new byte[1];
 
-		while (running)
+		while (connected)
 		{
 
 			byte[] bytes = this.mem.read(typeArr);
 			if (bytes == null)
 			{
-				continue;// timout
+				try
+				{
+					Thread.sleep(100);
+				} catch (InterruptedException e)
+				{
+				}
+				continue;
 			}
 
 			byte type = typeArr[0];
@@ -135,13 +217,19 @@ public class ProtocolDriver implements Runnable
 						break;
 					case fmi2GetString:
 						reply = service.GetString(Fmi2GetRequest.parseFrom(bytes));
+						if(reply.getSerializedSize() > maxBufferSize)
+						{
+							service.error("Buffer overflow. Protobuf message too big. Actual: "+reply.getSerializedSize()+" max allowed: "+maxBufferSize);
+							logger.error("Buffer overflow. Protobuf message too big. Actual: "+reply.getSerializedSize()+" max allowed: "+maxBufferSize);
+							reply = Fmi2GetStringReply.newBuilder().setValid(false).build();
+						}
 						break;
 					case fmi2Instantiate:
 						reply = service.Instantiate(Fmi2InstantiateRequest.parseFrom(bytes));
 						break;
 					case fmi2FreeInstance:
 						service.FreeInstantiate(Fmi2Empty.parseFrom(bytes));
-						reply = null; //no reply
+						reply = null; // no reply
 						break;
 					case fmi2Reset:
 						reply = service.Reset(Fmi2Empty.parseFrom(bytes));
@@ -204,10 +292,24 @@ public class ProtocolDriver implements Runnable
 			if (reply != null)
 			{
 				logger.debug("Sending message type {}", type);
+
+				bytes = reply.toByteArray();
+				if (bytes.length > maxBufferSize)
+				{
+					InvalidProtocolBufferException e =new InvalidProtocolBufferException("Buffer overflow. Protobuf message too big. Actual: "+bytes.length+" max allowed: "+maxBufferSize); 
+					service.error(e);
+					logger.error(e.getMessage()+" Returning FATAL", e);
+					// This may be the wrong reply but better than nothing
+					//reply = Fmi2StatusReply.newBuilder().setStatus(Fmi2StatusReply.Status.Fatal).build();
+					this.mem.send(type, new byte[]{});
+				} else{
+
 				this.mem.send(type, reply.toByteArray());
+				}
 			} else
 			{
-				String errorMsg="deadlocking do not know how to answer: "+cmd;
+				String errorMsg = "deadlocking do not know how to answer: "
+						+ cmd;
 				service.error(errorMsg);
 				logger.error(errorMsg);
 			}

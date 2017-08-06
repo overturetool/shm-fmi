@@ -9,7 +9,7 @@
 	<groupId>org.intocps.java.fmi</groupId>
 	<artifactId>fmi-shm-server</artifactId>
 	<name>Java SHM-FMI server</name>
-	<version>0.1.4</version>
+	<version>0.2.2</version>
 	<dependencies>
 
 		<dependency>
@@ -44,6 +44,32 @@
 			<version>1.7.5</version>
 			<!-- scope>test</scope -->
 		</dependency>
+		
+		
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>1.10.19</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4</artifactId>
+			<version>1.6.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-mockito</artifactId>
+			<version>1.6.4</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -176,7 +202,7 @@
     <url>git@gitlab.au.dk:into-cps/shm-fmi.git</url>
     <connection>scm:git:git://gitlab.au.dk:into-cps/shm-fmi.git</connection>
     <developerConnection>scm:git:git@gitlab.au.dk:into-cps/shm-fmi.git</developerConnection>
-    <tag>Release/0.1.4</tag>
+    <tag>Release/0.2.2</tag>
   </scm>
 
 

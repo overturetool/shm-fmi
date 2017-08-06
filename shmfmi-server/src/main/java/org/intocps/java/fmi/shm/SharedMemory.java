@@ -7,25 +7,69 @@ import org.intocps.fmi.jnifmuapi.NativeLibraryLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SharedMemory
+public class SharedMemory implements ISharedMemory
 {
 
 	public final static String DEFAULT_MEMORY_NAME = "shmFmiTest";
 
 	private final static String LIBRARY_NAME = "sharedmemory";
 
+	public final static int ALIVE_INTERVAL = 200;
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.intocps.java.fmi.shm.ISharedMemory#setId(java.lang.String)
+	 */
+	@Override
 	public native boolean setId(String id);
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.intocps.java.fmi.shm.ISharedMemory#read(byte[])
+	 */
+	@Override
 	public native byte[] read(byte[] type);
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.intocps.java.fmi.shm.ISharedMemory#send(int, byte[])
+	 */
+	@Override
 	public native void send(int type, byte[] data);
-	
-	public static native void setDebug(boolean on);
-	
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.intocps.java.fmi.shm.ISharedMemory#setDebug(boolean)
+	 */
+	@Override
+	public native void setDebug(boolean on);
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.intocps.java.fmi.shm.ISharedMemory#waitForWatchDogEvent()
+	 */
+	@Override
+	public native boolean waitForWatchDogEvent();
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.intocps.java.fmi.shm.ISharedMemory#stop()
+	 */
+	@Override
 	public native void stop();
+	
+	@Override
+	public native int getBufferSize();
+
+	@Override
+	public int getAliveInterval()
+	{
+		// native cycle is set to 200 ms
+		return ALIVE_INTERVAL * 4; // allow for missing events
+	}
 
 	final static Logger logger = LoggerFactory.getLogger(SharedMemory.class);
-	
+
 	static boolean libraryLoaded = false;
 
 	static
@@ -98,5 +142,7 @@ public class SharedMemory
 		}
 
 	}
+
+	
 
 }

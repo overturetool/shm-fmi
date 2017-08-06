@@ -23,11 +23,14 @@ if(APPLE)
 include_directories(${CMAKE_SOURCE_DIR}/third_party/osx/include)
 endif(APPLE)
 
+include_directories(${CMAKE_SOURCE_DIR}/third_party/uuid4/src/)
 include_directories(includes/fmi)
 include_directories(${libshmfmi_INCLUDE_DIRS})
 
 
-add_library(${PROJECT_NAME} SHARED uri.c fmu.cpp FmuContainer.cpp JavaLauncher.cpp ConfigFile.cpp)
+add_library(${PROJECT_NAME} SHARED ${CMAKE_SOURCE_DIR}/third_party/uuid4/src/uuid4.c uri.c fmu.cpp FmuContainer.cpp JavaLauncher.cpp ConfigFile.cpp)
+
+add_library(${PROJECT_NAME}_static ${CMAKE_SOURCE_DIR}/third_party/uuid4/src/uuid4.c uri.c fmu.cpp FmuContainer.cpp JavaLauncher.cpp ConfigFile.cpp)
 
 
 target_link_libraries(${PROJECT_NAME} libshmfmi)
@@ -47,10 +50,11 @@ endforeach()
 message(STATUS "Static linking with libstdc++.a in ${STDCPP_LIBRARY}")
 target_link_libraries(${PROJECT_NAME} ${STDCPP_LIBRARY})
 
-
+if(NOT APPLE)
+#https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man3/pthread.3.html it is included in system
 find_library(PTHREAD_LIBRARY NAMES libpthread.a libpthread.dylib)
 target_link_libraries(${PROJECT_NAME} ${PTHREAD_LIBRARY})
-
+endif()
 
 # I need this: -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic
 

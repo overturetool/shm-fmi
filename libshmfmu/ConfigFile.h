@@ -13,15 +13,14 @@
 #include <vector>
 #include <string.h>
 
-class ConfigFile
-{
-public:
-	ConfigFile(std::string configFile, std::string port);
-	virtual ~ConfigFile();
+class ConfigFile {
+ public:
+  ConfigFile(std::string configFile, std::string port);
+  virtual ~ConfigFile();
 
-	bool m_skipLaunch;
-	std::string m_port;
-	 char **m_args;
+  bool m_skipLaunch;
+  std::string m_port;
+  char **m_args;
 };
 
 #endif /* CONFIGFILE_H_ */

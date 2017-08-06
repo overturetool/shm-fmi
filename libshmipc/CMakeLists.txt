@@ -51,4 +51,8 @@ set(${PROJECT_NAME}_LIBS ${PROTOBUF_LIBRARIES} ${ADDITIONAL_LIBS} CACHE INTERNAL
 
 target_link_libraries(${PROJECT_NAME} ${ADDITIONAL_LIBS})
 
+if (WIN32)
+        #windows        
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+endif() 
 

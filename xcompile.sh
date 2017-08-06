@@ -27,6 +27,8 @@ function compileDarwin64
 						 -DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/osx-gcc.cmake` \
 						 -DOSXCROSS_ROOT=$OSXCROSS_ROOT \
 						 -DPROTOBUF_PROTOC_EXECUTABLE=/usr/bin/protoc \
+						 -DPYTHON_EXECUTABLE=/usr/bin/python \
+						 -DPROTOBUF_INCLUDE_DIR=$SHM_DEPENDENCIES_ROOT/darwin64/usr/protobuf/include/ \
 						 -DPROTOBUF_INCLUDE_DIRS=$SHM_DEPENDENCIES_ROOT/darwin64/usr/protobuf/include/ \
 						 -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/darwin64/usr/protobuf/lib/libprotobuf.a
 
@@ -48,13 +50,14 @@ function compileWin32
 						 -H$1 \
 						 -DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/cmake-toolchains/Toolchain-Ubuntu-mingw32.cmake` \
 						 -DPROTOBUF_INCLUDE_DIRS=$SHM_DEPENDENCIES_ROOT/win32/usr/protobuf/include/ \
+						 -DPYTHON_EXECUTABLE=/usr/bin/python \
+						 -DPROTOBUF_INCLUDE_DIR=$SHM_DEPENDENCIES_ROOT/win32/usr/protobuf/include/ \
              -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/win32/usr/protobuf/lib/libprotobuf.a
 
 		# Do to a bug in gtest when compiling with MinGW we have to avoid building test code
 		#               make -C $B -j$threads
-		make -j$threads -C $B/libshmfmu
-		make -j$threads -C $B/shmfmi-server
-
+		make -j$threads -C $B
+		make -C $B test
 }
 
 function compileWin64
@@ -71,13 +74,14 @@ function compileWin64
 						 -H$1 \
 						 -DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/cmake-toolchains/Toolchain-Ubuntu-mingw64.cmake` \
 						 -DPROTOBUF_INCLUDE_DIRS=$SHM_DEPENDENCIES_ROOT/win64/usr/protobuf/include/ \
-             -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/win64/usr/protobuf/lib/libprotobuf.a 
+						 -DPYTHON_EXECUTABLE=/usr/bin/python \
+						 -DPROTOBUF_INCLUDE_DIR=$SHM_DEPENDENCIES_ROOT/win64/usr/protobuf/include/ \
+						 -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/win64/usr/protobuf/lib/libprotobuf.a
 
 		# Do to a bug in gtest when compiling with MinGW we have to avoid building test code
 		#		make -C $B -j$threads
-		make -j$threads -C $B/libshmfmu
-		make -j$threads -C $B/shmfmi-server
-
+		make -j$threads -C $B
+		make -C $B test
 
 }
 
@@ -95,6 +99,7 @@ function compileLinux64
              -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/linux64/usr/protobuf/lib/libprotobuf.a
 
 		make -C $B -j$threads
+		make -C $B test
 }
 
 function compileLinux32
@@ -109,10 +114,12 @@ function compileLinux32
 			-B$B \
 			-H$1 \
 			-DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/linux32-gcc.cmake` \
+			-DPROTOBUF_INCLUDE_DIR=$SHM_DEPENDENCIES_ROOT/linux32/usr/protobuf/include/ \
 			-DPROTOBUF_INCLUDE_DIRS=$SHM_DEPENDENCIES_ROOT/linux32/usr/protobuf/include/ \
       -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/linux32/usr/protobuf/lib/libprotobuf.a
 
 		make -C $B -j$threads
+		make -C $B test
 }
 
 function generateJava
@@ -142,9 +149,9 @@ function xcompile
 {
 		D=$1
 		echo Compiling using CMake and make
-		compileDarwin64 $D
 		compileLinux64 $D
 		compileLinux32 $D
+		compileDarwin64 $D
 		compileWin64 $D
 		compileWin32 $D
 }
@@ -152,6 +159,42 @@ function xcompile
 
 createGitInfo
 
-xcompile .
+#xcompile .
+
+D=.
+
+while [ "$1" != "" ]; do
+		case $1 in
+				-darwin)
+						compileDarwin64 $D
+						;;
+
+				-linux32)
+						compileLinux32 $D
+						;;
+
+				-linux64)
+						compileLinux64 $D
+						;;
+
+				-win32)
+						compileWin32 $D
+						;;
+
+				-win64)
+						compileWin64 $D
+						;;
+
+				-all)
+						xcompile $D
+						;;
+
+				*)               # Default case: If no more options then break out of the loop.
+						break
+		esac
+		shift
+done
+
+
 
 generateJava

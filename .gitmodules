@@ -9,3 +9,6 @@
 [submodule "toolchains/cmake-toolchains"]
 	path = toolchains/cmake-toolchains
 	url = https://github.com/zyga/cmake-toolchains.git
+[submodule "third_party/uuid4"]
+	path = third_party/uuid4
+	url = https://github.com/rxi/uuid4.git

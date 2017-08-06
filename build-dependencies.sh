@@ -1,4 +1,30 @@
 #!/bin/bash
+
+HERE=`readlink -f .`
+FORCE="0"
+PLATFORM="linux64"
+
+for i in "$@"
+do
+		case $i in
+				-p=*|--platform=*)
+						PLATFORM="${i#*=}"
+						shift # past argument=value
+						;;
+				-f=*|--force=*)
+						FORCE=1
+						shift # past argument=value
+						;;
+				--default)
+						DEFAULT=YES
+						shift # past argument with no value
+						;;
+				*)
+            # unknown option
+						;;
+		esac
+done
+
 set -e
 
 REQUIRED_PACKAGES=("gcc-multilib" "g++-multilib" "curl" "autoconf" "libtool" "automake" "build-essential" "make" "wget")
@@ -33,27 +59,39 @@ function buildProtobuf
 {
 
 		ROOT=$1
+		echo "###  Building with root: $ROOT ###"
 		mkdir -p "${ROOT}/usr/protobuf"
 		PROTOBUF_INSTALL=`readlink -f "${ROOT}/usr/protobuf"`
 		
-		read -n 1 -p "Remove old build if pressend at $ROOT? (y/n)? " answer
-		case ${answer:0:1} in
-				y|Y )
-						echo Yes
-						echo Removing old folder
-						rm -rf $ROOT
-						;;
-				* )
-						echo No
-						;;
-		esac
+		if [ "$FORCE" = "1" ]
+		then
+				rm -rf $ROOT
+		else
 
+				read -n 1 -p "Remove old build if pressend at $ROOT? (y/n)? " answer
+				case ${answer:0:1} in
+						y|Y )
+								echo Yes
+								echo Removing old folder
+								rm -rf $ROOT
+								;;
+						* )
+								echo No
+								;;
+				esac
+		fi
 
 		mkdir -p $ROOT
 		cd $ROOT
 		git clone https://github.com/google/protobuf.git protobuf
 		cd protobuf
 		git checkout 5d4a856
+
+		# fix for missing download
+		wget https://github.com/google/googletest/archive/release-1.7.0.zip
+		unzip -q release-1.7.0.zip
+		mv googletest-release-1.7.0 gtest
+		# end fix
 		./autogen.sh
 
 		if [ "$ROOT" == "darwin64" ]; then
@@ -110,6 +148,17 @@ function buildProtobuf
 		make install
 
 		echo Protobuf is installed to: $PROTOBUF_INSTALL
+		cd $HERE
 }
 check
-buildProtobuf $1
+
+if [ "$PLATFORM" = "all" ]
+then
+		buildProtobuf "linux64"
+		buildProtobuf "linux32"
+		buildProtobuf "darwin64"
+		buildProtobuf "win32"
+		buildProtobuf "win64"
+else
+		buildProtobuf $PLATFORM
+fi

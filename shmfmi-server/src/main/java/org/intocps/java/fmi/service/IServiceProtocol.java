@@ -1,9 +1,27 @@
 package org.intocps.java.fmi.service;
 
-import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.lausdahl.examples.Service.Fmi2BooleanStatusReply;
+import com.lausdahl.examples.Service.Fmi2DoStepRequest;
 import com.lausdahl.examples.Service.Fmi2Empty;
-import com.lausdahl.examples.Service.*;
+import com.lausdahl.examples.Service.Fmi2GetBooleanReply;
+import com.lausdahl.examples.Service.Fmi2GetIntegerReply;
+import com.lausdahl.examples.Service.Fmi2GetMaxStepSizeReply;
+import com.lausdahl.examples.Service.Fmi2GetRealReply;
+import com.lausdahl.examples.Service.Fmi2GetRequest;
+import com.lausdahl.examples.Service.Fmi2GetStringReply;
+import com.lausdahl.examples.Service.Fmi2InstantiateRequest;
+import com.lausdahl.examples.Service.Fmi2IntegerStatusReply;
+import com.lausdahl.examples.Service.Fmi2RealStatusReply;
+import com.lausdahl.examples.Service.Fmi2SetBooleanRequest;
+import com.lausdahl.examples.Service.Fmi2SetDebugLoggingRequest;
+import com.lausdahl.examples.Service.Fmi2SetIntegerRequest;
+import com.lausdahl.examples.Service.Fmi2SetRealRequest;
+import com.lausdahl.examples.Service.Fmi2SetStringRequest;
+import com.lausdahl.examples.Service.Fmi2SetupExperimentRequest;
+import com.lausdahl.examples.Service.Fmi2StatusReply;
+import com.lausdahl.examples.Service.Fmi2StatusRequest;
+import com.lausdahl.examples.Service.Fmi2StringStatusReply;
 
 public interface IServiceProtocol {
 
@@ -25,7 +43,7 @@ public interface IServiceProtocol {
 
 	Fmi2GetRealReply GetReal(Fmi2GetRequest parseFrom);
 
-	GeneratedMessage GetString(Fmi2GetRequest parseFrom);
+	Fmi2GetStringReply GetString(Fmi2GetRequest parseFrom);
 
 	Fmi2StatusReply Instantiate(Fmi2InstantiateRequest parseFrom);
 
