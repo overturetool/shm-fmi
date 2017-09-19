@@ -1,13 +1,26 @@
 /*
- * uri.c
  *
- *  Created on: Sep 8, 2016
- *      Author: kel
+ * Shared Memory FMI
+ * 
+ * Copyright (C) 2015 - 2017 Overture
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/gpl-3.0.html>.
  *
- *      The source is copied from:
- * https://github.com/controllab/fmi-export-20sim/blob/master/StandaloneFMU/src/%25FMI_PREFIX%25Functions.c
- *      with SHAR1: d6bc6156bee315c802606db5db02c29582eee7b2
+ * Author: Kenneth Lausdahl
  */
+
 
 #include "uri.h"
 
