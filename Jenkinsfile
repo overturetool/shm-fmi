@@ -169,7 +169,7 @@ node {
 		}
 	}
 	stage('Build Overture-FMU') {
-		build '../overture-fmu-pipe/development'
+		build job: 'overture-fmu/development', wait: false
 	}
 }
 
