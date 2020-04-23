@@ -50,7 +50,7 @@ jobs:
 
       - name: CMake Mac
         if: matrix.config.os == 'macos-latest'
-        run: cmake -B"builds/${{ matrix.config.os }}"  -H. -DPYTHON_EXECUTABLE=/usr/bin/python  -DCMAKE_INSTALL_PREFIX=third_party/protobuf/builds/${{ matrix.config.os }}/release/ -Dprotobuf_MODULE_COMPATIBLE=1 -DJAVA_HOME=$(realpath third_party/jvm/darwin64)
+        run: cmake -B"builds/${{ matrix.config.os }}"  -H. -DPYTHON_EXECUTABLE=/usr/bin/python  -DCMAKE_INSTALL_PREFIX=third_party/protobuf/builds/${{ matrix.config.os }}/release/ -Dprotobuf_MODULE_COMPATIBLE=1 -DJAVA_HOME=$(git rev-parse --show-toplevel)/third_party/jvm/darwin64
 
       - name: Compile
         run: make -C"builds/${{ matrix.config.os }}"
