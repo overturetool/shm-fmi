@@ -4,13 +4,8 @@ project (libshmfmi C CXX)
 include(CheckCXXCompilerFlag)
 
 set(CMAKE_VERBOSE_MAKEFILE on)
-
-find_package(Protobuf REQUIRED)
-include_directories(${PROTOBUF_INCLUDE_DIRS})
-
-PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ../proto/service.proto)
-
-
+find_package(protobuf   REQUIRED)
+include_directories(${PROTOBUF_INCLUDE_DIRS} ${Protobuf_INCLUDE_DIR})
 
 # protobuf outputs to current dir
 set(CMAKE_INCLUDE_CURRENT_DIR on)
@@ -27,7 +22,24 @@ endif()
 
 include_directories(${libshmipc_INCLUDE_DIRS})
 
-add_library(${PROJECT_NAME} ../libshmipc/sem_timedwait.cpp ../libshmipc/IpcBase.cpp ../libshmipc/IpcServer.cpp ../libshmipc/IpcClient.cpp ${PROTO_SRCS} ${PROTO_HDRS} FmuProxy.cpp)
+add_library(${PROJECT_NAME} ../libshmipc/sem_timedwait.cpp ../libshmipc/IpcBase.cpp ../libshmipc/IpcServer.cpp ../libshmipc/IpcClient.cpp  FmuProxy.cpp)
+
+if(DEFINED PROTOC_EXECUTABLE_OVERRIDE_PATH)
+# Help for cross compilation
+set_target_properties(protobuf::protoc PROPERTIES
+		IMPORTED_LOCATION_RELEASE ${PROTOC_EXECUTABLE_OVERRIDE_PATH}
+		)
+endif()
+
+protobuf_generate(
+		APPEND_PATH
+		LANGUAGE cpp
+		TARGET ${PROJECT_NAME}
+#		IMPORT_DIRS "${CMAKE_CURRENT_LIST_DIR}"
+		PROTOS "service.proto"
+		OUT_VAR "${CMAKE_CURRENT_BINARY_DIR}"
+#		PROTOC_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}"
+)
 
 set_target_properties(${PROJECT_NAME}
                       PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -51,3 +63,4 @@ if (UNIX)
 endif()
 
 set(${PROJECT_NAME}_LIBS ${PROTOBUF_LIBRARIES} ${ADDITIONAL_LIBS} CACHE INTERNAL "${PROJECT_NAME}: Libraries" FORCE)
+

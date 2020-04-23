@@ -12,3 +12,6 @@
 [submodule "third_party/uuid4"]
 	path = third_party/uuid4
 	url = https://github.com/rxi/uuid4.git
+[submodule "third_party/protobuf"]
+	path = third_party/protobuf
+	url = https://github.com/google/protobuf.git
