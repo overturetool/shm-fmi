@@ -1,0 +1,59 @@
+name: Build with c++
+
+on: [push, pull_request]
+
+
+jobs:
+  compile:
+    runs-on: ${{ matrix.config.os }}
+
+    name: Build-${{ matrix.config.os }} (${{ matrix.config.r }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+#          - {
+#            name: "Windows Latest MSVC", artifact: "Windows-MSVC.tar.xz",
+#            os: windows-latest,
+#            build_type: "Release", cc: "cl", cxx: "cl",
+#            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+#          }
+#          - {
+#            name: "Windows Latest MinGW", artifact: "Windows-MinGW.tar.xz",
+#            os: windows-latest,
+#            build_type: "Release", cc: "gcc", cxx: "g++"
+#          }
+          - {
+            name: "Ubuntu Latest GCC", artifact: "Linux.tar.xz",
+            os: ubuntu-latest,
+            build_type: "Release", cc: "gcc", cxx: "g++"
+          }
+          - {
+            name: "macOS Latest Clang", artifact: "macOS.tar.xz",
+            os: macos-latest,
+            build_type: "Release", cc: "clang", cxx: "clang++"
+          }
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      - name: CMake protobuf
+        run: cd third_party/protobuf && cmake  -B"builds/${{ matrix.config.os }}" -Hcmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release  -DCMAKE_INSTALL_PREFIX="builds/${{ matrix.config.os }}/release" -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC"
+
+      - name: Make protobuf
+        run: cd third_party/protobuf && make -C"builds/${{ matrix.config.os }}" -j8 install
+
+      - name: CMake Ubuntu
+        if: matrix.config.os == 'ubuntu-latest'
+        run: cmake -B"builds/${{ matrix.config.os }}"  -H. -DPYTHON_EXECUTABLE=/usr/bin/python  -DCMAKE_INSTALL_PREFIX=third_party/protobuf/builds/${{ matrix.config.os }}/release/ -Dprotobuf_MODULE_COMPATIBLE=1 -DJAVA_HOME=$(readlink -f third_party/jvm/linux64)
+
+      - name: CMake Mac
+        if: matrix.config.os == 'macos-latest'
+        run: cmake -B"builds/${{ matrix.config.os }}"  -H. -DPYTHON_EXECUTABLE=/usr/bin/python  -DCMAKE_INSTALL_PREFIX=third_party/protobuf/builds/${{ matrix.config.os }}/release/ -Dprotobuf_MODULE_COMPATIBLE=1 -DJAVA_HOME=$(readlink -f third_party/jvm/darwin64)
+
+      - name: Compile
+        run: make -C"builds/${{ matrix.config.os }}"
+
+      - name: Test
+        run: make -C"builds/${{ matrix.config.os }}" test
