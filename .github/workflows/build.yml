@@ -27,13 +27,13 @@ jobs:
           - {
             name: "Ubuntu Latest GCC", artifact: "Linux.tar.xz",
             os: ubuntu-latest,
-            file_extension: "so"
+            file_extension: "so",
             build_type: "Release", cc: "gcc", cxx: "g++"
           }
           - {
             name: "macOS Latest Clang", artifact: "macOS.tar.xz",
             os: macos-latest,
-            file_extension: "dylib"
+            file_extension: "dylib",
             build_type: "Release", cc: "clang", cxx: "clang++"
           }
     steps:
