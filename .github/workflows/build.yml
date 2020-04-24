@@ -60,8 +60,12 @@ jobs:
 
       - name: List Dependencies Ubuntu
         if: matrix.config.os == 'ubuntu-latest'
-        run: find builds/${{ matrix.config.os }} -name "*.so" -exec echo {} \; -exec ldd {} \;
+        run: find builds/${{ matrix.config.os }} -name "*.so" -exec echo {} \; -exec ldd {} \; -exec echo "::set-env lib={}" \;
 
       - name: List Dependencies Mac
         if: matrix.config.os == 'macos-latest'
-        run: find builds/${{ matrix.config.os }} -name "*.dylib" -exec echo {} \; -exec otool -L {} \;
+        run: find builds/${{ matrix.config.os }} -name "*.dylib" -exec echo {} \; -exec otool -L {} \; -exec echo "::set-env lib={}" \;
+
+      - name: Upload artifact
+        with:
+          path: $lib
