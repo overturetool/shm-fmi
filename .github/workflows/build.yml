@@ -57,3 +57,11 @@ jobs:
 
       - name: Test
         run: make -C"builds/${{ matrix.config.os }}" test
+
+      - name: List Dependencies Ubuntu
+        if: matrix.config.os == 'ubuntu-latest'
+        run: find builds/${{ matrix.config.os }} -name "*.so" -exec echo {} \; -exec ldd {} \;
+
+      - name: List Dependencies Mac
+        if: matrix.config.os == 'macos-latest'
+        run: find builds/${{ matrix.config.os }} -name "*.dylib" -exec echo {} \; -exec otool -L {} \;
