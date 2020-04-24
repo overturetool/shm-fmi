@@ -27,11 +27,13 @@ jobs:
           - {
             name: "Ubuntu Latest GCC", artifact: "Linux.tar.xz",
             os: ubuntu-latest,
+            file_extension: "so"
             build_type: "Release", cc: "gcc", cxx: "g++"
           }
           - {
             name: "macOS Latest Clang", artifact: "macOS.tar.xz",
             os: macos-latest,
+            file_extension: "dylib"
             build_type: "Release", cc: "clang", cxx: "clang++"
           }
     steps:
@@ -60,13 +62,20 @@ jobs:
 
       - name: List Dependencies Ubuntu
         if: matrix.config.os == 'ubuntu-latest'
-        run: find builds/${{ matrix.config.os }} -name "*.so" -exec echo {} \; -exec ldd {} \; -exec echo "::set-env lib={}" \;
+        run: find builds/${{ matrix.config.os }} -name "*.so" -exec echo {} \; -exec ldd {} \;
 
       - name: List Dependencies Mac
         if: matrix.config.os == 'macos-latest'
-        run: find builds/${{ matrix.config.os }} -name "*.dylib" -exec echo {} \; -exec otool -L {} \; -exec echo "::set-env lib={}" \;
+        run: find builds/${{ matrix.config.os }} -name "*.dylib" -exec echo {} \; -exec otool -L {} \;
 
-      - name: Upload artifact
+      - name: Upload libshmfmu artifact
         uses: actions/upload-artifact@v1
         with:
-          path: $lib
+          name: libshmfmu.${{ matrix.config.file_extension }}
+          path: builds/${{ matrix.config.os }}/libshmfmu/liblibshmfmu.${{ matrix.config.file_extension }}
+
+      - name: Upload libsharedmemory artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: libsharedmemory.${{ matrix.config.file_extension }}
+          path: builds/${{ matrix.config.os }}/shmfmi-server/libsharedmemory.${{ matrix.config.file_extension }}
