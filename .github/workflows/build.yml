@@ -67,5 +67,6 @@ jobs:
         run: find builds/${{ matrix.config.os }} -name "*.dylib" -exec echo {} \; -exec otool -L {} \; -exec echo "::set-env lib={}" \;
 
       - name: Upload artifact
+        uses: actions/upload-artifact@v1
         with:
           path: $lib
