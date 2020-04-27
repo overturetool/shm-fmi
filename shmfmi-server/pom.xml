@@ -225,9 +225,9 @@
     </snapshotRepository>
   </distributionManagement>
   <scm>
-    <url>git@gitlab.au.dk:into-cps/shm-fmi.git</url>
-    <connection>scm:git:git://gitlab.au.dk:into-cps/shm-fmi.git</connection>
-    <developerConnection>scm:git:git@gitlab.au.dk:into-cps/shm-fmi.git</developerConnection>
+    <url>git@github.com:overturetool/shm-fmi.git</url>
+    <connection>scm:git:git@github.com:overturetool/shm-fmi.git</connection>
+    <developerConnection>scm:git:git@github.com:overturetool/shm-fmi.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
   <licenses>
