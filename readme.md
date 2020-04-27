@@ -8,15 +8,14 @@
 
 # Project overview
 
-The overview of the Overture-FMU is presented in this section.
-Please see https://www.ncl.ac.uk/media/wwwnclacuk/schoolofcomputingscience/files/trs/1524.pdf#section*.9 for a related publication.
+The overview of the Overture-FMU is presented in this section. For more details, please see the publication [Overture FMU: Export VDM-RT Models as
+Tool-Wrapper FMUs](https://www.ncl.ac.uk/media/wwwnclacuk/schoolofcomputingscience/files/trs/1524.pdf#section*.9).
 
 The COE and Overture-FMU communicated via IPC (shared memory) based on protobuf messages.
 
 ![Overture-FMU Architecture](readme-resources/overturefmu.png)
 
-Libraries corresponding to project directories are marked with *italic*
-
+Libraries corresponding to project directories are marked with *italic*, i.e.:
 *libshmfmu* acts as the FMU interface from the COE process.
 
 ## libshmfmu
