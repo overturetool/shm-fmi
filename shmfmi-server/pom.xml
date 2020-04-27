@@ -9,7 +9,7 @@
   <groupId>org.intocps.java.fmi</groupId>
   <artifactId>fmi-shm-server</artifactId>
   <name>Java SHM-FMI server</name>
-  <version>0.2.3-SNAPSHOT</version>
+  <version>0.2.4</version>
   <dependencies>
     <dependency>
       <groupId>com.google.protobuf</groupId>
@@ -142,7 +142,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore/>
+                    <ignore />
                   </action>
                 </pluginExecution>
               </pluginExecutions>
@@ -228,7 +228,7 @@
     <url>git@github.com:overturetool/shm-fmi.git</url>
     <connection>scm:git:git@github.com:overturetool/shm-fmi.git</connection>
     <developerConnection>scm:git:git@github.com:overturetool/shm-fmi.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>Release/0.2.4</tag>
   </scm>
   <licenses>
     <license>
@@ -259,21 +259,21 @@
                 <configuration>
                   <tasks>
                     <exec dir="${project.basedir}" executable="mkdir" failonerror="true">
-                      <arg value="-p"/>
-                      <arg value="target/generated-protoc/"/>
+                      <arg value="-p" />
+                      <arg value="target/generated-protoc/" />
                     </exec>
                     <exec dir="${project.basedir}" executable="protoc" failonerror="true">
-                      <arg value="--java_out=target/generated-protoc/"/>
-                      <arg value="--proto_path=../proto"/>
-                      <arg value="../proto/service.proto"/>
+                      <arg value="--java_out=target/generated-protoc/" />
+                      <arg value="--proto_path=../proto" />
+                      <arg value="../proto/service.proto" />
                     </exec>
                     <exec dir="${project.basedir}" executable="mkdir" failonerror="true">
-                      <arg value="-p"/>
-                      <arg value="target/classes/lib/Windows-x86"/>
+                      <arg value="-p" />
+                      <arg value="target/classes/lib/Windows-x86" />
                     </exec>
                     <exec dir="${project.basedir}" executable="mkdir" failonerror="true">
-                      <arg value="-p"/>
-                      <arg value="target/classes/lib/Mac-x86_64"/>
+                      <arg value="-p" />
+                      <arg value="target/classes/lib/Mac-x86_64" />
                     </exec>
                   </tasks>
                 </configuration>
@@ -287,27 +287,27 @@
                 <configuration>
                   <tasks>
                     <exec dir="${project.basedir}/src/main/native" executable="javah" failonerror="true">
-                      <arg value="-classpath"/>
-                      <arg value="../../../target/classes"/>
-                      <arg value="org.intocps.java.fmi.shm.SharedMemory"/>
+                      <arg value="-classpath" />
+                      <arg value="../../../target/classes" />
+                      <arg value="org.intocps.java.fmi.shm.SharedMemory" />
                       <redirector outputproperty="redirector.out" errorproperty="redirector.err">
                         <inputfilterchain>
-                          <replacestring from="before" to="after"/>
+                          <replacestring from="before" to="after" />
                         </inputfilterchain>
-                        <outputmapper type="merge" to="target/redirector-mac.out"/>
-                        <errormapper type="merge" to="target/redirector-mac.err"/>
+                        <outputmapper type="merge" to="target/redirector-mac.out" />
+                        <errormapper type="merge" to="target/redirector-mac.err" />
                       </redirector>
                     </exec>
                     <exec dir="${project.basedir}/src/main/native" executable="javah" failonerror="true">
-                      <arg value="-classpath"/>
-                      <arg value="../../../target/classes"/>
-                      <arg value="org.intocps.java.fmi.shm.SharedMemoryServer"/>
+                      <arg value="-classpath" />
+                      <arg value="../../../target/classes" />
+                      <arg value="org.intocps.java.fmi.shm.SharedMemoryServer" />
                       <redirector outputproperty="redirector.out" errorproperty="redirector.err">
                         <inputfilterchain>
-                          <replacestring from="before" to="after"/>
+                          <replacestring from="before" to="after" />
                         </inputfilterchain>
-                        <outputmapper type="merge" to="target/redirector-mac.out"/>
-                        <errormapper type="merge" to="target/redirector-mac.err"/>
+                        <outputmapper type="merge" to="target/redirector-mac.out" />
+                        <errormapper type="merge" to="target/redirector-mac.err" />
                       </redirector>
                     </exec>
                   </tasks>
