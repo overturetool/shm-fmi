@@ -8,12 +8,12 @@
 
 # Project overview
 
-COE (Process) <--> IPC communication <--> Overture-FMU (Process)
+The overview of the Overture-FMU is presented in this section.
+Please see https://www.ncl.ac.uk/media/wwwnclacuk/schoolofcomputingscience/files/trs/1524.pdf#section*.9 for a related publication.
 
 The COE and Overture-FMU communicated via IPC (shared memory) based on protobuf messages.
 
-See ![Architecture](readme-resources/overturefmu.png "Architecture")
-
+![Overture-FMU Architecture](readme-resources/overturefmu.png)
 
 Libraries corresponding to project directories are marked with *italic*
 
