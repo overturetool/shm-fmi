@@ -89,6 +89,8 @@ export SHM_DEPENDENCIES_ROOT=~/dependencies
 
 ## Release the library
 
+**Note: Use java8 for building**
+
 
 ```bash
 cd shmfmi-server
