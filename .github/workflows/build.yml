@@ -27,47 +27,26 @@ jobs:
           - {
             name: "Ubuntu Latest GCC", artifact: "Linux.tar.xz",
             os: ubuntu-latest,
-            file_extension: "so",
             build_type: "Release", cc: "gcc", cxx: "g++"
-          }
-          - {
-            name: "Ubuntu Latest GCC", artifact: "Linux.tar.xz",
-            os: ubuntu-latest,
-            build_type: "Release", cc: "gcc -m32", cxx: "g++ -m32"
           }
           - {
             name: "macOS Latest Clang", artifact: "macOS.tar.xz",
             os: macos-latest,
-            file_extension: "dylib",
             build_type: "Release", cc: "clang", cxx: "clang++"
           }
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: 'true'
-
       - name: CMake protobuf
-        if: matrix.config.cc != "gcc -m32"
         run: cd third_party/protobuf && cmake  -B"builds/${{ matrix.config.os }}" -Hcmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release  -DCMAKE_INSTALL_PREFIX="builds/${{ matrix.config.os }}/release" -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC"
-
-      - name: CMake protobuf 32 bit
-        if: matrix.config.cc == "gcc -m32"
-        run: cd third_party/protobuf && cmake -DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/linux32-gcc.cmake` -B"builds/${{ matrix.config.os }}" -Hcmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release  -DCMAKE_INSTALL_PREFIX="builds/${{ matrix.config.os }}/release" -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC"
-
-
 
       - name: Make protobuf
         run: cd third_party/protobuf && make -C"builds/${{ matrix.config.os }}" -j8 install
 
       - name: CMake Ubuntu 64 bit
-        if: matrix.config.os == 'ubuntu-latest' &&  matrix.config.cc != "gcc -m32"
+        if: matrix.config.os == 'ubuntu-latest'
         run: cmake -B"builds/${{ matrix.config.os }}"  -H. -DPYTHON_EXECUTABLE=/usr/bin/python  -DCMAKE_INSTALL_PREFIX=third_party/protobuf/builds/${{ matrix.config.os }}/release/ -Dprotobuf_MODULE_COMPATIBLE=1 -DJAVA_HOME=$(readlink -f third_party/jvm/linux64)
-
-      - name: CMake Ubuntu 32 bit
-        if: matrix.config.os == 'ubuntu-latest' &&  matrix.config.cc == "gcc -m32"
-        run: cmake -B"builds/${{ matrix.config.os }}" -DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/linux32-gcc.cmake` -H. -DPYTHON_EXECUTABLE=/usr/bin/python  -DCMAKE_INSTALL_PREFIX=third_party/protobuf/builds/${{ matrix.config.os }}/release/ -Dprotobuf_MODULE_COMPATIBLE=1 -DJAVA_HOME=$(readlink -f third_party/jvm/linux64)
-
-
 
       - name: CMake Mac
         if: matrix.config.os == 'macos-latest'
@@ -86,15 +65,3 @@ jobs:
       - name: List Dependencies Mac
         if: matrix.config.os == 'macos-latest'
         run: find builds/${{ matrix.config.os }} -name "*.dylib" -exec echo {} \; -exec otool -L {} \;
-
-      - name: Upload libshmfmu artifact
-        uses: actions/upload-artifact@v1
-        with:
-          name: libshmfmu.${{ matrix.config.file_extension }}
-          path: builds/${{ matrix.config.os }}/libshmfmu/liblibshmfmu.${{ matrix.config.file_extension }}
-
-      - name: Upload libsharedmemory artifact
-        uses: actions/upload-artifact@v1
-        with:
-          name: libsharedmemory.${{ matrix.config.file_extension }}
-          path: builds/${{ matrix.config.os }}/shmfmi-server/libsharedmemory.${{ matrix.config.file_extension }}
