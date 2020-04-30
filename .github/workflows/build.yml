@@ -27,6 +27,7 @@ jobs:
           - {
             name: "Ubuntu Latest GCC", artifact: "Linux.tar.xz",
             os: ubuntu-latest,
+            file_extension: "so",
             build_type: "Release", cc: "gcc", cxx: "g++"
           }
           - {
@@ -37,6 +38,7 @@ jobs:
           - {
             name: "macOS Latest Clang", artifact: "macOS.tar.xz",
             os: macos-latest,
+            file_extension: "dylib",
             build_type: "Release", cc: "clang", cxx: "clang++"
           }
     steps:
@@ -84,3 +86,15 @@ jobs:
       - name: List Dependencies Mac
         if: matrix.config.os == 'macos-latest'
         run: find builds/${{ matrix.config.os }} -name "*.dylib" -exec echo {} \; -exec otool -L {} \;
+
+      - name: Upload libshmfmu artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: libshmfmu.${{ matrix.config.file_extension }}
+          path: builds/${{ matrix.config.os }}/libshmfmu/liblibshmfmu.${{ matrix.config.file_extension }}
+
+      - name: Upload libsharedmemory artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: libsharedmemory.${{ matrix.config.file_extension }}
+          path: builds/${{ matrix.config.os }}/shmfmi-server/libsharedmemory.${{ matrix.config.file_extension }}
