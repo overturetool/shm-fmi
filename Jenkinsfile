@@ -6,6 +6,7 @@ node {
 
 	stage('Compile Java library') {
 		checkout scm
+		sh 'git submodule update --init'
 
 		//clear all
 		withMaven(mavenLocalRepo: '.repository', mavenSettingsFilePath: "${env.MVN_SETTINGS_PATH}") {
