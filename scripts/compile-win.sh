@@ -16,25 +16,28 @@ cd $(git rev-parse --show-toplevel)
 
 if [ ! -d "third_party/protobuf/builds/win${platform}/release/" ]; then
 
-echo Compiling protobuf dependency
+	echo Compiling protobuf dependency
 
-cd third_party/protobuf
+	cd third_party/protobuf
 
-../../$executer cmake -B"builds/win${platform}" -Hcmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="builds/win${platform}/release" -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC"
+	../../$executer cmake -B"builds/win${platform}" -Hcmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="builds/win${platform}/release" -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC"
 
-../../$executer make -C"builds/win${platform}" install
-
-
-docker run --rm dockcross/linux-x64:latest >linux_executer
-chmod +x linux_executer
+	../../$executer make -C"builds/win${platform}" install -j9
 
 
-./linux_executer cmake -B"builds/linux-x64" -Hcmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="builds/linux-x64/release" -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC"
+		if [ ! -d "third_party/protobuf/builds/inux-x64/release/" ]; then
 
-./linux_executer make -C"builds/linux-x64" install
+			docker run --rm dockcross/linux-x64:latest >linux_executer
+			chmod +x linux_executer
 
 
-cd ../../
+			./linux_executer cmake -B"builds/linux-x64" -Hcmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="builds/linux-x64/release" -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC"
+
+			./linux_executer make -C"builds/linux-x64" install -j9
+		fi
+
+
+	cd ../../
 fi
 
 
