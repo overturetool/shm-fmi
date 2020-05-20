@@ -4,7 +4,7 @@ executer=windows-static-x86
 
 if [ ! -f "$executer" ]; then
 
-docker run --rm dockcross/windows-static-x64-posix >$executer
+docker run --rm dockcross/windows-static-x86-posix >$executer
 chmod +x $executer
 
 fi
