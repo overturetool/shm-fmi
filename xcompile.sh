@@ -1,5 +1,5 @@
 #!/bin/bash
-
+  
 echo Storing git info in 'git-info.txt'
 
 INFO=git-info.txt
