@@ -1,200 +1,62 @@
 #!/bin/bash
 set -e
 
+./scripts/compile-linux32.sh
+./scripts/compile-linux64.sh
 
-threads=4
-#SHM_DEPENDENCIES_ROOT=/home/kel/shm2/tmp/
+./scripts/compile-win32.sh
+./scripts/compile-win64.sh
 
-if [ -z "$SHM_DEPENDENCIES_ROOT" ]; 
-then echo "The dependency path 'SHM_DEPENDENCIES_ROOT' is now set. Please set it using 'export SHM_DEPENDENCIES_ROOT=/some/path/to/dependency/root'"; exit 1 
-		 #else echo "var is set to '$var'"; 
-fi
-
-echo "Building with dependencies from: '${SHM_DEPENDENCIES_ROOT}' using make -j${threads}"
-
-function compileDarwin64
-{
-
-		echo Building Darwin 64 .dylib
-		B=$1/build/darwin64
-
-		rm -rf $B
-		mkdir -p $B
-
-		JAVA_HOME=../third_party/jvm/darwin64 cmake  \
-						 -B$B \
-						 -H$1 \
-						 -DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/osx-gcc.cmake` \
-						 -DOSXCROSS_ROOT=$OSXCROSS_ROOT \
-						 -DPROTOBUF_PROTOC_EXECUTABLE=/usr/bin/protoc \
-						 -DPYTHON_EXECUTABLE=/usr/bin/python \
-						 -DPROTOBUF_INCLUDE_DIR=$SHM_DEPENDENCIES_ROOT/darwin64/usr/protobuf/include/ \
-						 -DPROTOBUF_INCLUDE_DIRS=$SHM_DEPENDENCIES_ROOT/darwin64/usr/protobuf/include/ \
-						 -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/darwin64/usr/protobuf/lib/libprotobuf.a
-
-		make -C $B -j$threads
-
-}
-
-function compileWin32
-{
-
-		echo Building Win32 .dll
-		B=$1/build/win32
-
-		rm -rf $B
-		mkdir -p $B
-
-		JAVA_HOME=../third_party/jvm/win32 cmake  \
-						 -B$B \
-						 -H$1 \
-						 -DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/cmake-toolchains/Toolchain-Ubuntu-mingw32.cmake` \
-						 -DPROTOBUF_INCLUDE_DIRS=$SHM_DEPENDENCIES_ROOT/win32/usr/protobuf/include/ \
-						 -DPYTHON_EXECUTABLE=/usr/bin/python \
-						 -DPROTOBUF_INCLUDE_DIR=$SHM_DEPENDENCIES_ROOT/win32/usr/protobuf/include/ \
-             -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/win32/usr/protobuf/lib/libprotobuf.a
-
-		# Do to a bug in gtest when compiling with MinGW we have to avoid building test code
-		#               make -C $B -j$threads
-		make -j$threads -C $B
-		make -C $B test
-}
-
-function compileWin64
-{
-
-		echo Building Win64 .dll
-		B=$1/build/win64
-
-		rm -rf $B
-		mkdir -p $B
-
-		JAVA_HOME=../third_party/jvm/win64 cmake  \
-						 -B$B \
-						 -H$1 \
-						 -DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/cmake-toolchains/Toolchain-Ubuntu-mingw64.cmake` \
-						 -DPROTOBUF_INCLUDE_DIRS=$SHM_DEPENDENCIES_ROOT/win64/usr/protobuf/include/ \
-						 -DPYTHON_EXECUTABLE=/usr/bin/python \
-						 -DPROTOBUF_INCLUDE_DIR=$SHM_DEPENDENCIES_ROOT/win64/usr/protobuf/include/ \
-						 -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/win64/usr/protobuf/lib/libprotobuf.a
-
-		# Do to a bug in gtest when compiling with MinGW we have to avoid building test code
-		#		make -C $B -j$threads
-		make -j$threads -C $B
-		make -C $B test
-
-}
-
-function compileLinux64
-{
-		echo Building Linux x64 .so
-		B=$1/build/linux64
-		rm -rf $B
-		mkdir -p $B
-
-		JAVA_HOME=../third_party/jvm/linux64 cmake  \
-						 -B$B \
-						 -H$1 \
-						 -DPROTOBUF_INCLUDE_DIRS=$SHM_DEPENDENCIES_ROOT/linux64/usr/protobuf/include/ \
-             -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/linux64/usr/protobuf/lib/libprotobuf.a
-
-		make -C $B -j$threads
-		make -C $B test
-}
-
-function compileLinux32
-{
-		echo Building Linux x32 .so
-		B=$1/build/linux32
-
-		rm -rf $B
-		mkdir -p $B
-
-		CC="gcc -m32" CXX="g++ -m32" JAVA_HOME=../third_party/jvm/linux64 cmake \
-			-B$B \
-			-H$1 \
-			-DCMAKE_TOOLCHAIN_FILE=`readlink -f toolchains/linux32-gcc.cmake` \
-			-DPROTOBUF_INCLUDE_DIR=$SHM_DEPENDENCIES_ROOT/linux32/usr/protobuf/include/ \
-			-DPROTOBUF_INCLUDE_DIRS=$SHM_DEPENDENCIES_ROOT/linux32/usr/protobuf/include/ \
-      -DPROTOBUF_LIBRARY=$SHM_DEPENDENCIES_ROOT/linux32/usr/protobuf/lib/libprotobuf.a
-
-		make -C $B -j$threads
-		make -C $B test
-}
-
-function generateJava
-{
-		OUT=shmfmi-server/target/generated-protoc/
-		mkdir -p $OUT
-		protoc --java_out=$OUT --proto_path=proto proto/service.proto
-
-}
-
-function createGitInfo
-{
-		echo Storing git info in 'git-info.txt'
-
-		INFO=git-info.txt
-		rm -f $INFO
-
-		set +e
-		git remote -v > $INFO
-		git show-ref >> $INFO
-		git rev-parse HEAD >> $INFO
-		set -e
-
-}
-
-function xcompile
-{
-		D=$1
-		echo Compiling using CMake and make
-		compileLinux64 $D
-		compileLinux32 $D
-		compileDarwin64 $D
-		compileWin64 $D
-		compileWin32 $D
-}
+./scripts/compile-mac.sh
 
 
-createGitInfo
+echo Copy native libraries in place
 
-#xcompile .
+LIB=shmfmi-server/target/classes/lib
 
-D=.
+rm -rf $LIB
 
-while [ "$1" != "" ]; do
-		case $1 in
-				-darwin)
-						compileDarwin64 $D
-						;;
+mkdir -p $LIB/Mac-x86_64
+mkdir -p $LIB/Linux-amd64
+mkdir -p $LIB/Linux-i386
+mkdir -p $LIB/Windows-amd64
+mkdir -p $LIB/Windows-x86
 
-				-linux32)
-						compileLinux32 $D
-						;;
+echo Copying server libs
 
-				-linux64)
-						compileLinux64 $D
-						;;
+cp git-info.txt $LIB/
+cp builds/mac/shmfmi-server/libsharedmemory.dylib $LIB/Mac-x86_64/
+cp builds/linu-x64/shmfmi-server/libsharedmemory.so $LIB/Linux-amd64/
+cp builds/linu-x32/shmfmi-server/libsharedmemory.so $LIB/Linux-i386/
+cp builds/winx64/shmfmi-server/sharedmemory.dll $LIB/Windows-amd64/
+cp builds/winx32/shmfmi-server/sharedmemory.dll $LIB/Windows-x86/
 
-				-win32)
-						compileWin32 $D
-						;;
+# tag server
+INFO=shmfmi-server/target/classes/git-info-server.txt
+rm -f $INFO
 
-				-win64)
-						compileWin64 $D
-						;;
+set +e
+git remote -v > $INFO
+git show-ref HEAD >> $INFO
+git rev-parse --verify HEAD >> $INFO
+set -e
 
-				-all)
-						xcompile $D
-						;;
-
-				*)               # Default case: If no more options then break out of the loop.
-						break
-		esac
-		shift
-done
+echo Copy FMU libs
 
 
+FMU=vdm-tool-wrapper
+FMUBIN=$FMU/binaries
+mkdir -p $FMUBIN/darwin64
+mkdir -p $FMUBIN/linux64
+mkdir -p $FMUBIN/linux32
+mkdir -p $FMUBIN/win64
+mkdir -p $FMUBIN/win32
 
-generateJava
+cp git-info.txt $FMUBIN/
+cp builds/mac/libshmfmu/liblibshmfmu.dylib $FMUBIN/darwin64/$FMU.dylib
+cp builds/linu-x64/libshmfmu/liblibshmfmu.so $FMUBIN/linux64/$FMU.so
+cp builds/linu-x32/libshmfmu/liblibshmfmu.so $FMUBIN/linux32/$FMU.so
+cp builds/winx64/libshmfmu/libshmfmu.dll $FMUBIN/win64/$FMU.dll
+cp builds/winx32/libshmfmu/libshmfmu.dll $FMUBIN/win32/$FMU.dll
+
+cp -r $FMU $LIB

@@ -25,7 +25,7 @@ if [ ! -d "third_party/protobuf/builds/win${platform}/release/" ]; then
 	../../$executer make -C"builds/win${platform}" install -j9
 
 
-		if [ ! -d "third_party/protobuf/builds/inux-x64/release/" ]; then
+		if [ ! -d "third_party/protobuf/builds/linux-x64/release/" ]; then
 
 			docker run --rm dockcross/linux-x64:latest >linux_executer
 			chmod +x linux_executer
