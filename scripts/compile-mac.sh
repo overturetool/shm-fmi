@@ -52,9 +52,9 @@ if [ ! -d "third_party/protobuf/builds/mac/release/" ]; then
 fi
 
 
-./docker-mac cmake   -Bbuilds/mac  -H.   -DPYTHON_EXECUTABLE=/usr/bin/python   -DPROTOC_EXECUTABLE_OVERRIDE_PATH=/work/third_party/protobuf/builds/linux-x64/release/bin/protoc -DCMAKE_INSTALL_PREFIX=/work/third_party/protobuf/builds/mac/release/ -Dprotobuf_MODULE_COMPATIBLE=1 -DJAVA_HOME=/work/third_party/jvm/darwin64
+./$executer  cmake   -Bbuilds/mac  -H.   -DPYTHON_EXECUTABLE=/usr/bin/python   -DPROTOC_EXECUTABLE_OVERRIDE_PATH=/work/third_party/protobuf/builds/linux-x64/release/bin/protoc -DCMAKE_INSTALL_PREFIX=/work/third_party/protobuf/builds/mac/release/ -Dprotobuf_MODULE_COMPATIBLE=1 -DJAVA_HOME=/work/third_party/jvm/darwin64
 
-./docker-mac make   -Cbuilds/mac
+./$executer  make   -Cbuilds/mac
 
 
-./docker-mac bash -c "find builds/mac -name \"*.dylib\" -exec echo {} \; -exec /opt/osxcross/target/bin/x86_64-apple-darwin19-otool -L {} \;"
+./$executer  bash -c "find builds/mac -name \"*.dylib\" -exec echo {} \; -exec /opt/osxcross/target/bin/x86_64-apple-darwin19-otool -L {} \;"
