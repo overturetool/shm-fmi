@@ -6,12 +6,14 @@ on: [push, pull_request]
 jobs:
 
   compileWindows:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: 'true'
-      - name: "Build"
+      - name: "Build windows x64"
         run: ./scripts/compile-win64.sh
-        shell: bash
+
+      - name: "Build windows x86"
+        run: ./scripts/compile-win64.sh
