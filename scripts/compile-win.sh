@@ -62,4 +62,6 @@ fi
 
 #./$executer bash -c "find \"builds/win-${platform}\" -name \"*.so\" -exec echo {} \; -exec file {} \; -exec ldd {} \;"
 
+docker run -it -v $(pwd):/work thawsystems/wine-stable wine /work/builds/win${platform}/testfmu-integration/testfmu-integration.exe
+
 ./$executer  bash -c "find /work -name \"*.dll\" -exec echo {} \; -exec bash -c \"objdump -p {} | grep 'DLL Name:'\" \;"
