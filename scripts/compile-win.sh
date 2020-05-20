@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 executer=$1
 platform=$2
 
@@ -61,8 +63,17 @@ fi
 
 ./$executer make   -C"builds/win${platform}" VERBOSE=1
 
+wine32=benjymous/docker-wine-headless
+wine64=thawsystems/wine-stable
 
-docker run -it -v $(pwd):/work thawsystems/wine-stable wine /work/builds/win${platform}/testfmu-integration/testfmu-integration.exe
+w=$wine64
+if [ "$platform" == "x32" ]; then
+  w=$wine32
+fi
+
+
+
+docker run --rm -e "DISPLAY=:0.0" -v $(pwd):/work $w wine /work/builds/win${platform}/testfmu-integration/testfmu-integration.exe
 
 ./$executer bash -c "find builds/win${platform} -name \"*.dll\" -exec echo -e \"\\n\\n{}\" \; -exec bash -c \"nm -a {} |grep fmi\" \;"
 
