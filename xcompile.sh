@@ -1,5 +1,5 @@
 #!/bin/bash
-  
+
 echo Storing git info in 'git-info.txt'
 
 INFO=git-info.txt
@@ -67,8 +67,8 @@ mkdir -p $FMUBIN/win32
 
 cp git-info.txt $FMUBIN/
 cp builds/mac/libshmfmu/liblibshmfmu.dylib $FMUBIN/darwin64/$FMU.dylib
-cp builds/linu-x64/libshmfmu/liblibshmfmu.so $FMUBIN/linux64/$FMU.so
-cp builds/linu-x32/libshmfmu/liblibshmfmu.so $FMUBIN/linux32/$FMU.so
+cp builds/linux-x64/libshmfmu/liblibshmfmu.so $FMUBIN/linux64/$FMU.so
+cp builds/linux-x32/libshmfmu/liblibshmfmu.so $FMUBIN/linux32/$FMU.so
 cp builds/winx64/libshmfmu/libshmfmu.dll $FMUBIN/win64/$FMU.dll
 cp builds/winx32/libshmfmu/libshmfmu.dll $FMUBIN/win32/$FMU.dll
 
