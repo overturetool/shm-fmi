@@ -4,6 +4,18 @@ on: [push, pull_request]
 
 
 jobs:
+
+  compileWindows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      - name: "Build"
+        run: ./scripts/compile-win64.sh
+        shell: bash
+
   compile:
     runs-on: ${{ matrix.config.os }}
 

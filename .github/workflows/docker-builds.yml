@@ -1,0 +1,58 @@
+name: Build with c++ for windows
+
+on: [push, pull_request]
+
+
+jobs:
+
+  compileWindowsx64:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
+      - name: "Build windows x64"
+        run: ./scripts/compile-win64.sh
+
+  compileWindowsx32:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
+      - name: "Build windows x86"
+        run: ./scripts/compile-win32.sh
+
+  compileLinuxx32:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      - name: "Build linux x32"
+        run: ./scripts/compile-linux32.sh
+
+#  compileLinuxx64:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - uses: actions/checkout@v2
+#        with:
+#          submodules: 'true'
+#      - name: "Build linux x64"
+#        run: ./scripts/compile-linux64.sh
+
+#  compileMacOSXx64:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - uses: actions/checkout@v2
+#        with:
+#          submodules: 'true'
+#      - name: "Build MacOSX x64"
+#        run: ./scripts/compile-mac.sh
