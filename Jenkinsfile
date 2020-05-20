@@ -5,6 +5,8 @@ node {
 	properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', numToKeepStr: '5']]])
 
 	stage('Compile Java library') {
+	    cleanWs()
+
 		checkout scm
 		sh 'git submodule update --init'
 
