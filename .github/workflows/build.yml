@@ -5,17 +5,6 @@ on: [push, pull_request]
 
 jobs:
 
-  compileWindows:
-    runs-on: windows-latest
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-      - name: "Build"
-        run: ./scripts/compile-win64.sh
-        shell: bash
-
   compile:
     runs-on: ${{ matrix.config.os }}
 
@@ -81,23 +70,23 @@ jobs:
       - uses: actions/upload-artifact@v2
         if: matrix.config.os == 'ubuntu-latest'
         with:
-          name: linux-64
+          name: linux-x64
           path: builds/${{ matrix.config.os }}/shmfmi-server/libsharedmemory.so
 
       - uses: actions/upload-artifact@v2
         if: matrix.config.os == 'ubuntu-latest'
         with:
-          name: linux-64
+          name: linux-x64
           path: builds/${{ matrix.config.os }}/libshmfmu/liblibshmfmu.so
 
       - uses: actions/upload-artifact@v2
         if: matrix.config.os == 'macos-latest'
         with:
-          name: macos-64
+          name: macos-x64
           path: builds/${{ matrix.config.os }}/shmfmi-server/libsharedmemory.dylib
 
       - uses: actions/upload-artifact@v2
         if: matrix.config.os == 'macos-latest'
         with:
-          name: macos-64
+          name: macos-x64
           path: builds/${{ matrix.config.os }}/libshmfmu/liblibshmfmu.dylib
