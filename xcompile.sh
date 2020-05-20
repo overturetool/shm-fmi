@@ -1,4 +1,17 @@
 #!/bin/bash
+
+echo Storing git info in 'git-info.txt'
+
+INFO=git-info.txt
+rm -f $INFO
+
+set +e
+git remote -v > $INFO
+git show-ref >> $INFO
+git rev-parse HEAD >> $INFO
+set -e
+
+
 set -e
 
 ./scripts/compile-linux32.sh
