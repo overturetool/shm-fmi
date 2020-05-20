@@ -56,7 +56,7 @@ bool FileExists(const std::string& Filename) {
 void okReply(SharedFmiMessage* msg) {
   Fmi2StatusReply* r = new Fmi2StatusReply();
   r->set_status(Fmi2StatusReply_Status_Ok);
-  msg->protoBufMsgSize = r->ByteSize();
+  msg->protoBufMsgSize = r->ByteSizeLong();
   r->SerializeWithCachedSizesToArray(msg->protoBufMsg);
 }
 
@@ -164,7 +164,7 @@ void remoteTestDriver(const char* shmKey) {
         reply->add_values(reals[id]);
       }
 
-      msg->protoBufMsgSize = reply->ByteSize();
+      msg->protoBufMsgSize = reply->ByteSizeLong();
       reply->SerializeWithCachedSizesToArray(msg->protoBufMsg);
     } break;
     case sharedfmimemory::fmi2GetBoolean: {
@@ -178,7 +178,7 @@ void remoteTestDriver(const char* shmKey) {
         reply->add_values(bools[id]);
       }
 
-      msg->protoBufMsgSize = reply->ByteSize();
+      msg->protoBufMsgSize = reply->ByteSizeLong();
       reply->SerializeWithCachedSizesToArray(msg->protoBufMsg);
     } break;
     case sharedfmimemory::fmi2GetInteger: {
@@ -192,7 +192,7 @@ void remoteTestDriver(const char* shmKey) {
         reply->add_values(ints[id]);
       }
 
-      msg->protoBufMsgSize = reply->ByteSize();
+      msg->protoBufMsgSize = reply->ByteSizeLong();
       reply->SerializeWithCachedSizesToArray(msg->protoBufMsg);
     } break;
     case sharedfmimemory::fmi2GetString: {
@@ -208,7 +208,7 @@ void remoteTestDriver(const char* shmKey) {
         reply->add_values(strings[id]);
       }
 
-      msg->protoBufMsgSize = reply->ByteSize();
+      msg->protoBufMsgSize = reply->ByteSizeLong();
       reply->SerializeWithCachedSizesToArray(msg->protoBufMsg);
     } break;
 
@@ -217,7 +217,7 @@ void remoteTestDriver(const char* shmKey) {
 
       reply->set_maxstepsize(100);
 
-      msg->protoBufMsgSize = reply->ByteSize();
+      msg->protoBufMsgSize = reply->ByteSizeLong();
       reply->SerializeWithCachedSizesToArray(msg->protoBufMsg);
     } break;
 
@@ -230,7 +230,7 @@ void remoteTestDriver(const char* shmKey) {
       if (r->status() == Fmi2StatusRequest::fmi2LastSuccessfulTime)
         reply->set_value(100.5);
 
-      msg->protoBufMsgSize = reply->ByteSize();
+      msg->protoBufMsgSize = reply->ByteSizeLong();
       reply->SerializeWithCachedSizesToArray(msg->protoBufMsg);
     } break;
     case sharedfmimemory::fmi2GetIntegerStatus: {
@@ -242,7 +242,7 @@ void remoteTestDriver(const char* shmKey) {
       if (r->status() == Fmi2StatusRequest::fmi2LastSuccessfulTime)
         reply->set_value(100);
 
-      msg->protoBufMsgSize = reply->ByteSize();
+      msg->protoBufMsgSize = reply->ByteSizeLong();
       reply->SerializeWithCachedSizesToArray(msg->protoBufMsg);
     } break;
     case sharedfmimemory::fmi2GetBooleanStatus: {
@@ -254,7 +254,7 @@ void remoteTestDriver(const char* shmKey) {
       if (r->status() == Fmi2StatusRequest::fmi2Terminated)
         reply->set_value(true);
 
-      msg->protoBufMsgSize = reply->ByteSize();
+      msg->protoBufMsgSize = reply->ByteSizeLong();
       reply->SerializeWithCachedSizesToArray(msg->protoBufMsg);
     } break;
     case sharedfmimemory::fmi2GetStringStatus: {
@@ -266,7 +266,7 @@ void remoteTestDriver(const char* shmKey) {
       if (r->status() == Fmi2StatusRequest::fmi2DoStepStatus)
         reply->set_value("waiting");
 
-      msg->protoBufMsgSize = reply->ByteSize();
+      msg->protoBufMsgSize = reply->ByteSizeLong();
       reply->SerializeWithCachedSizesToArray(msg->protoBufMsg);
     } break;
     default:
