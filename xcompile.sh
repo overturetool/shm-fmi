@@ -39,8 +39,8 @@ echo Copying server libs
 
 cp git-info.txt $LIB/
 cp builds/mac/shmfmi-server/libsharedmemory.dylib $LIB/Mac-x86_64/
-cp builds/linu-x64/shmfmi-server/libsharedmemory.so $LIB/Linux-amd64/
-cp builds/linu-x32/shmfmi-server/libsharedmemory.so $LIB/Linux-i386/
+cp builds/linux-x64/shmfmi-server/libsharedmemory.so $LIB/Linux-amd64/
+cp builds/linux-x32/shmfmi-server/libsharedmemory.so $LIB/Linux-i386/
 cp builds/winx64/shmfmi-server/sharedmemory.dll $LIB/Windows-amd64/
 cp builds/winx32/shmfmi-server/sharedmemory.dll $LIB/Windows-x86/
 
