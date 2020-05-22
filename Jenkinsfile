@@ -25,7 +25,7 @@ node {
 		withMaven(mavenLocalRepo: '.repository', mavenSettingsFilePath: "${env.MVN_SETTINGS_PATH}") {
 
             sh "./xcompile.sh"
-            sh "cd shmfmi-server && cp ../third_party/protobuf/builds/mac/release/bin/protoc ."
+            sh "cd shmfmi-server && cp ../third_party/protobuf/builds/linux-x64/release/bin/protoc ."
 
 
 			// Run the maven build
