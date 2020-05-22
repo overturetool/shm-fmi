@@ -25,10 +25,11 @@ node {
 		withMaven(mavenLocalRepo: '.repository', mavenSettingsFilePath: "${env.MVN_SETTINGS_PATH}") {
 
             sh "./xcompile.sh"
+            sh "cd shmfmi-server && ln -s ../third_party/protobuf/builds/mac/release/bin/protoc"
 
 
 			// Run the maven build
-			sh "mvn install -f shmfmi-server/pom.xml -P!protoc"
+			sh "mvn install -f shmfmi-server/pom.xml"
 			step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
 			step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml, **/gtestresults.xml'])
 			step([$class: 'JacocoPublisher'])
