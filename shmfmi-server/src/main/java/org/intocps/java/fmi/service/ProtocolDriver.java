@@ -208,7 +208,7 @@ public class ProtocolDriver implements Runnable
 				service.error("Unknown type");
 			}
 
-			com.google.protobuf.GeneratedMessage reply = null;
+			com.google.protobuf.GeneratedMessageV3 reply = null;
 
 			try
 			{

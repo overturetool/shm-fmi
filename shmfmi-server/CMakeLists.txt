@@ -15,22 +15,23 @@ else()
         message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
+message("JAVA_HOME set to: ${JAVA_HOME}")
 
-include_directories($ENV{JAVA_HOME}/include)
+include_directories(${JAVA_HOME}/include)
 
 if (WIN32)
 	#windows	
 	#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
  	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--add-stdcall-alias")
-	include_directories($ENV{JAVA_HOME}/include/win32)
+	include_directories(${JAVA_HOME}/include/win32)
 endif() 
 
 if (UNIX)
 
 	if(APPLE)
-		include_directories($ENV{JAVA_HOME}/include/darwin)
+		include_directories(${JAVA_HOME}/include/darwin)
 	else()
-		include_directories($ENV{JAVA_HOME}/include/linux)
+		include_directories(${JAVA_HOME}/include/linux)
 	endif()
 endif()
 

@@ -1,3 +1,5 @@
+project("shm-fmi")
+
 cmake_minimum_required(VERSION 2.8.10)
 
 include(toolchains/clang-format.cmake)

@@ -58,33 +58,39 @@ At this stage there are two processes related to overture-fmu that communicates 
 - The *Overture-FMU/fmu-interpreter* communicates via *shmfmi-server*.
 
 
+# Checkout 
+
+You need to checkout with submodules:
+
+```bash
+git clone <path> <location>
+cd <location>
+git submodule update --init
+```
+
 # Environment setup
 
-Protobuf must be compiled and the path be avaliable in the environemnt variable `SHM_DEPENDENCIES_ROOT`
+You must have the following installed to use the cross compilation:
+* docker
+* java
+* maven 3
 
-You can use the script `build-dependencies.sh` to compile protobuf
 
-```bash
-mkdir -p ~/dependencies
-cd ~/dependencies
 
-REPO/build-dependencies.sh linux32 <<<y
-REPO/build-dependencies.sh linux64<<<y
-REPO/build-dependencies.sh win32<<<y
-REPO/build-dependencies.sh win64<<<y
-REPO/build-dependencies.sh darwin64<<<y
-```
+If you want to install the development env locally then check the scripts for you plantform under `scripts`
 
-and then in `~/.bash_profile` set
+If will consist of three parts:
 
-```bash
-export SHM_DEPENDENCIES_ROOT=~/dependencies
-```
+1. Compile protobuf
+2. Run cmake and build the native library
+3. Make `protoc` available in `shmfmi-server`
+    e.g. `ln -s <path to the build version of protobuf>` called from the folder `shmfmi-server`
 
 # Compilation
 
 ```bash
 ./xcompile.sh 
+mvn install -f shmfmi-server/pom.xml
 ```
 
 ## Release the library
