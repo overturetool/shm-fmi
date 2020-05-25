@@ -7,6 +7,16 @@
 [![Maven Central](https://img.shields.io/maven-central/v/org.overturetool/core.svg?label=Maven%20Central)](http://search.maven.org/#search$)
 
 
+# Checkout 
+
+You need to checkout with submodules:
+
+```bash
+git clone <path> <location>
+cd <location>
+git submodule update --init
+```
+
 # Environment setup
 
 You must have the following installed to use the cross compilation:
