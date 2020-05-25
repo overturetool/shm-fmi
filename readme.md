@@ -117,3 +117,7 @@ Navigate to:
 `X.X.X` is last development version and `Y.Y.Y` is the release of `X.X.X`.
 
 copy the `fmi-shm-server-X.X.X.*.jar/lib` into `fmi-shm-server-Y.Y.Y.*.jar` and redeploy the release jar to Artifactory.
+
+# Try new dlls
+The `sharedmemory.xx` goes into: `fmi-interpreter-jar-with-dependencies.jar/lib/architecture/`
+The `libshmfmu.xx` goes into: `fmu/binaries/architecture/fmuname.xx`
