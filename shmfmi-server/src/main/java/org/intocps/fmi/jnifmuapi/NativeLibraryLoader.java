@@ -66,25 +66,7 @@ public class NativeLibraryLoader
 					+ relativeLibraryPath);
 		}
 
-		String libname = lib.getName();
-
-		int libnameDotIndex = libname.indexOf('.');
-
-		if (libnameDotIndex != -1)
-		{
-			libname = libname.substring(0, libnameDotIndex);
-		}
-
-		if (libname.startsWith("lib")
-				&& (System.getProperty("os.name").equalsIgnoreCase("linux") || System.getProperty("os.name").toLowerCase().startsWith("mac")))
-		{
-			libname = libname.substring(3);
-		}
-
-		// Add the folder in which the library exists to the lib load path
-		addLibraryPath(lib.getParentFile());
-
-		System.loadLibrary(libname);
+		System.load(lib.getAbsolutePath());
 
 		loadedLibs.put(relativeLibraryPath, lib);
 
@@ -126,36 +108,4 @@ public class NativeLibraryLoader
 		}
 		return null;
 	}
-
-	/**
-	 * Adds the specified path to the java library path
-	 *
-	 * @param dirPathToAdd
-	 *            the path to add
-	 * @throws Exception
-	 */
-	public static void addLibraryPath(File dirPathToAdd) throws Exception
-	{
-		final String pathToAdd = dirPathToAdd.getAbsolutePath();
-		final Field usrPathsField = ClassLoader.class.getDeclaredField("usr_paths");
-		usrPathsField.setAccessible(true);
-
-		// get array of paths
-		final String[] paths = (String[]) usrPathsField.get(null);
-
-		// check if the path to add is already present
-		for (String path : paths)
-		{
-			if (path.equals(pathToAdd))
-			{
-				return;
-			}
-		}
-
-		// add the new path
-		final String[] newPaths = Arrays.copyOf(paths, paths.length + 1);
-		newPaths[newPaths.length - 1] = pathToAdd;
-		usrPathsField.set(null, newPaths);
-	}
-
 }

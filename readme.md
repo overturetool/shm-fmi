@@ -6,6 +6,57 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.overturetool/core.svg?label=Maven%20Central)](http://search.maven.org/#search$)
 
+# Project overview
+
+The overview of the Overture-FMU is presented in this section. For more details, please see the publication [Overture FMU: Export VDM-RT Models as
+Tool-Wrapper FMUs](https://www.ncl.ac.uk/media/wwwnclacuk/schoolofcomputingscience/files/trs/1524.pdf#section*.9).
+
+The COE and Overture-FMU communicated via IPC (shared memory) based on protobuf messages.
+
+![Overture-FMU Architecture](readme-resources/overturefmu.png)
+
+Libraries corresponding to project directories are marked with *italic*, i.e.:
+*libshmfmu* acts as the FMU interface from the COE process.
+
+## libshmfmu
+- Starts an Overture-FMU process based on *overture-fmu/fmi-interpreter*.
+- Implements the FMI interfacts and is the FMU interface from the COE process.
+- Sends FMI commands to Overture-FMU via *libshmfmi*.
+- Creates an IPC server for sending FMI commands via *libshmipc*.
+- Connects as client to an IPC server for receiving callbacks via *libshmipc*
+
+## overture-fmu/fmi-interpreter
+- Invokes the overture interpreter to perform the actions required.
+- Receives commands via *shmfmi-server*
+- Replies via *shmfmi-server*
+
+## libshmfmi
+- Sends FMI commands via *libshmipc*
+- Receives replies
+
+## libshmipc
+- Controls the shared memory both in terms of server and client.
+- Handles access to shared memory via semaphores
+
+## shmfmi-server 
+- Java interface to *libshmipc*
+- Creates an IPC server for sending callbacks via *libshmipc*
+- Connects as client to an IPC server for receiving FMI commands via *libshmipc*
+
+## Starting an Overture-FMU
+
+The flow in loading an Overture-FMU in view of a co-simulation and the folders of the shm-fmi repository and the  overture-fmu repository is the following:
+
+COE loads *libshmfmu*.
+*libshmfmu* starts the java process *overture-fmu/fmi-interpreter*.
+
+At this stage there are two processes related to overture-fmu that communicates via shared memory (IPC):
+1. The COE
+2. Overture-FMU 
+
+- The COE communicates via *libshmfmu*
+- The *Overture-FMU/fmu-interpreter* communicates via *shmfmi-server*.
+
 
 # Checkout 
 
@@ -44,6 +95,8 @@ mvn install -f shmfmi-server/pom.xml
 
 ## Release the library
 
+**Note: Use java8 for building**
+
 
 ```bash
 cd shmfmi-server
@@ -70,3 +123,7 @@ Navigate to:
 `X.X.X` is last development version and `Y.Y.Y` is the release of `X.X.X`.
 
 copy the `fmi-shm-server-X.X.X.*.jar/lib` into `fmi-shm-server-Y.Y.Y.*.jar` and redeploy the release jar to Artifactory.
+
+# Try new dlls
+The `sharedmemory.xx` goes into: `fmi-interpreter-jar-with-dependencies.jar/lib/architecture/`
+The `libshmfmu.xx` goes into: `fmu/binaries/architecture/fmuname.xx`
