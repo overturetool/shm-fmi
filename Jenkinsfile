@@ -39,7 +39,7 @@ node {
 	}
 
 	stage('Deploy') {
-		if (env.BRANCH_NAME == 'development') {
+		if (env.BRANCH_NAME == 'development' || env.BRANCH_NAME == 'master') {
 			
 			def server = Artifactory.server "-844406945@1404457436085"
 			def buildInfo = Artifactory.newBuildInfo()
