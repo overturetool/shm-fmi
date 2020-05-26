@@ -9,7 +9,7 @@
   <groupId>org.intocps.java.fmi</groupId>
   <artifactId>fmi-shm-server</artifactId>
   <name>Java SHM-FMI server</name>
-  <version>0.3.0-SNAPSHOT</version>
+  <version>0.3.0</version>
   <dependencies>
     <!-- https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java -->
     <dependency>
@@ -229,7 +229,7 @@
     <url>git@github.com:overturetool/shm-fmi.git</url>
     <connection>scm:git:git@github.com:overturetool/shm-fmi.git</connection>
     <developerConnection>scm:git:git@github.com:overturetool/shm-fmi.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>Release/0.3.0</tag>
   </scm>
   <licenses>
     <license>
@@ -264,9 +264,9 @@
                       <arg value="target/generated-protoc/" />
                     </exec>
                     <exec dir="${project.basedir}" executable="./protoc" failonerror="true">
-                      <arg value="--java_out=target/generated-protoc/"/>
-                      <arg value="--proto_path=../libshmfmi"/>
-                      <arg value="../libshmfmi/service.proto"/>
+                      <arg value="--java_out=target/generated-protoc/" />
+                      <arg value="--proto_path=../libshmfmi" />
+                      <arg value="../libshmfmi/service.proto" />
                     </exec>
                     <exec dir="${project.basedir}" executable="mkdir" failonerror="true">
                       <arg value="-p" />
