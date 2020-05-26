@@ -9,7 +9,7 @@
   <groupId>org.intocps.java.fmi</groupId>
   <artifactId>fmi-shm-server</artifactId>
   <name>Java SHM-FMI server</name>
-  <version>0.3.0</version>
+  <version>0.3.1-SNAPSHOT</version>
   <dependencies>
     <!-- https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java -->
     <dependency>
@@ -229,7 +229,7 @@
     <url>git@github.com:overturetool/shm-fmi.git</url>
     <connection>scm:git:git@github.com:overturetool/shm-fmi.git</connection>
     <developerConnection>scm:git:git@github.com:overturetool/shm-fmi.git</developerConnection>
-    <tag>Release/0.3.0</tag>
+    <tag>HEAD</tag>
   </scm>
   <licenses>
     <license>
