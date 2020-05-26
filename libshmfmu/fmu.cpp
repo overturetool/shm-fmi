@@ -204,7 +204,7 @@ void callbackThreadFunc(FmuContainer* container, const char* shmCallbackKey) {
 
         Fmi2Empty request;
 
-        msgReply->protoBufMsgSize = request.ByteSize();
+        msgReply->protoBufMsgSize = request.ByteSizeLong();
         request.SerializeWithCachedSizesToArray(msgReply->protoBufMsg);
         msgReply->cmd = sharedfmimemory::fmi2Log;
         callbackClient->sendReply(msgReply);

@@ -1,112 +1,3 @@
-def copyStashInPlace ='''#!/bin/bash
-
-echo Copy native libraries in place
-
-LIB=shmfmi-server/target/classes/lib
-
-rm -rf $LIB
-
-mkdir -p $LIB/Mac-x86_64
-mkdir -p $LIB/Linux-amd64
-mkdir -p $LIB/Linux-i386
-mkdir -p $LIB/Windows-amd64
-mkdir -p $LIB/Windows-x86
-
-echo Copying server libs
-
-cp git-info.txt $LIB/
-cp build/darwin64/shmfmi-server/libsharedmemory.dylib $LIB/Mac-x86_64/
-cp build/linux64/shmfmi-server/libsharedmemory.so $LIB/Linux-amd64/
-cp build/linux32/shmfmi-server/libsharedmemory.so $LIB/Linux-i386/
-cp build/win64/shmfmi-server/sharedmemory.dll $LIB/Windows-amd64/
-cp build/win32/shmfmi-server/sharedmemory.dll $LIB/Windows-x86/
-
-# tag server
-INFO=shmfmi-server/target/classes/git-info-server.txt
-rm -f $INFO
-
-set +e
-git remote -v > $INFO
-git show-ref HEAD >> $INFO
-git rev-parse --verify HEAD >> $INFO
-set -e
-
-echo Copy FMU libs
-
-
-FMU=vdm-tool-wrapper
-FMUBIN=$FMU/binaries
-mkdir -p $FMUBIN/darwin64
-mkdir -p $FMUBIN/linux64
-mkdir -p $FMUBIN/linux32
-mkdir -p $FMUBIN/win64
-mkdir -p $FMUBIN/win32
-
-cp git-info.txt $FMUBIN/
-cp build/darwin64/libshmfmu/liblibshmfmu.dylib $FMUBIN/darwin64/$FMU.dylib
-cp build/linux64/libshmfmu/liblibshmfmu.so $FMUBIN/linux64/$FMU.so
-cp build/linux32/libshmfmu/liblibshmfmu.so $FMUBIN/linux32/$FMU.so
-cp build/win64/libshmfmu/libshmfmu.dll $FMUBIN/win64/$FMU.dll
-cp build/win32/libshmfmu/libshmfmu.dll $FMUBIN/win32/$FMU.dll
-
-cp -r $FMU $LIB
-'''
-
-
-stage('Compile native code X') {
-			
-	parallel  darwin: {
-		node('Xcompile') {
-			checkout scm
-			sh 'git submodule update --init'
-			lock('SHM-FMI-TEST'){
-				sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -darwin"
-			}
-			sh "./list-dependencies.sh"
-			stash includes: '**/*.dylib, git-info.txt, **/gtestresults.xml', name: 'shm-api-darwin' 
-		}
-	},linux32: {
-		node('Xcompile') {
-			checkout scm
-			sh 'git submodule update --init'
-			lock('SHM-FMI-TEST'){
-				sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -linux32"
-			}
-			sh "./list-dependencies.sh"
-			stash includes: '**/*.so, git-info.txt, **/gtestresults.xml', name: 'shm-api-linux32' 
-		}
-	},linux64: {
-		node('Xcompile') {
-			checkout scm
-			sh 'git submodule update --init'
-			lock('SHM-FMI-TEST'){
-				sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -linux64"
-			}
-			sh "./list-dependencies.sh"
-			stash includes: '**/*.so, git-info.txt, shmfmi-server/target/generated-protoc/**/*.java, **/gtestresults.xml', name: 'shm-api-linux64'  
-		}
-	},win32: {
-		node('Xcompile') {
-			checkout scm
-			sh 'git submodule update --init'
-			lock('SHM-FMI-TEST'){
-				sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -win32"
-			}
-			sh "./list-dependencies.sh"
-			stash includes: '**/*.dll, git-info.txt, **/gtestresults.xml', name: 'shm-api-win32' 
-		}
-	},win64: {
-		node('Xcompile') {
-			checkout scm
-			sh 'git submodule update --init'
-			lock('SHM-FMI-TEST'){
-				sh "SHM_DEPENDENCIES_ROOT=/home/privatejenkins/shm-dependencies ./xcompile.sh -win64"
-			}
-			sh "./list-dependencies.sh"
-			stash includes: '**/*.dll, git-info.txt, **/gtestresults.xml', name: 'shm-api-win64'
-		}
-	}
-}
 
 node {
 
@@ -114,10 +5,14 @@ node {
 	properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', numToKeepStr: '5']]])
 
 	stage('Compile Java library') {
+	    cleanWs()
+
 		checkout scm
+		sh 'git submodule update --init'
 
 		//clear all
 		withMaven(mavenLocalRepo: '.repository', mavenSettingsFilePath: "${env.MVN_SETTINGS_PATH}") {
+
 
 			// Run the maven build
 			sh "mvn clean -f shmfmi-server/pom.xml"
@@ -125,20 +20,16 @@ node {
 		}
 
 
-		//copy back all native libraries
-		unstash 'shm-api-darwin' 
-		unstash 'shm-api-linux32'
-		unstash 'shm-api-linux64'
-		unstash 'shm-api-win32'
-		unstash 'shm-api-win64'
-							
-		sh copyStashInPlace
 
 		//compile the java library
 		withMaven(mavenLocalRepo: '.repository', mavenSettingsFilePath: "${env.MVN_SETTINGS_PATH}") {
 
+            sh "./xcompile.sh"
+            sh "cd shmfmi-server && cp ../third_party/protobuf/builds/linux-x64/release/bin/protoc ."
+
+
 			// Run the maven build
-			sh "mvn install -f shmfmi-server/pom.xml -P!protoc"
+			sh "mvn install -f shmfmi-server/pom.xml"
 			step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
 			step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml, **/gtestresults.xml'])
 			step([$class: 'JacocoPublisher'])
@@ -148,7 +39,7 @@ node {
 	}
 
 	stage('Deploy') {
-		if (env.BRANCH_NAME == 'development') {
+		if (env.BRANCH_NAME == 'development' || env.BRANCH_NAME == 'master') {
 			
 			def server = Artifactory.server "-844406945@1404457436085"
 			def buildInfo = Artifactory.newBuildInfo()
@@ -162,7 +53,7 @@ node {
 			rtMaven.run pom: 'shmfmi-server/pom.xml', goals: 'install -P!protoc', buildInfo: buildInfo
 
 			//get rid of old snapshots only keep then for a short amount of time
-			buildInfo.retention maxBuilds: 5, maxDays: 7, deleteBuildArtifacts: true
+			//buildInfo.retention maxBuilds: 5, maxDays: 7, deleteBuildArtifacts: true
 		
 			// Publish build info.
 			server.publishBuildInfo buildInfo

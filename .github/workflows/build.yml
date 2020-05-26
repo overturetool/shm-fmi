@@ -1,0 +1,193 @@
+name: Build with c++
+
+on: [push, pull_request]
+
+
+jobs:
+
+  compileWindowsx64:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
+      - name: "Build windows x64"
+        run: ./scripts/compile-win64.sh
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: win-x64
+          path: builds/winx64/shmfmi-server/sharedmemory.dll
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: win-x64
+          path: builds/winx64/libshmfmu/libshmfmu.dll
+
+  compileWindowsx32:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
+      - name: "Build windows x86"
+        run: ./scripts/compile-win32.sh
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: win-x32
+          path: builds/winx32/shmfmi-server/sharedmemory.dll
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: win-x32
+          path: builds/winx32/libshmfmu/libshmfmu.dll
+
+  compileLinuxx32:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      - name: "Build linux x32"
+        run: ./scripts/compile-linux32.sh
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: linux-x32
+          path: builds/linux-x32/shmfmi-server/libsharedmemory.so
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: linux-x32
+          path: builds/linux-x32/libshmfmu/liblibshmfmu.so
+
+  #  compileLinuxx64:
+  #    runs-on: ubuntu-latest
+  #
+  #    steps:
+  #      - uses: actions/checkout@v2
+  #        with:
+  #          submodules: 'true'
+  #      - name: "Build linux x64"
+  #        run: ./scripts/compile-linux64.sh
+  #      - uses: actions/upload-artifact@v2
+  #        with:
+  #          name: linux-x64
+  #          path: builds/linux-x64/shmfmi-server/libsharedmemory.so
+  #
+  #      - uses: actions/upload-artifact@v2
+  #        with:
+  #          name: linux-x64
+  #          path: builds/linux-x64/libshmfmu/liblibshmfmu.so
+
+  #  compileMacOSXx64:
+  #    runs-on: ubuntu-latest
+  #
+  #    steps:
+  #      - uses: actions/checkout@v2
+  #        with:
+  #          submodules: 'true'
+  #      - name: "Build MacOSX x64"
+  #        run: ./scripts/compile-mac.sh
+  #      - uses: actions/upload-artifact@v2
+  #        with:
+  #          name: macos-x64
+  #          path: builds/mac/shmfmi-server/libsharedmemory.dylib
+  #
+  #      - uses: actions/upload-artifact@v2
+  #        with:
+  #          name: macos-x64
+  #          path: builds/mac/libshmfmu/liblibshmfmu.dylib
+  
+
+  compile:
+    runs-on: ${{ matrix.config.os }}
+
+    name: Build-${{ matrix.config.os }} (${{ matrix.config.r }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+#          - {
+#            name: "Windows Latest MSVC", artifact: "Windows-MSVC.tar.xz",
+#            os: windows-latest,
+#            build_type: "Release", cc: "cl", cxx: "cl",
+#            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+#          }
+#          - {
+#            name: "Windows Latest MinGW", artifact: "Windows-MinGW.tar.xz",
+#            os: windows-latest,
+#            build_type: "Release", cc: "gcc", cxx: "g++"
+#          }
+          - {
+            name: "Ubuntu Latest GCC", artifact: "Linux.tar.xz",
+            os: ubuntu-latest,
+            build_type: "Release", cc: "gcc", cxx: "g++"
+          }
+          - {
+            name: "macOS Latest Clang", artifact: "macOS.tar.xz",
+            os: macos-latest,
+            build_type: "Release", cc: "clang", cxx: "clang++"
+          }
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      - name: CMake protobuf
+        run: cd third_party/protobuf && cmake  -B"builds/${{ matrix.config.os }}" -Hcmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release  -DCMAKE_INSTALL_PREFIX="builds/${{ matrix.config.os }}/release" -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC"
+
+      - name: Make protobuf
+        run: cd third_party/protobuf && make -C"builds/${{ matrix.config.os }}" -j8 install
+
+      - name: CMake Ubuntu 64 bit
+        if: matrix.config.os == 'ubuntu-latest'
+        run: cmake -B"builds/${{ matrix.config.os }}"  -H. -DPYTHON_EXECUTABLE=/usr/bin/python  -DCMAKE_INSTALL_PREFIX=third_party/protobuf/builds/${{ matrix.config.os }}/release/ -Dprotobuf_MODULE_COMPATIBLE=1 -DJAVA_HOME=$(readlink -f third_party/jvm/linux64)
+
+      - name: CMake Mac
+        if: matrix.config.os == 'macos-latest'
+        run: cmake -B"builds/${{ matrix.config.os }}"  -H. -DPYTHON_EXECUTABLE=/usr/bin/python  -DCMAKE_INSTALL_PREFIX=third_party/protobuf/builds/${{ matrix.config.os }}/release/ -Dprotobuf_MODULE_COMPATIBLE=1 -DJAVA_HOME=$(git rev-parse --show-toplevel)/third_party/jvm/darwin64
+
+      - name: Compile
+        run: make -C"builds/${{ matrix.config.os }}"
+
+      - name: Test
+        run: make -C"builds/${{ matrix.config.os }}" test
+
+      - name: List Dependencies Ubuntu
+        if: matrix.config.os == 'ubuntu-latest'
+        run: find builds/${{ matrix.config.os }} -name "*.so" -exec echo {} \; -exec ldd {} \;
+
+      - name: List Dependencies Mac
+        if: matrix.config.os == 'macos-latest'
+        run: find builds/${{ matrix.config.os }} -name "*.dylib" -exec echo {} \; -exec otool -L {} \;
+
+      - uses: actions/upload-artifact@v2
+        if: matrix.config.os == 'ubuntu-latest'
+        with:
+          name: linux-x64
+          path: builds/${{ matrix.config.os }}/shmfmi-server/libsharedmemory.so
+
+      - uses: actions/upload-artifact@v2
+        if: matrix.config.os == 'ubuntu-latest'
+        with:
+          name: linux-x64
+          path: builds/${{ matrix.config.os }}/libshmfmu/liblibshmfmu.so
+
+      - uses: actions/upload-artifact@v2
+        if: matrix.config.os == 'macos-latest'
+        with:
+          name: macos-x64
+          path: builds/${{ matrix.config.os }}/shmfmi-server/libsharedmemory.dylib
+
+      - uses: actions/upload-artifact@v2
+        if: matrix.config.os == 'macos-latest'
+        with:
+          name: macos-x64
+          path: builds/${{ matrix.config.os }}/libshmfmu/liblibshmfmu.dylib

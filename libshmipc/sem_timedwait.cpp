@@ -50,9 +50,8 @@ static useconds_t timespec_to_milisec(const struct timespec *spec) {
 
 int sem_timedwait(sem_t *sem, const struct timespec *abs_timeout) {
   while (sem_trywait(sem) == -1 && errno == EAGAIN) {
-    struct timespec ts;
-    clock_gettime(0, &ts);
-
+ struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
     useconds_t now = timespec_to_milisec(&ts);
     useconds_t delay = timespec_to_milisec(abs_timeout);
 

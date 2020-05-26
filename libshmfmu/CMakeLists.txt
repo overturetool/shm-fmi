@@ -37,24 +37,24 @@ target_link_libraries(${PROJECT_NAME} libshmfmi)
 target_link_libraries(${PROJECT_NAME} ${libshmfmi_LIBS})
 
 
-foreach(LETTER ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
-	
-if(EXISTS "${LETTER}/libstdc++.a")
-#   message (STATUS "${LETTER}")
-	set(STDCPP_LIBRARY "${LETTER}/libstdc++.a")
-else()
-#  message (STATUS "${LETTER} ---- not these")
-endif()
-endforeach()
-
-message(STATUS "Static linking with libstdc++.a in ${STDCPP_LIBRARY}")
-target_link_libraries(${PROJECT_NAME} ${STDCPP_LIBRARY})
-
-if(NOT APPLE)
-#https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man3/pthread.3.html it is included in system
-find_library(PTHREAD_LIBRARY NAMES libpthread.a libpthread.dylib)
-target_link_libraries(${PROJECT_NAME} ${PTHREAD_LIBRARY})
-endif()
+#foreach(LETTER ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
+#
+#if(EXISTS "${LETTER}/libstdc++.a")
+##   message (STATUS "${LETTER}")
+#	set(STDCPP_LIBRARY "${LETTER}/libstdc++.a")
+#else()
+##  message (STATUS "${LETTER} ---- not these")
+#endif()
+#endforeach()
+#
+#message(STATUS "Static linking with libstdc++.a in ${STDCPP_LIBRARY}")
+#target_link_libraries(${PROJECT_NAME} ${STDCPP_LIBRARY})
+#
+#if(NOT APPLE)
+##https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man3/pthread.3.html it is included in system
+#find_library(PTHREAD_LIBRARY NAMES libpthread.a libpthread.dylib)
+#target_link_libraries(${PROJECT_NAME} ${PTHREAD_LIBRARY})
+#endif()
 
 # I need this: -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic
 
